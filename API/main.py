@@ -1,6 +1,7 @@
-from typing import Optional, Union
+from io import StringIO
+from typing import Any, Dict, Optional, Union
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from typing import List
 
@@ -88,7 +89,7 @@ def crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,coef_err
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df
 
-@app.get("/tendencia/fin")
+@app.get("/Datos/tendencia/fin")
 def read_item(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
 
     return {
@@ -96,7 +97,7 @@ def read_item(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, Non
 
     }
 
-@app.get("/tendencia/periodos")
+@app.get("/Datos/tendencia/periodos")
 def read_item(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
     return {
         pasar_csv(crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,error))
@@ -238,7 +239,7 @@ def crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params):
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
-@app.get("/distribucion/fin")
+@app.get("/Datos/distribucion/fin")
 def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
 
     return {
@@ -246,7 +247,7 @@ def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Qu
 
     }
 
-@app.get("/distribucion/periodos")
+@app.get("/Datos/distribucion/periodos")
 def read_item(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
     return {
         pasar_csv(crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params))
@@ -274,8 +275,9 @@ def datos_periodicos_cantidad(distr,params,num_datos,num_periodos):
     datos_base = datos_base0
     for i in range(0,num_periodos-1):
         datos_base=np.concatenate((datos_base0,datos_base))
-    if res>0:
+    while res>0:
         datos_base=np.concatenate((datos_base,datos_base0[:res]))
+        res = res - periodo
     return datos_base
 
 def crear_df_fin_periodicos(inicio,fin,freq,columna,distr,params,p,tipo):
@@ -300,7 +302,7 @@ def crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tip
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
-@app.get("/periodicos/fin")
+@app.get("/Datos/periodicos/fin")
 def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
 
     return {
@@ -308,7 +310,7 @@ def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, colum
 
     }
 
-@app.get("/periodicos/periodos")
+@app.get("/Datos/periodicos/periodos")
 def read_item(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
     return {
         pasar_csv(crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tipo))
@@ -483,44 +485,15 @@ def crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s=0,phi=[],teta=[
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
-@app.get("/AR/fin")
-def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: List[float]= Query(...,description="Parámetros autorregresivos")):
-    return {
-        pasar_csv(crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s,phi))
-
-    }
-
-@app.get("/MA/fin")
-def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), teta: List[float]= Query(...,description="Parámetros medias móviles")):
-    return {
-        pasar_csv(crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s,teta=teta))
-
-    }
-    
-@app.get("/ARMA/fin")
-def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: List[float]= Query(...,description="Parámetros autorregresivos"), teta: List[float]= Query(...,description="Parámetros medias móviles")):
+@app.get("/Datos/ARMA/fin")
+def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     return {
         pasar_csv(crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s,phi,teta))
 
     }
     
-    
-@app.get("/AR/periodos")
-def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: List[float]= Query(...,description="Parámetros autorregresivos")):
-    return {
-        pasar_csv(crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s,phi))
-
-    }
-
-@app.get("/MA/periodos")
-def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), teta: List[float]= Query(...,description="Parámetros medias móviles")):
-    return {
-        pasar_csv(crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s,teta=teta))
-
-    }
-    
-@app.get("/ARMA/periodos")
-def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: List[float]= Query(...,description="Parámetros autorregresivos"), teta: List[float]= Query(...,description="Parámetros medias móviles")):
+@app.get("/Datos/ARMA/periodos")
+def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     return {
         pasar_csv(crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s,phi,teta))
 
@@ -637,7 +610,8 @@ def crear_drift(params1,params2,tipo,num_drift,num_datos):
             datos1=datos_periodicos_amplitud(distr,params,num_drift,p)
         elif tipo1==2:
             datos1=datos_periodicos_cantidad(distr,params,num_drift,p)
-            
+        print(datos1.shape)
+
         tipo2 = params2[0]
         distr,param,p = params2[1],params2[2],params2[3]
         if tipo2==1:
@@ -741,38 +715,38 @@ def crear_df_periodos_DRIFT(inicio,periodos,freq,columna,params1,params2,tipo,nu
     return df 
 
 
-@app.get("/drift/fin/dist-dist")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int,dist1:int,dist2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+@app.get("/Datos/drift/fin/dist-dist")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
         pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[dist2,params2],1,num_drift))
 
     }
 
-@app.get("/drift/periodos/dist-dist")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int,dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+@app.get("/Datos/drift/periodos/dist-dist")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[dist2,params2],1,num_drift))
     }
  
-@app.get("/drift/fin/dist-ARMA")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int,dist1:int ,c:int , desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+@app.get("/Datos/drift/fin/dist-ARMA")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
     return {
         pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift))
 
     }
 
-@app.get("/drift/periodos/dist-ARMA")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int,dist1:int ,c:int , desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+@app.get("/Datos/drift/periodos/dist-ARMA")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift))
     }
 
  
-@app.get("/drift/fin/dist-periodico")
+@app.get("/Datos/drift/fin/dist-periodico")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
@@ -780,14 +754,14 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:in
 
     }
 
-@app.get("/drift/periodos/dist-periodico")
+@app.get("/Datos/drift/periodos/dist-periodico")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift))
     }
     
-@app.get("/drift/fin/dist-tendencia")
+@app.get("/Datos/drift/fin/dist-tendencia")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
 
     return {
@@ -795,41 +769,437 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:in
 
     }
 
-@app.get("/drift/periodos/dist-tendencia")
+@app.get("/Datos/drift/periodos/dist-tendencia")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift))
     }
     
-@app.get("/drift/fin/ARMA-ARMA")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float,desv2:float,s1: Union[int,None] = 0,s2: Union[int,None] = 0,columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+@app.get("/Datos/drift/fin/ARMA-ARMA")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],6,num_drift))
+        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift))
 
     }
 
-@app.get("/drift/periodos/ARMA-ARMA")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:int , desv1:float, c2:int , desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+@app.get("/Datos/drift/periodos/ARMA-ARMA")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float , desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],6,num_drift))
+        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift))
     }
 
 
 
-@app.get("/drift/fin/ARMA-dist")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:int , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la primera distribución")):
+@app.get("/Datos/drift/fin/ARMA-dist")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
         pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift))
 
     }
 
-@app.get("/drift/periodos/ARMA-dist")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:int , desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segubnda distribución")):
+@app.get("/Datos/drift/periodos/ARMA-dist")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift))
     }
+
+@app.get("/Datos/drift/fin/ARMA-periodicos")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    return {
+        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift))
+
+    }
+
+@app.get("/Datos/drift/periodos/ARMA-periodicos")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    return {
+        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift))
+    }
+    
+@app.get("/Datos/drift/fin/ARMA-tendencia")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
+
+    return {
+        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift))
+
+    }
+
+@app.get("/Datos/drift/periodos/ARMA-tendencia")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
+
+    return {
+        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift))
+    }
+
+@app.get("/Datos/drift/fin/periodico-periodico")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    return {
+        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift))
+
+    }
+
+@app.get("/Datos/drift/periodos/periodico-periodico")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    return {
+        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift))
+    }
+    
+@app.get("/Datos/drift/fin/periodico-distr")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    return {
+        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift))
+
+    }
+
+@app.get("/Datos/drift/periodos/periodico-distr")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    return {
+        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift))
+    }
+    
+
+@app.get("/Datos/drift/fin/periodico-ARMA")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+
+    return {
+        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift))
+
+    }
+
+@app.get("/Datos/drift/periodos/periodico-ARMA")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+
+    return {
+        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift))
+    }
+    
+@app.get("/Datos/drift/fin/periodico-tendencia")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+
+    return {
+        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift))
+
+    }
+
+@app.get("/Datos/drift/periodos/periodico-tendencia")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+
+    return {
+        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift))
+    }
+    
+@app.get("/Datos/drift/fin/tendencia-tendencia")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+
+    return {
+        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift))
+
+    }
+
+@app.get("/Datos/drift/periodos/tendencia-tendencia")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+
+    return {
+        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift))
+    }
+ 
+@app.get("/Datos/drift/fin/tendencia-distr")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    return {
+        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift))
+
+    }
+
+@app.get("/Datos/drift/periodos/tendencia-distr")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    return {
+        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift))
+    }
+   
+
+@app.get("/Datos/drift/fin/tendencia-ARMA")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+
+    return {
+        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift))
+
+    }
+
+@app.get("/Datos/drift/periodos/tendencia-ARMA")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+
+    return {
+        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift))
+    }
+   
+@app.get("/Datos/drift/fin/tendencia-periodicos")
+def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    return {
+        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift))
+
+    }
+
+@app.get("/Datos/drift/periodos/tendencia-periodicos")
+def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    return {
+        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift))
+    }
+    
+
+# Crea una columna Target: y = a + b * x
+def objetivo_lineal(df_caract,a,b,columna):
+    df = df_caract.copy()
+    df[columna] = a + b * df_caract[df_caract.columns[0]]
+    return df
+
+ 
+# Generación de nuevas variables a partir de las anterionres  
+@app.post("/Variables/Lineal")
+async def modify_item(a : float, b: float, indice:str, columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    
+    df1 = objetivo_lineal(df,a,b, columna)
+    
+    result = pasar_csv(df1)
+
+    return {result}
+    
+
+# Crea una columna Target: y = sumatorio a[i] * x ^ i
+
+def objetivo_polinomico(df_caract,a, columna):
+    df = df_caract.copy()
+    df[columna] = np.zeros(df.shape[0])
+    for i in range(0,len(a)):
+        df[columna] = df[columna] + a[i]*df_caract[df_caract.columns[0]]**i
+    return df
+
+@app.post("/Variables/Polinomico")
+async def modify_item( indice:str, columna:str, a: List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    
+    df1 = objetivo_polinomico(df,a, columna)
+    
+    result = pasar_csv(df1)
+
+    return {result}
+
+# Crea una columna Target: y = a * e ^ (b * x)
+
+def objetivo_exp(df_caract,a,b,columna):
+    df = df_caract.copy()
+    df[columna] = a * np.exp(b* df_caract[df_caract.columns[0]])
+    return df
+
+@app.post("/Variables/Exponencial")
+async def modify_item( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    
+    df1 = objetivo_exp(df,a,b, columna)
+    
+    result = pasar_csv(df1)
+
+    return {result}
+
+# Crea una columna Target: y = a + b * log (x)
+
+def objetivo_log(df_caract,a,b,columna):
+    df = df_caract.copy()
+    df[columna] = a + b * np.log(df_caract[df_caract.columns[0]])
+    return df
+
+@app.post("/Variables/Logaritmica")
+async def modify_item( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    
+    df1 = objetivo_log(df,a,b, columna)
+    
+    result = pasar_csv(df1)
+
+    return {result}
+
+# Crea una columna Target: y = a + sumatorio b[i] * x [i]
+def multivariante(df_caract,a,b,columna):
+    df = df_caract.copy()
+    df[columna] = a
+    for k in range(0,len(b)):
+        df[columna] = df[columna] + b[k] * df_caract[df.columns[k]]
+    return df
+
+@app.post("/Variables/Multivariante")
+async def modify_item(a:float, indice:str, columna:str, b :List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    
+    df1 = multivariante(df,a,b, columna)
+    
+    result = pasar_csv(df1)
+
+    return {result}
+
+# Crea una columna Target: y = a + sumatorio b[i][i] * x [i] + sumatorio b[j][k]x[j]x[k]
+
+def interaccion(df_caract,a,b,columna):
+    df = df_caract.copy()
+    df[columna] = a
+    for k in range(0,b.shape[0]):
+        df[columna] = df[columna] + b[k][k] * df_caract[df.columns[k]]
+        for i in range(k+1,b.shape[1]):
+            df[columna] = df[columna] + b[k][i] * df_caract[df.columns[k]] * df_caract[df.columns[i]]
+    return df
+
+class MatrixBody(BaseModel):
+    matrix: List[List[float]]
+    
+#Mirar matriz
+@app.post("/Variables/Interaccion")
+async def modify_item(a:float, indice:str, columna:str, b: MatrixBody, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    
+    df1 = interaccion(df,a,b, columna)
+    
+    result = pasar_csv(df1)
+
+    return {result}
+
+# Crea una columna Target: y = a / x ^ n
+
+def objetivo_prop_inversa(df_caract,a,n,columna):
+    df = df_caract.copy()
+    df[columna] = a / (df_caract[df_caract.columns[0]] ** n)
+    return df
+
+@app.post("/Variables/Inversa")
+async def modify_item(a:float, n:int , indice:str, columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    
+    df1 = objetivo_prop_inversa(df,a,n, columna)
+    
+    result = pasar_csv(df1)
+
+    return {result}
+
+# Crea una columna Target: Si x < umbral, y = f(x). En otro caso, y = g(x)
+
+def objetivo_escalonada(df_caract,f,g,umbral,columna):
+    df = df_caract.copy()
+    df[columna] = np.zeros(df_caract.shape[0])
+    for k in df.index:
+        x = df_caract.loc[k,df.columns[0]]
+        if x < umbral:
+            df.loc[k,columna] = f(x)
+        else :
+            df.loc[k,columna] = g(x)     
+    return df
+
+@app.post("/Variables/Escalonada")
+async def modify_item(umbral:float, n:int, f:float,g:float , indice:str, columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    
+    df1 = objetivo_escalonada(df,f,g, umbral,columna)
+    
+    result = pasar_csv(df1)
+
+    return {result}
