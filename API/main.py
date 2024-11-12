@@ -1,3 +1,4 @@
+from functools import partial
 from io import StringIO
 from typing import Any, Dict, Optional, Union
 
@@ -1183,8 +1184,71 @@ def objetivo_escalonada(df_caract,f,g,umbral,columna):
             df.loc[k,columna] = g(x)     
     return df
 
+def lineal(x):
+    return x + 5
+
+def polinomica2(x):
+    return 5 * x **2 + 3 * x - 10
+
+def polinomica3(x):
+    return 2 * x ** 3 - 7 * x ** 2 + 2 * x - 50
+
+def polinomica4(x):
+    return 3 * x **4 - 5 * x ** 3 + 2 * x ** 2 -10 * x + 3
+
+def expon(x):
+    return math.exp(x-2) + 7
+
+def expon2(x):
+    return math.pow(2,x-4) - 19
+
+def logaritmo(x):
+    return math.log(x+8) -3
+
+def raiz(x):
+    return math.sqrt(x+3) - 24
+
+def elegir_funcion(funcion):
+    
+    if funcion=='Lineal':
+        return lineal
+    elif funcion == 'Polinomica2':
+        return polinomica2
+    elif funcion == 'Polinomica3':
+        return polinomica3
+    elif funcion == 'Polinomica4':
+        return polinomica4
+    elif funcion == 'Exponencial':
+        return expon
+    elif funcion == 'Exponencial2':
+        return expon2
+    elif funcion == 'Log':
+        return logaritmo
+    elif funcion == 'Raiz':
+        return raiz
+    elif funcion == 'Seno':
+        return math.sin
+    elif funcion == 'Coseno':
+        return math.cos
+    elif funcion == 'Tangente':
+        return math.tan
+    elif funcion == 'Absoluto':
+        return math.fabs    
+    elif funcion == 'Truncar':
+        return math.trunc
+    elif funcion == 'Log10':
+        return math.log10
+    elif funcion == 'Log1p':
+        return math.log1p
+    elif funcion == 'Log2p':
+        return math.log2p
+    elif funcion == 'Exp1':
+        return math.expm1
+    elif funcion == 'Ceil':
+        return math.ceil
+    
 @app.post("/Variables/Escalonada")
-async def modify_item(umbral:float, n:int, f:float,g:float , indice:str, columna:str, file: UploadFile = File(...)) :
+async def modify_item(umbral:float, f: str,g:str , indice:str, columna:str, file: UploadFile = File(...)) :
     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -1197,9 +1261,339 @@ async def modify_item(umbral:float, n:int, f:float,g:float , indice:str, columna
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
-    
-    df1 = objetivo_escalonada(df,f,g, umbral,columna)
+    f1 = elegir_funcion(f)
+    g1 = elegir_funcion(g)
+    df1 = objetivo_escalonada(df,f1,g1, umbral,columna)
     
     result = pasar_csv(df1)
 
     return {result}
+
+# Crea una columna Target: Si x cumple condM --> y = fM(x1,...,xN)
+
+def objetivo_condicional(df_caract,columna,cond,func):
+    df = df_caract.copy()
+    df[columna] = np.zeros(df_caract.shape[0])
+    
+    for k in df_caract.index:
+        a = list()
+        for j in df_caract.columns:
+            a.append(df_caract.loc[k,j])
+        find = False  
+        i = 0
+        while find == False and i < len(cond):
+            if cond[i](a):
+               df.loc[k,columna] = func[i](a)
+               find = True
+            i +=1
+            
+    return df
+
+def igual(x,valor,indice):
+    return x[indice]==valor
+
+def menor(x,valor,indice):
+    return x[indice]<valor
+
+def mayor(x,valor,indice):
+    return x[indice]>valor
+
+def menorI(x,valor,indice):
+    return x[indice] <= valor
+
+def mayorI(x,valor,indice):
+    return x[indice] >= valor
+
+def iguales(x,valor1,valor2):
+    return x[valor1] == x[valor2]
+
+def mayores(x,valor1,valor2):
+    return x[valor1] > x[valor2]
+
+def menores(x,valor1,valor2):
+    return x[valor1] < x[valor2]
+
+def mayoresI(x,valor1,valor2):
+    return x[valor1] >= x[valor2]
+
+def menoresI(x,valor1,valor2):
+    return x[valor1] <= x[valor2]
+
+def verdad(x):
+    return True
+
+def elegir_condicion(cond):
+    
+    if cond[1:7]=='MenorI':
+        ind = cond[0]
+        indice = int(ind)
+        valor = cond[7:]
+        num = float(valor)
+        return partial(menorI,valor=num,indice=indice)
+    elif cond[1:7]=='MayorI':
+        ind = cond[0]
+        indice = int(ind)
+        valor = cond[7:]
+        num = float(valor)
+        return partial(mayorI,valor=num,indice=indice)
+
+    
+    elif cond[1:9]=='MenoresI':
+        valor1 = cond[0]
+        valor2 = cond[9]
+        num1 = int(valor1)
+        num2 = int(valor2)
+        return partial(menoresI,valor1=num1,valor2=num2)
+    elif cond[1:9]=='MayoresI':
+        valor1 = cond[0]
+        valor2 = cond[9]
+        num1 = int(valor1)
+        num2 = int(valor2)
+        return partial(mayoresI,valor1=num1,valor2=num2)
+    
+    elif cond[1:8]=='Iguales':
+        valor1 = cond[0]
+        valor2 = cond[8]
+        num1 = int(valor1)
+        num2 = int(valor2)
+        return partial(iguales,valor1=num1,valor2=num2)
+    elif cond[1:8]=='Menores':
+        valor1 = cond[0]
+        valor2 = cond[8]
+        num1 = int(valor1)
+        num2 = int(valor2)
+        return partial(menores,valor1=num1,valor2=num2)
+    elif cond[1:8]=='Mayores':
+        valor1 = cond[0]
+        valor2 = cond[8]
+        num1 = int(valor1)
+        num2 = int(valor2)
+        return partial(mayores,valor1=num1,valor2=num2)
+    
+    if cond[1:6] == 'Igual':
+        ind = cond[0]
+        indice = int(ind)
+        valor = cond[6:]
+        num = float(valor)
+        return partial(igual,valor=num,indice=indice)
+    elif cond[1:6]=='Menor':
+        ind = cond[0]
+        indice = int(ind)
+        valor = cond[6:]
+        num = float(valor)
+        return partial(menor,valor=num,indice=indice)
+    elif cond[1:6]=='Mayor':
+        ind = cond[0]
+        indice = int(ind)
+        valor = cond[6:]
+        num = float(valor)
+        return partial(mayor,valor=num,indice=indice)
+    
+    elif cond == 'default' :
+        return verdad
+   
+def linealM(x):
+    result = (random()-0.5) * 20
+    for k in range(0,len(x)):
+        n = (random()-0.5) * 20
+        result += n * x[k]
+    return result
+
+def polinomica2M(x):
+    result = 0
+    for k in range(0,len(x)):
+        n = (random()-0.5) * 20
+        for j in range (1,3):
+            result += n * x[k] ** j
+    return result
+
+def polinomica3M(x):
+    result = 0
+    for k in range(0,len(x)):
+        n = (random()-0.5) * 20
+        for j in range (1,4):
+            result += n * x[k] ** j
+    return result
+
+def polinomica4M(x):
+    result = 0
+    for k in range(0,len(x)):
+        n = (random()-0.5) * 20
+        for j in range (1,5):
+            result += n * x[k] ** j
+    return result
+
+def exponM(x):
+    a = (random()-0.5) * 20
+    b = (random()-0.5) * 20
+    result = linealM(x)
+    return math.exp(result-a) + b
+
+def expon2M(x):
+    a = (random()) * 10
+    b = (random()-0.5) * 20
+    result = linealM(x)/100
+    return math.pow(2,result-a) - b
+
+def logaritmoM(x):
+    a = (random()-0.5) * 20
+    b = (random()-0.5) * 20
+    result = linealM(x)
+    return math.log(result+a) - b
+
+def raizM(x):
+    a = (random()) * 10
+    b = (random()-0.5) * 20
+    result = math.fabs(linealM(x))
+    return math.sqrt(result+a) - b
+
+def sinM(x):
+    result = linealM(x)
+    return math.sin(result)
+
+def cosM(x):
+    result = linealM(x)
+    return math.cos(result)
+
+def tanM(x):
+    result = linealM(x)
+    return math.tan(result)
+
+def absM(x):
+    result = linealM(x)
+    return math.fabs(result)
+
+def truncM(x):
+    result = linealM(x)
+    return math.trunc(result)
+
+def log10M(x):
+    result = absM(x)
+    return math.log10(result)
+
+def log1pM(x):
+    result = absM(x)
+    return math.log1p(result)
+
+def log2pM(x):
+    result = absM(x)
+    return math.log2(result)
+
+def exp1M(x):
+    result = linealM(x)
+    return math.expm1(result)
+
+def ceilM (x):
+    result = linealM(x)
+    return math.ceil(result)
+
+
+def elegir_funcion_multi(funcion):
+    
+    if funcion=='Lineal':
+        return linealM
+    elif funcion == 'Polinomica2':
+        return polinomica2M
+    elif funcion == 'Polinomica3':
+        return polinomica3M
+    elif funcion == 'Polinomica4':
+        return polinomica4M
+    elif funcion == 'Exponencial':
+        return exponM
+    elif funcion == 'Exponencial2':
+        return expon2M
+    elif funcion == 'Log':
+        return logaritmoM
+    elif funcion == 'Raiz':
+        return raizM
+    elif funcion == 'Seno':
+        return sinM
+    elif funcion == 'Coseno':
+        return cosM
+    elif funcion == 'Tangente':
+        return tanM
+    elif funcion == 'Absoluto':
+        return absM
+    elif funcion == 'Truncar':
+        return truncM
+    elif funcion == 'Log10':
+        return log10M
+    elif funcion == 'Log1p':
+        return log1pM
+    elif funcion == 'Log2':
+        return log2pM
+    elif funcion == 'Exp1':
+        return exp1M
+    elif funcion == 'Ceil':
+        return ceilM     
+
+
+@app.post("/Variables/Condicional")
+async def modify_item( funciones: List[str],condiciones: List[str] , indice:str, columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    func = funciones[0].split(",")
+    cond = condiciones[0].split(",")
+    f = list()
+    c = list ()
+    for k in range(0,len(func)):
+        f.append(elegir_funcion_multi(func[k]))
+        
+    for k in range(0, len(cond)):
+        c.append(elegir_condicion(cond[k]))
+        
+    df1 = objetivo_condicional(df,columna,c,f)
+    
+    result = pasar_csv(df1)
+
+    return {result}
+
+
+# Crea una columna Target: y = f(x1,...,xN)
+
+def objetivo_funcional(df_caract,columna,f):
+    df = df_caract.copy()       
+    df[columna] = np.zeros(df_caract.shape[0])
+    for k in df_caract.index:
+        a = list()
+        for j in df_caract.columns:
+            a.append(df_caract.loc[k,j])
+        df.loc[k,columna]=f(a)
+    return df
+
+
+
+@app.post("/Variables/Funcional")
+async def modify_item( funciones: str , indice:str, columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    f = elegir_funcion_multi(funciones)
+    df1 = objetivo_funcional(df,columna,f)
+    
+    result = pasar_csv(df1)
+
+    return {result}
+
+
+
+# Técnicas de aumentación de datos: 
