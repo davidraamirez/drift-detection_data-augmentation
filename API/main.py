@@ -15,6 +15,9 @@ from random import randrange, random
 import math
 import matplotlib.pyplot as plt
 
+from scipy.interpolate import interp1d
+from scipy.interpolate import UnivariateSpline
+
 app = FastAPI()
 
 @app.get("/")
@@ -1597,3 +1600,591 @@ async def modify_item( funciones: str , indice:str, columna:str, file: UploadFil
 
 
 # Técnicas de aumentación de datos: 
+
+# Definimos nuevos datos indicando el número de datos a generar, la frequencia y el tipo de interpolación (lineal/cubico).
+def interpolacion_max(df,kind,num,freq):
+    df=df.reset_index()
+    indices=df.index.values
+    indice=series_periodos(df[df.columns[0]][0],num,freq)
+    x =indices 
+    for i in range(1,len(df.columns)):
+        y = df[df.columns[i]]
+        f = interp1d(x, y, kind=kind) # kind ='linear' / 'cubic'
+        x_new = np.linspace(0,df[df.columns[i]].argmax(), num=num)  # New x values
+        y_new = f(x_new)  # Interpolated y values
+        if i==1:
+            df_int = pd.DataFrame(data=y_new,index=indice,columns=[df.columns[i]])
+        else :     
+            df_n = pd.DataFrame(data=y_new,index=indice,columns=[df.columns[i]])
+            df_int= df_int.join(df_n, how="outer")
+    return df_int
+
+# Definimos nuevos datos indicando el número de datos a generar, la frequencia y el tipo de interpolación (lineal/cubico).
+def interpolacion_min(df,kind,num,freq):
+    df=df.reset_index()
+    indices=df.index.values
+    indice=series_periodos(df[df.columns[0]][0],num,freq)
+    x =indices 
+    for i in range(1,len(df.columns)):
+        y = df[df.columns[i]]
+        f = interp1d(x, y, kind=kind) # kind ='linear' / 'cubic'
+        x_new = np.linspace(0,df[df.columns[i]].argmin(), num=num)  # New x values
+        y_new = f(x_new)  # Interpolated y values
+        if i==1:
+            df_int = pd.DataFrame(data=y_new,index=indice,columns=[df.columns[i]])
+        else :     
+            df_n = pd.DataFrame(data=y_new,index=indice,columns=[df.columns[i]])
+            df_int= df_int.join(df_n, how="outer")
+            
+    return df_int
+
+def interpolate(data):
+    interpolated_data = []
+    for i in range(len(data) - 1):
+        interpolated_data.append(data.iloc[i])
+        interpolated_data.append((data.iloc[i] + data.iloc[i + 1]) / 2)  # Punto intermedio
+    interpolated_data.append(data.iloc[-1])
+    return np.array(interpolated_data)
+
+# Añadimos datos que sean el punto de medio entre dos datos consecutivos
+
+def punto_medio(df,freq):
+    for x in df.columns:
+        data = df[x]
+        a = interpolate(data)
+        if x == df.columns[0]:
+            indice = series_periodos(df.index[0],len(a),freq)
+            df_pm = pd.DataFrame(data=a,index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=a,index=indice,columns=[x])
+            df_pm = df_pm.join(df_new, how="outer")
+    return df_pm
+
+def spline_interpolation(data, s=1):
+    x = np.arange(len(data))
+    spline = UnivariateSpline(x, data, s=s)
+    return spline(x)
+
+# Realizamos la interpolación spline 
+def interpolacion_spline(df,s):
+    for x in df.columns:
+        df[x]=spline_interpolation(df[x],s)
+    return df
+
+# Interpolación
+@app.post("/Aumentar/Interpolacion/Min")
+async def modify_item(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = interpolacion_min(df,tipo,num,freq)
+    return {pasar_csv(df1)}
+
+@app.post("/Aumentar/Interpolacion/Max")
+async def modify_item(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = interpolacion_max(df,tipo,num,freq)
+    return {pasar_csv(df1)}
+
+
+@app.post("/Aumentar/Interpolacion/Medio")
+async def modify_item(freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = punto_medio(df,freq)
+    return {pasar_csv(df1)}
+
+@app.post("/Aumentar/Interpolacion/Spline")
+async def modify_item(s:int, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = interpolacion_spline(df,s)
+    return {pasar_csv(df1)}
+
+
+# Random Sampling
+
+def sampling(df,size,freq):
+    indice = series_periodos(df.index[0],size+df.shape[0],freq)
+    for x in df.columns:
+        data = df[x]
+        sampled_data = np.random.choice(data, size=size, replace=True)
+        if x == df.columns[0]:
+            df_sampling=pd.DataFrame(data=np.concatenate((data,sampled_data)),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,sampled_data)),index=indice,columns=[x])
+            df_sampling= df_sampling.join(df_new, how="outer")
+    return df_sampling
+
+
+@app.post("/Aumentar/Sampling")
+async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = sampling(df,size,freq)
+    return {pasar_csv(df1)}
+
+# Técnicas estadísticas
+
+# Devuelve df con datos añadidos calculados a partir de una distribución normal con la media y desviación de los datos pasados 
+
+def normal(df,freq,size):
+    indice=series_periodos(df.index[0],size+df.shape[0],freq)
+    for x in df.columns:
+        data = df[x]
+        mean,std_dev = np.mean(data),np.std(data)
+        data_augmented = np.random.normal(mean,std_dev,size=size)
+        if x == df.columns[0]:
+            df_normal=pd.DataFrame(data=np.concatenate((df[x].values,data_augmented)),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,data_augmented)),index=indice,columns=[x])
+            df_normal= df_normal.join(df_new, how="outer")
+    return df_normal
+
+# Devuelve df con datos añadidos calculados a partir de una distribución lognormal cuya media es el logaritmo de la media de los datos pasados 
+def log_normal(df,freq,sigma,size):
+    indice=series_periodos(df.index[0],size+df.shape[0],freq)
+    for x in df.columns:
+        data = df[x].values
+        data_augmented = np.random.lognormal(mean=np.log(data.mean()),sigma=sigma,size=size)
+        if x == df.columns[0]:
+            df_lognormal=pd.DataFrame(data=np.concatenate((df[x].values,data_augmented)),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,data_augmented)),index=indice,columns=[x])
+            df_lognormal= df_lognormal.join(df_new, how="outer")
+    return df_lognormal
+
+# Calcula nuevos datos usando: media + z * desv donde la media y las desv son las de los datos pasados y z = raiz (-2 * log u1) cos(2 pi u2) tal que u1,u2 son dos randoms entre 0 e 1
+
+def box_muller_transform(mean, std_dev, size=100):
+    u1, u2 = np.random.rand(size), np.random.rand(size)
+    z1 = np.sqrt(-2 * np.log(u1)) * np.cos(2 * np.pi * u2)
+    return mean + z1 * std_dev
+
+def box_muller(df,freq,size):
+    indice=series_periodos(df.index[0],size+df.shape[0],freq)
+    for x in df.columns:
+        data = df[x].values
+        data_bm = box_muller_transform(data.mean(),data.std(),size)
+        if x == df.columns[0]:
+            df_bm=pd.DataFrame(data=np.concatenate((df[x].values,data_bm)),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((df[x].values,data_bm)),index=indice,columns=[x])
+            df_bm = df_bm.join(df_new, how="outer")
+    return df_bm
+
+@app.post("/Aumentar/Normal")
+async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = normal(df,freq,size)
+    return {pasar_csv(df1)}
+
+
+@app.post("/Aumentar/Lognormal")
+async def modify_item(sigma:float, size:int,freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = log_normal(df,freq,sigma,size)
+    return {pasar_csv(df1)}
+
+@app.post("/Aumentar/Muller")
+async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = box_muller(df,freq,size)
+    return {pasar_csv(df1)}
+
+# Bootstrapping 
+# Obtenemos nuevos datos barajando los originales + introduciendo ruido
+
+def agregar_bootstrapping(df,freq):
+    
+    for x in df.columns:
+        synthetic_data = df.sample(frac=1, replace=True).reset_index(drop=True)
+        synthetic_data[x] += np.random.normal(0, 0.1, len(synthetic_data))  # Añadir ruido
+        indice=series_periodos(df.index[0],len(df)+len(synthetic_data),freq)
+        a=pd.concat([df[x],synthetic_data[x]])
+        a.index=indice
+        if x == df.columns[0]:
+            df_bootstrap=pd.DataFrame(data=a)
+        else:
+            df_bootstrap= df_bootstrap.join(a, how="outer")
+    return df_bootstrap
+
+@app.post("/Aumentar/Bootstrap")
+async def modify_item(freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = agregar_bootstrapping(df,freq)
+    return {pasar_csv(df1)}
+
+
+# Duplicar
+
+def duplicate_and_perturb(data, duplication_factor=0.3, perturbation_std=0.05):
+    duplicated_data = []
+    np.random.seed(8)
+    for point in data:
+        duplicated_data.append(point)
+        if np.random.rand() < duplication_factor:
+            duplicated_data.append(point + np.random.normal(0, perturbation_std))
+    return np.array(duplicated_data)
+
+# Duplicamos algunos datos añadiendole cierto ruido.
+
+def duplicados(df,freq,duplication_factor=0.3,perturbation_std=0.05):
+    
+    for x in df.columns:
+        data = df[x]
+        data_dd=duplicate_and_perturb(data,duplication_factor,perturbation_std)
+        if x == df.columns[0]:
+            indice = series_periodos(df.index[0],len(data_dd),freq)
+            df_dd = pd.DataFrame(data=data_dd,index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data = data_dd,index=indice,columns=[x])
+            df_dd = df_dd.join(df_new, how="outer")
+            
+    return df_dd
+
+@app.post("/Aumentar/Duplicado")
+async def modify_item(freq:str,duplication_factor:float, perturbation_std: float, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = duplicados(df,freq,duplication_factor,perturbation_std)
+    return {pasar_csv(df1)}
+
+# Comb lineal
+
+# Calculamos nuevos datos como combinación lineal de los otros 
+
+def linear_combinations(data, n_combinations):
+    combinations = []
+    for _ in range(n_combinations):
+        weights = np.random.rand(data.shape[0])
+        weights /= np.sum(weights)  # Normalizar pesos
+        combination = np.dot(weights, data)
+        combinations.append(combination)
+    return np.array(combinations)
+
+def agregar_comb(df,freq,size):
+    for x in df.columns:
+        data = df[x]
+        data_augmented = linear_combinations(data,size)
+        datos=np.concatenate((data.values,data_augmented))
+        if x == df.columns[0]:
+            indice = series_periodos(df.index[0],len(datos),freq)
+            df_dl = pd.DataFrame(data=datos,index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data = datos,index=indice,columns=[x])
+            df_dl = df_dl.join(df_new, how="outer")
+    return df_dl
+
+@app.post("/Aumentar/Comb_lineal")
+async def modify_item(freq:str,size:int, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = agregar_comb(df,freq,size)
+    return {pasar_csv(df1)}
+
+# Técnicas que realizan modificaciones en los datos:
+
+# Traslacion
+
+# Desplazamiento espacial de la serie
+def traslacion(df,shift,freq):
+    df_trasl =df.copy()
+    for x in df_trasl.columns:
+        data = df[x]
+        data_augmented = df[x] + shift
+        datos = np.concatenate((data.values,data_augmented))
+        if x == df.columns[0]:
+            indice = series_periodos(df.index[0],len(datos),freq)
+            df_trasl = pd.DataFrame(data=datos,index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data = datos,index=indice,columns=[x])
+            df_trasl = df_trasl.join(df_new, how="outer")
+    return df_trasl
+
+@app.post("/Aumentar/Traslacion")
+async def modify_item(shift:float, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = traslacion(df,shift,freq)
+    return {pasar_csv(df1)}
+
+# Agregación de ruido harmónico
+
+# Añadimos ruido harmonico a la muestra con cierta amplitud y frequencia
+
+def add_harmonic_noise(df,freq, amplitude=0.1, frequency=0.5):
+    df_harm = df.copy()
+    for x in df_harm.columns:
+        data = df[x]
+        time = np.arange(len(data))
+        harmonic_noise = amplitude * np.sin(2 * np.pi * frequency * time)
+        data_augmented = data + harmonic_noise
+        datos = np.concatenate((data.values,data_augmented))
+        if x == df.columns[0]:
+            indice = series_periodos(df.index[0],len(datos),freq)
+            df_harm = pd.DataFrame(data=datos,index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data = datos,index=indice,columns=[x])
+            df_harm = df_harm.join(df_new, how="outer")
+    
+    return df_harm
+
+
+@app.post("/Aumentar/Harmonico")
+async def modify_item(amplitude:float, frequency:float,freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = add_harmonic_noise(df,freq, amplitude, frequency)
+    return {pasar_csv(df1)}
+
+# Escalado
+
+# Desplazamiento espacial de la serie
+def escalado(df,freq,factor):
+    df_esc =df.copy()
+    for x in df_esc.columns:
+        data = df[x]
+        data_augmented = df[x]*factor
+        datos = np.concatenate((data.values,data_augmented))
+        if x == df.columns[0]:
+            indice = series_periodos(df.index[0],len(datos),freq)
+            df_esc = pd.DataFrame(data=datos,index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data = datos,index=indice,columns=[x])
+            df_esc= df_esc.join(df_new, how="outer")
+    return df_esc
+
+@app.post("/Aumentar/Escalado")
+async def modify_item(factor:float, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = escalado(df,freq,factor)
+    return {pasar_csv(df1)}
+
+# Saltos
+
+# Mixup
+def mixup(data, alpha=0.2):
+    lambda_ = np.random.beta(alpha, alpha)
+    indices = np.random.permutation(len(data))
+    data_mixup = lambda_ * data + (1 - lambda_) * data[indices]
+    return data_mixup
+
+# Agregar combinación del data junto a otro dato aleatorio
+def agregar_mixup(df,freq,alpha=0.2):
+    df_mix =df.copy()
+    for x in df_mix.columns:
+        data = df[x]
+        data_augmented = mixup(data,alpha)
+        datos = np.concatenate((data.values,data_augmented))
+        if x == df.columns[0]:
+            indice = series_periodos(df.index[0],len(datos),freq)
+            df_mix = pd.DataFrame(data=datos,index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data = datos,index=indice,columns=[x])
+            df_mix= df_mix.join(df_new, how="outer")
+    return df_mix
+
+@app.post("/Aumentar/Mixup")
+async def modify_item(alpha:float, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = agregar_mixup(df,freq,alpha)
+    return {pasar_csv(df1)}
+
+
+def random_mix(data, n_samples=100):
+    mixed_data = []
+    for _ in range(n_samples):
+        i, j = np.random.choice(len(data), 2, replace=False)
+        mixed_data.append((data[i] + data[j]) / 2)
+    return np.array(mixed_data)
+
+# Los valores se calculan tomando dos valores al azar y haciendo la media
+
+def agregar_random_mix(df,freq,n_samples):
+    indice=series_periodos(df.index[0],n_samples+df.shape[0],freq)
+    for x in df.columns:
+        sampled_data = random_mix(df[x],n_samples)
+        if x == df.columns[0]:
+            df_sampling=pd.DataFrame(data=np.concatenate((df[x],sampled_data)),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((df[x],sampled_data)),index=indice,columns=[x])
+            df_sampling= df_sampling.join(df_new, how="outer")
+    return df_sampling
+
+@app.post("/Aumentar/Random_mix")
+async def modify_item(n_samples:int, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = agregar_random_mix(df,freq,n_samples)
+    return {pasar_csv(df1)}
+
+
+# Transformaciones matemáticas
+
