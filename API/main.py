@@ -1,10 +1,13 @@
 from functools import partial
 from io import StringIO
+import io
+import json
 from typing import Any, Dict, Optional, Union
 
 from fastapi import FastAPI, Query, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from typing import List
+from fastapi.responses import StreamingResponse
 
 # Imports
 import pandas as pd
@@ -93,20 +96,48 @@ def crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,coef_err
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df
 
+
+def plot_df(df):
+    plt.figure()
+    df.plot(title="Serie temporal",figsize=(13,5))
+    plt.xlabel("Tiempo")      
+
 @app.get("/Datos/tendencia/fin")
 def read_item(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
 
     return {
         pasar_csv(crear_df_fin_tend_det(inicio,fin,freq,columna,params,tipo,error))
-
     }
+
+@app.get("/Plot/tendencia/fin")
+async def read_item(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
+    
+    df = crear_df_fin_tend_det(inicio,fin,freq,columna,params,tipo,error)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/tendencia/periodos")
 def read_item(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
     return {
         pasar_csv(crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,error))
     }
-    
+
+@app.get("/Plot/Tendencia/periodos")   
+async def read_item(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
+
+    df = crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,error)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse( buffer,media_type="image/png")
+
 # Modelos con ciertas distribuciones:
 
 def crear_datos(distr,params,num_datos):
@@ -251,12 +282,33 @@ def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Qu
 
     }
 
+@app.get("/Plot/distribuciones/fin")
+async def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
+    df = crear_df_fin_datos(inicio,fin,freq,columna,distr,params)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/distribucion/periodos")
 def read_item(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
     return {
         pasar_csv(crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params))
     }
-    
+
+@app.get("/Plot/distribucion/periodos")
+async def read_item(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
+    df = crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
 
 #MODELOS PERIÓDICOS
 
@@ -314,13 +366,34 @@ def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, colum
 
     }
 
+@app.get("/Plot/periodicos/fin")
+async def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
+    df = crear_df_fin_periodicos(inicio,fin,freq,columna,distr,params, p,tipo)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/periodicos/periodos")
 def read_item(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
     return {
         pasar_csv(crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tipo))
     }
  
- 
+@app.get("/Plot/periodicos/periodos")
+async def read_item(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
+    df = crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tipo)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 # Modelos ARMA
 
 def modelo_AR(c,phi,num_datos,desv,a=[]):
@@ -495,14 +568,38 @@ def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int,
         pasar_csv(crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s,phi,teta))
 
     }
-    
+
+@app.get("/Plot/ARMA/fin")
+async def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+    df = crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s,phi,teta)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 @app.get("/Datos/ARMA/periodos")
 def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     return {
         pasar_csv(crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s,phi,teta))
 
     }
-    
+
+@app.get("/Plot/ARMA/periodos") 
+async def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+
+    df = crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s,phi,teta)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 def crear_drift(params1,params2,tipo,num_drift,num_datos):
     
     if tipo==1:
@@ -727,13 +824,38 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:in
 
     }
 
+@app.get("/Plot/drift/fin/dist-dist")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 @app.get("/Datos/drift/periodos/dist-dist")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[dist2,params2],1,num_drift))
     }
- 
+
+@app.get("/Plot/drift/periodos/dist-dist")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna, [dist1,params1],[dist2,params2],1,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 @app.get("/Datos/drift/fin/dist-ARMA")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
@@ -742,6 +864,18 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float,
 
     }
 
+@app.get("/Plot/drift/fin/dist-ARMA")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/periodos/dist-ARMA")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
@@ -749,7 +883,18 @@ def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:f
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift))
     }
 
- 
+@app.get("/Plot/drift/periodos/dist-ARMA")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 @app.get("/Datos/drift/fin/dist-periodico")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
@@ -758,12 +903,36 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:in
 
     }
 
+@app.get("/Plot/drift/fin/dist-periodico")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna, [dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 @app.get("/Datos/drift/periodos/dist-periodico")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift))
     }
+
+@app.get("/Plot/drift/periodos/dist-periodico")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
     
 @app.get("/Datos/drift/fin/dist-tendencia")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
@@ -772,6 +941,16 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:in
         pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift))
 
     }
+@app.get("/Plot/drift/fin/dist-tendencia")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/dist-tendencia")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
@@ -779,6 +958,18 @@ def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tip
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift))
     }
+
+@app.get("/Plot/drift/periodos/dist-tendencia")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
     
 @app.get("/Datos/drift/fin/ARMA-ARMA")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -787,6 +978,17 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:fl
         pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift))
 
     }
+@app.get("/Plot/drift/fin/ARMA-ARMA")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 
 @app.get("/Datos/drift/periodos/ARMA-ARMA")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float , desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -795,6 +997,17 @@ def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , des
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift))
     }
 
+@app.get("/Plot/drift/periodos/ARMA-ARMA")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float , desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
 
 
 @app.get("/Datos/drift/fin/ARMA-dist")
@@ -805,12 +1018,36 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:floa
 
     }
 
+@app.get("/Plot/drift/fin/ARMA-dist")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 @app.get("/Datos/drift/periodos/ARMA-dist")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift))
     }
+
+@app.get("/Plot/drift/periodos/ARMA-dist")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/ARMA-periodicos")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -820,13 +1057,35 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float
 
     }
 
+@app.get("/Plot/drift/fin/ARMA-periodicos")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/periodos/ARMA-periodicos")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift))
     }
-    
+
+@app.get("/Plot/drift/periodos/ARMA-periodicos")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/fin/ARMA-tendencia")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
 
@@ -835,12 +1094,34 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:floa
 
     }
 
+@app.get("/Plot/drift/fin/ARMA-tendencia")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/periodos/ARMA-tendencia")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift))
     }
+
+@app.get("/Plot/drift/periodos/ARMA-tendencia")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/periodico-periodico")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -850,6 +1131,18 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:i
 
     }
 
+@app.get("/Plot/drift/fin/periodico-periodico")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/periodos/periodico-periodico")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
@@ -857,6 +1150,17 @@ def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dis
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift))
     }
     
+@app.get("/Plot/drift/periodos/periodico-periodico")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/fin/periodico-distr")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
@@ -865,6 +1169,20 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:i
 
     }
 
+
+@app.get("/Drift/drift/fin/periodico-distr")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
+
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/periodos/periodico-distr")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
@@ -872,6 +1190,17 @@ def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dis
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift))
     }
     
+@app.get("/Plot/drift/periodos/periodico-distr")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/periodico-ARMA")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -881,12 +1210,35 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:i
 
     }
 
+@app.get("/Plot/drift/fin/periodico-ARMA")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/periodos/periodico-ARMA")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift))
     }
+
+@app.get("/Plot/drift/periodos/periodico-ARMA")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
     
 @app.get("/Datos/drift/fin/periodico-tendencia")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
@@ -896,12 +1248,36 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:i
 
     }
 
+@app.get("/Plot/drift/fin/periodico-tendencia")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/periodos/periodico-tendencia")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift))
     }
+
+@app.get("/Plot/drift/periodos/periodico-tendencia")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
     
 @app.get("/Datos/drift/fin/tendencia-tendencia")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
@@ -911,13 +1287,36 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int
 
     }
 
+@app.get("/Plot/drift/fin/tendencia-tendencia")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/periodos/tendencia-tendencia")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift))
     }
- 
+
+@app.get("/Plot/drift/periodos/tendencia-tendencia")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/fin/tendencia-distr")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
@@ -926,13 +1325,39 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:in
 
     }
 
+@app.get("/Plot/drift/fin/tendencia-distr")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 @app.get("/Datos/drift/periodos/tendencia-distr")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift))
     }
-   
+
+@app.get("/Plot/drift/periodos/tendencia-distr")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 
 @app.get("/Datos/drift/fin/tendencia-ARMA")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -942,12 +1367,36 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,
 
     }
 
+@app.get("/Plot/drift/fin/tendencia-ARMA")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/periodos/tendencia-ARMA")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift))
     }
+
+@app.get("/Plot/drift/periodos/tendencia-ARMA")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
    
 @app.get("/Datos/drift/fin/tendencia-periodicos")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -957,13 +1406,35 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:in
 
     }
 
+@app.get("/Plot/drift/fin/tendencia-periodicos")
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.get("/Datos/drift/periodos/tendencia-periodicos")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     return {
         pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift))
     }
-    
+@app.get("/Plot/drift/periodos/tendencia-periodicos")
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Crea una columna Target: y = a + b * x
 def objetivo_lineal(df_caract,a,b,columna):
@@ -987,13 +1458,31 @@ async def modify_item(a : float, b: float, indice:str, columna:str, file: Upload
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
-    
     df1 = objetivo_lineal(df,a,b, columna)
-    
     result = pasar_csv(df1)
-
     return {result}
     
+@app.post("/Plot/Variables/Lineal")
+async def modify_item(a : float, b: float, indice:str, columna:str, file: UploadFile = File(...)) :
+
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    df1 = objetivo_lineal(df,a,b, columna)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 
 # Crea una columna Target: y = sumatorio a[i] * x ^ i
 
@@ -1017,13 +1506,30 @@ async def modify_item( indice:str, columna:str, a: List[float]= Query(...,descri
         df = pd.read_csv(csv_data,index_col=indice)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-
     
     df1 = objetivo_polinomico(df,a, columna)
-    
     result = pasar_csv(df1)
-
     return {result}
+
+@app.post("/Plot/Variables/Polinomico")
+async def modify_item( indice:str, columna:str, a: List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    df1 = objetivo_polinomico(df,a, columna)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Crea una columna Target: y = a * e ^ (b * x)
 
@@ -1046,12 +1552,30 @@ async def modify_item( a:float,b:float,indice:str, columna:str, file: UploadFile
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
-    
-    df1 = objetivo_exp(df,a,b, columna)
-    
+    df1 = objetivo_exp(df,a,b, columna)    
     result = pasar_csv(df1)
-
     return {result}
+
+@app.post("/Plot/Variables/Exponencial")
+async def modify_item( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
+
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    df1 = objetivo_exp(df,a,b, columna)    
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Crea una columna Target: y = a + b * log (x)
 
@@ -1074,12 +1598,30 @@ async def modify_item( a:float,b:float,indice:str, columna:str, file: UploadFile
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
-    
-    df1 = objetivo_log(df,a,b, columna)
-    
+    df1 = objetivo_log(df,a,b, columna)    
     result = pasar_csv(df1)
-
     return {result}
+
+@app.post("/Plot/Variables/Logaritmica")
+async def modify_item( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    df1 = objetivo_log(df,a,b, columna)    
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 
 # Crea una columna Target: y = a + sumatorio b[i] * x [i]
 def multivariante(df_caract,a,b,columna):
@@ -1105,10 +1647,30 @@ async def modify_item(a:float, indice:str, columna:str, b :List[float]= Query(..
 
     
     df1 = multivariante(df,a,b, columna)
-    
     result = pasar_csv(df1)
-
     return {result}
+
+@app.post("/Plot/Variables/Multivariante")
+async def modify_item(a:float, indice:str, columna:str, b :List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
+
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    df1 = multivariante(df,a,b, columna)    
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 
 # Crea una columna Target: y = a + sumatorio b[i][i] * x [i] + sumatorio b[j][k]x[j]x[k]
 
@@ -1126,7 +1688,7 @@ class MatrixBody(BaseModel):
     
 #Mirar matriz
 @app.post("/Variables/Interaccion")
-async def modify_item(a:float, indice:str, columna:str, b: MatrixBody, file: UploadFile = File(...)) :
+async def modify_item(a:float, indice:str, columna:str, b: str, file: UploadFile = File(...)) :
     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -1138,13 +1700,43 @@ async def modify_item(a:float, indice:str, columna:str, b: MatrixBody, file: Upl
         df = pd.read_csv(csv_data,index_col=indice)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-
     
-    df1 = interaccion(df,a,b, columna)
-    
+    b1 = json.loads(b)
+    m = np.zeros((len(b1),len(b1)))
+    for i in range(0,m.shape[0]):
+        for j in range(0,m.shape[1]):
+            m[i][j] = b1[i][j]
+    df1 = interaccion(df,a,m, columna)
     result = pasar_csv(df1)
-
     return {result}
+
+@app.post("/Plot/Variables/Interaccion")
+async def modify_item(a:float, indice:str, columna:str, b: str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    b1 = json.loads(b)
+    m = np.zeros((len(b1),len(b1)))
+    for i in range(0,m.shape[0]):
+        for j in range(0,m.shape[1]):
+            m[i][j] = b1[i][j]
+
+    df1 = interaccion(df,a,m, columna)    
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 
 # Crea una columna Target: y = a / x ^ n
 
@@ -1167,12 +1759,30 @@ async def modify_item(a:float, n:int , indice:str, columna:str, file: UploadFile
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
-    
-    df1 = objetivo_prop_inversa(df,a,n, columna)
-    
+    df1 = objetivo_prop_inversa(df,a,n, columna)    
     result = pasar_csv(df1)
-
     return {result}
+
+@app.post("/Plot/Variables/Inversa")
+async def modify_item(a:float, n:int , indice:str, columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    df1 = objetivo_prop_inversa(df,a, n, columna)    
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 
 # Crea una columna Target: Si x < umbral, y = f(x). En otro caso, y = g(x)
 
@@ -1267,10 +1877,32 @@ async def modify_item(umbral:float, f: str,g:str , indice:str, columna:str, file
     f1 = elegir_funcion(f)
     g1 = elegir_funcion(g)
     df1 = objetivo_escalonada(df,f1,g1, umbral,columna)
-    
     result = pasar_csv(df1)
-
     return {result}
+
+@app.post("/Plot/Variables/Escalonada")
+async def modify_item(umbral:float, f: str,g:str , indice:str, columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    f1 = elegir_funcion(f)
+    g1 = elegir_funcion(g)
+    df1 = objetivo_escalonada(df,f1,g1,umbral, columna)    
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 
 # Crea una columna Target: Si x cumple condM --> y = fM(x1,...,xN)
 
@@ -1439,9 +2071,9 @@ def expon2M(x):
     return math.pow(2,result-a) - b
 
 def logaritmoM(x):
-    a = (random()-0.5) * 20
+    a = (random()) * 10
     b = (random()-0.5) * 20
-    result = linealM(x)
+    result = math.fabs(linealM(x))
     return math.log(result+a) - b
 
 def raizM(x):
@@ -1556,11 +2188,39 @@ async def modify_item( funciones: List[str],condiciones: List[str] , indice:str,
         c.append(elegir_condicion(cond[k]))
         
     df1 = objetivo_condicional(df,columna,c,f)
-    
     result = pasar_csv(df1)
-
     return {result}
 
+@app.post("/Plot/Variables/Condicional")
+async def modify_item( funciones: List[str],condiciones: List[str] , indice:str, columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    func = funciones[0].split(",")
+    cond = condiciones[0].split(",")
+    f=list()
+    c=list()
+
+    for k in range(0,len(func)):
+        f.append(elegir_funcion_multi(func[k]))
+
+    for k in range(0,len(f)):
+        c.append(elegir_condicion(cond[k]))
+
+    df1 = objetivo_condicional(df,columna,c,f)    
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Crea una columna Target: y = f(x1,...,xN)
 
@@ -1592,12 +2252,29 @@ async def modify_item( funciones: str , indice:str, columna:str, file: UploadFil
 
     f = elegir_funcion_multi(funciones)
     df1 = objetivo_funcional(df,columna,f)
-    
     result = pasar_csv(df1)
-
     return {result}
 
+@app.post("/Plot/Variables/Funcional")
+async def modify_item( funciones: str , indice:str, columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    f = elegir_funcion_multi(funciones)
+    df1 = objetivo_funcional(df,columna,f)    
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Técnicas de aumentación de datos: 
 
@@ -1647,7 +2324,6 @@ def interpolate(data):
     return np.array(interpolated_data)
 
 # Añadimos datos que sean el punto de medio entre dos datos consecutivos
-
 def punto_medio(df,freq):
     for x in df.columns:
         data = df[x]
@@ -1689,6 +2365,30 @@ async def modify_item(tipo : str, num: int, freq:str, indice:str, file: UploadFi
     df1 = interpolacion_min(df,tipo,num,freq)
     return {pasar_csv(df1)}
 
+@app.post("/Plot/Aumentar/Interpolacion/Min")
+async def modify_item(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    
+    df1 = interpolacion_min(df,tipo,num,freq)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 @app.post("/Aumentar/Interpolacion/Max")
 async def modify_item(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -1707,6 +2407,28 @@ async def modify_item(tipo : str, num: int, freq:str, indice:str, file: UploadFi
     return {pasar_csv(df1)}
 
 
+@app.post("/Plot/Aumentar/Interpolacion/Max")
+async def modify_item(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = interpolacion_max(df,tipo,num,freq)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 @app.post("/Aumentar/Interpolacion/Medio")
 async def modify_item(freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -1723,6 +2445,30 @@ async def modify_item(freq:str, indice:str, file: UploadFile = File(...)) :
     
     df1 = punto_medio(df,freq)
     return {pasar_csv(df1)}
+
+
+@app.post("/Plot/Aumentar/Interpolacion/Medio")
+async def modify_item(freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = punto_medio(df,freq)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 
 @app.post("/Aumentar/Interpolacion/Spline")
 async def modify_item(s:int, indice:str, file: UploadFile = File(...)) :
@@ -1741,6 +2487,27 @@ async def modify_item(s:int, indice:str, file: UploadFile = File(...)) :
     df1 = interpolacion_spline(df,s)
     return {pasar_csv(df1)}
 
+@app.post("/Plot/Aumentar/Interpolacion/Spline")
+async def modify_item(s:int, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = interpolacion_spline(df,s)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Random Sampling
 
@@ -1773,6 +2540,30 @@ async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...
     
     df1 = sampling(df,size,freq)
     return {pasar_csv(df1)}
+
+
+@app.post("/Plot/Aumentar/Sampling")
+async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = sampling(df,size,freq)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 
 # Técnicas estadísticas
 
@@ -1840,6 +2631,27 @@ async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...
     df1 = normal(df,freq,size)
     return {pasar_csv(df1)}
 
+@app.post("/Plot/Aumentar/Normal")
+async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = normal(df,freq,size)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 @app.post("/Aumentar/Lognormal")
 async def modify_item(sigma:float, size:int,freq:str, indice:str, file: UploadFile = File(...)) :
@@ -1858,6 +2670,29 @@ async def modify_item(sigma:float, size:int,freq:str, indice:str, file: UploadFi
     df1 = log_normal(df,freq,sigma,size)
     return {pasar_csv(df1)}
 
+@app.post("/Plot/Aumentar/Lognormal")
+async def modify_item(sigma:float, size:int,freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = log_normal(df,freq,sigma,size)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 @app.post("/Aumentar/Muller")
 async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -1874,6 +2709,30 @@ async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...
     
     df1 = box_muller(df,freq,size)
     return {pasar_csv(df1)}
+
+
+@app.post("/Plot/Aumentar/Muller")
+async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = box_muller(df,freq,size)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 
 # Bootstrapping 
 # Obtenemos nuevos datos barajando los originales + introduciendo ruido
@@ -1909,6 +2768,27 @@ async def modify_item(freq:str, indice:str, file: UploadFile = File(...)) :
     df1 = agregar_bootstrapping(df,freq)
     return {pasar_csv(df1)}
 
+@app.post("/Plot/Aumentar/Bootstrap")
+async def modify_item(freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = agregar_bootstrapping(df,freq)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Duplicar
 
@@ -1954,6 +2834,31 @@ async def modify_item(freq:str,duplication_factor:float, perturbation_std: float
     df1 = duplicados(df,freq,duplication_factor,perturbation_std)
     return {pasar_csv(df1)}
 
+
+
+@app.post("/Plot/Aumentar/Duplicado")
+async def modify_item(freq:str,duplication_factor:float, perturbation_std: float, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = duplicados(df,freq,duplication_factor,perturbation_std)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 # Comb lineal
 
 # Calculamos nuevos datos como combinación lineal de los otros 
@@ -1997,6 +2902,29 @@ async def modify_item(freq:str,size:int, indice:str, file: UploadFile = File(...
     df1 = agregar_comb(df,freq,size)
     return {pasar_csv(df1)}
 
+@app.post("/Plot/Aumentar/Comb_lineal")
+async def modify_item(freq:str,size:int, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = agregar_comb(df,freq,size)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 # Técnicas que realizan modificaciones en los datos:
 
 # Traslacion
@@ -2033,6 +2961,28 @@ async def modify_item(shift:float, freq:str, indice:str, file: UploadFile = File
     df1 = traslacion(df,shift,freq)
     return {pasar_csv(df1)}
 
+@app.post("/Plot/Aumentar/Traslacion")
+async def modify_item(shift:float, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = traslacion(df,shift,freq)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+    
 # Agregación de ruido harmónico
 
 # Añadimos ruido harmonico a la muestra con cierta amplitud y frequencia
@@ -2072,6 +3022,29 @@ async def modify_item(amplitude:float, frequency:float,freq:str, indice:str, fil
     df1 = add_harmonic_noise(df,freq, amplitude, frequency)
     return {pasar_csv(df1)}
 
+@app.post("/Plot/Aumentar/Harmonico")
+async def modify_item(amplitude:float, frequency:float,freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = add_harmonic_noise(df,freq, amplitude, frequency)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
 # Escalado
 
 # Desplazamiento espacial de la serie
@@ -2106,7 +3079,86 @@ async def modify_item(factor:float, freq:str, indice:str, file: UploadFile = Fil
     df1 = escalado(df,freq,factor)
     return {pasar_csv(df1)}
 
+@app.post("/Plot/Aumentar/Escalado")
+async def modify_item(factor:float, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = escalado(df,freq,factor)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 # Saltos
+def pulse_noise(data, num_pulses=5, amplitude=1):
+    pulse_indices = np.random.choice(len(data), num_pulses, replace=False)
+    pulse_data = list()
+    for i in pulse_indices:
+        pulse_data.append(data[i]+ np.random.uniform(-amplitude, amplitude))
+    return pulse_data
+
+# Calculamos nuevos datos como combinación lineal de los otros 
+
+def agregar_saltos(df,freq,num_saltos,amplitud):
+    for x in df.columns:
+        data = df[x]
+        data_augmented = pulse_noise(data,num_saltos,amplitud)
+        datos=np.concatenate((data.values,data_augmented))
+        if x == df.columns[0]:
+            indice = series_periodos(df.index[0],len(datos),freq)
+            df_saltos = pd.DataFrame(data=datos,index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data = datos,index=indice,columns=[x])
+            df_saltos = df_saltos.join(df_new, how="outer")
+    return df_saltos
+
+
+@app.post("/Aumentar/Saltos")
+async def modify_item(num_saltos:int, amplitud:float, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    df1 = agregar_saltos(df,freq,num_saltos,amplitud)
+    return {pasar_csv(df1)}
+
+@app.post("/Plot/Aumentar/Saltos")
+async def modify_item(num_saltos:int, amplitud:float, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    df1 = agregar_saltos(df,freq,num_saltos,amplitud)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Mixup
 def mixup(data, alpha=0.2):
@@ -2147,6 +3199,27 @@ async def modify_item(alpha:float, freq:str, indice:str, file: UploadFile = File
     df1 = agregar_mixup(df,freq,alpha)
     return {pasar_csv(df1)}
 
+@app.post("/Plot/Aumentar/Mixup")
+async def modify_item(alpha:float, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = agregar_mixup(df,freq,alpha)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 def random_mix(data, n_samples=100):
     mixed_data = []
@@ -2185,6 +3258,197 @@ async def modify_item(n_samples:int, freq:str, indice:str, file: UploadFile = Fi
     df1 = agregar_random_mix(df,freq,n_samples)
     return {pasar_csv(df1)}
 
+@app.post("/Plot/Aumentar/Random_mix")
+async def modify_item(n_samples:int, freq:str, indice:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = agregar_random_mix(df,freq,n_samples)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Transformaciones matemáticas
 
+# Aplicamos log
+def agregar_log(df):
+    df_o = df.copy()
+    for x in df_o.columns:
+        df_o[x] = np.log1p(df[x])
+    return df_o
+
+
+# Aplicamos la raíz cuadrada 
+def agregar_matematica(df,freq,funcion,factor=1):
+    indice=series_periodos(df.index[0],2*df.shape[0],freq)
+    for x in df.columns:
+        data = df[x]
+        if funcion == 'sqrt':
+            transformed_data = np.sqrt(data)
+        elif funcion == 'log':
+            transformed_data = np.log1p(data)
+        elif funcion == 'exp':
+            transformed_data = np.exp(data/factor)
+        elif funcion == 'sin':
+            transformed_data = np.sin(data)
+        elif funcion == 'cos':
+            transformed_data = np.cos(data)
+        elif funcion == 'trig':
+            transformed_data = np.cos(data) + np.sin(data)
+        elif funcion == 'sigmoide':
+            transformed_data = 1 / (1 + np.exp(-data))
+
+        if x == df.columns[0]:
+            df_transf=pd.DataFrame(data=np.concatenate((data,transformed_data)),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,transformed_data)),index=indice,columns=[x])
+            df_transf= df_transf.join(df_new, how="outer")
+    return df_transf
+
+
+@app.post("/Aumentar/Matematica")
+async def modify_item(funcion:str, freq:str, indice:str,factor : Union[float,None] = 1, file: UploadFile = File(...)) :
+
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = agregar_matematica(df,freq,funcion,factor)
+    return {pasar_csv(df1)}
+
+@app.post("/Plot/Aumentar/Matematica")
+async def modify_item(funcion:str, freq:str, indice:str,factor : Union[float,None] = 1, file: UploadFile = File(...)) :
+
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = agregar_matematica(df,freq,funcion,factor)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
+# Técnicas de reducción 
+
+# Ventana deslizante
+
+# Calculo con ventanas deslizantes del tamaño pasado como parámetro
+
+def ventanas(df,ventana):
+    df_o = df.copy()
+    for x in df.columns:
+        df_o[x] = df_o[x].rolling(window=ventana).mean()
+    df_o = df_o.dropna()
+    return df_o
+
+@app.post("/Aumentar/Ventana")
+async def modify_item(ventana:int, indice:str, file: UploadFile = File(...)) :
+
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    df1 = ventanas(df,ventana)
+    return {pasar_csv(df1)}
+
+@app.post("/Plot/Aumentar/Ventana")
+async def modify_item(ventana:int, indice:str, file: UploadFile = File(...)) :
+
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    df1 = ventanas(df,ventana)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+     
+# Recorte
+
+def crop(series, start, end):
+    return series[start:end]
+
+# Recortamos la serie quedándonos solo con una parte desde la posición de inicio al fin
+
+def recorte(df_i,start,end):
+    df_o = df_i.copy()
+    for x in df_o.columns:
+        df_o[x] = crop(df_o[x],start,end)
+    df_o=df_o.dropna()
+    return df_o
+
+@app.post("/Aumentar/Recorte")
+async def modify_item(start:int,end:int, indice:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    df1 = recorte(df,start,end)
+    return {pasar_csv(df1)}
+
+@app.post("/Plot/Aumentar/Recorte")
+async def modify_item(start:int,end:int, indice:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    df1 = recorte(df,start,end)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
