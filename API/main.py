@@ -96,18 +96,26 @@ def crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,coef_err
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df
 
-
 def plot_df(df):
     plt.figure()
     df.plot(title="Serie temporal",figsize=(13,5))
     plt.xlabel("Tiempo")      
 
 @app.get("/Datos/tendencia/fin")
-def read_item(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
+async def read_item(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
+    
+    df = crear_df_fin_tend_det(inicio,fin,freq,columna,params,tipo,error);
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    return {
-        pasar_csv(crear_df_fin_tend_det(inicio,fin,freq,columna,params,tipo,error))
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-tendencia-fin.csv"
+    
+    return response
 
 @app.get("/Plot/tendencia/fin")
 async def read_item(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
@@ -122,10 +130,20 @@ async def read_item(inicio: str, fin:str, freq:str, tipo:int , error: Union[floa
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/tendencia/periodos")
-def read_item(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
-    return {
-        pasar_csv(crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,error))
-    }
+async def read_item(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
+    
+    df=crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,error)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-tendencia-periodos.csv"
+    
+    return response
 
 @app.get("/Plot/Tendencia/periodos")   
 async def read_item(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
@@ -275,12 +293,20 @@ def crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params):
     return df 
 
 @app.get("/Datos/distribucion/fin")
-def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
+async def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
 
-    return {
-        pasar_csv(crear_df_fin_datos(inicio,fin,freq,columna,distr,params))
+    df = crear_df_fin_datos(inicio,fin,freq,columna,distr,params)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-distribucion-fin.csv"
+    
+    return response
 
 @app.get("/Plot/distribuciones/fin")
 async def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
@@ -294,10 +320,20 @@ async def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[st
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/distribucion/periodos")
-def read_item(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
-    return {
-        pasar_csv(crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params))
-    }
+async def read_item(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
+    
+    df = crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-distribucion-periodos.csv"
+    
+    return response
 
 @app.get("/Plot/distribucion/periodos")
 async def read_item(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
@@ -359,12 +395,21 @@ def crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tip
     return df 
 
 @app.get("/Datos/periodicos/fin")
-def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
+async def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
 
-    return {
-        pasar_csv(crear_df_fin_periodicos(inicio,fin,freq,columna,distr,params,p,tipo))
+    df =crear_df_fin_periodicos(inicio,fin,freq,columna,distr,params,p,tipo)
 
-    }
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-periodicos-fin.csv"
+    
+    return response
 
 @app.get("/Plot/periodicos/fin")
 async def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
@@ -378,10 +423,20 @@ async def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int,
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/periodicos/periodos")
-def read_item(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
-    return {
-        pasar_csv(crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tipo))
-    }
+async def read_item(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
+
+    df= crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tipo)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-periodicos-periodos.csv"
+    
+    return response
  
 @app.get("/Plot/periodicos/periodos")
 async def read_item(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
@@ -563,11 +618,20 @@ def crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s=0,phi=[],teta=[
     return df 
 
 @app.get("/Datos/ARMA/fin")
-def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
-    return {
-        pasar_csv(crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s,phi,teta))
+async def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+      
+    df = crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s,phi,teta)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-ARMA-fin.csv"
+    
+    return response
 
 @app.get("/Plot/ARMA/fin")
 async def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
@@ -582,12 +646,19 @@ async def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Unio
 
 
 @app.get("/Datos/ARMA/periodos")
-def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
-    return {
-        pasar_csv(crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s,phi,teta))
+async def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+    df = crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s,phi,teta)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
-
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-ARMA-periodos.csv"
+    
+    return response
+ 
 @app.get("/Plot/ARMA/periodos") 
 async def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
@@ -817,12 +888,19 @@ def crear_df_periodos_DRIFT(inicio,periodos,freq,columna,params1,params2,tipo,nu
 
 
 @app.get("/Datos/drift/fin/dist-dist")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[dist2,params2],1,num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
+     # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-dist-dist-fin.csv"
+    
+    return response
 
 @app.get("/Plot/drift/fin/dist-dist")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -838,11 +916,20 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, di
 
 
 @app.get("/Datos/drift/periodos/dist-dist")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[dist2,params2],1,num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-dist-dist-periodos.csv"
+    
+    return response
 
 @app.get("/Plot/drift/periodos/dist-dist")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -857,12 +944,20 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
 
 
 @app.get("/Datos/drift/fin/dist-ARMA")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-dist-ARMA-fin.csv"
+    
+    return response
 
 @app.get("/Plot/drift/fin/dist-ARMA")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
@@ -877,11 +972,20 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/dist-ARMA")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
+
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-dist-ARMA-periodos.csv"
+    
+    return response  
 
 @app.get("/Plot/drift/periodos/dist-ARMA")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
@@ -896,12 +1000,20 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
 
 
 @app.get("/Datos/drift/fin/dist-periodico")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-dist-periodico-fin.csv"
+    
+    return response  
+    
 
 @app.get("/Plot/drift/fin/dist-periodico")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -916,11 +1028,19 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, ti
 
 
 @app.get("/Datos/drift/periodos/dist-periodico")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-dist-periodico-periodos.csv"
+    
+    return response  
 
 @app.get("/Plot/drift/periodos/dist-periodico")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -935,12 +1055,21 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
 
     
 @app.get("/Datos/drift/fin/dist-tendencia")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-dist-tendencia-fin.csv"
+    
+    return response  
+
 @app.get("/Plot/drift/fin/dist-tendencia")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
@@ -953,11 +1082,19 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, ti
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/dist-tendencia")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-dist-tendencia-periodos.csv"
+    
+    return response 
 
 @app.get("/Plot/drift/periodos/dist-tendencia")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
@@ -972,12 +1109,22 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
 
     
 @app.get("/Datos/drift/fin/ARMA-ARMA")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-ARMA-fin.csv"
+    
+    return response 
+
+
 @app.get("/Plot/drift/fin/ARMA-ARMA")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
@@ -993,9 +1140,18 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , de
 @app.get("/Datos/drift/periodos/ARMA-ARMA")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float , desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
+    
+     # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-ARMA-periodos.csv"
+    
+    return response 
 
 @app.get("/Plot/drift/periodos/ARMA-ARMA")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float , desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -1011,12 +1167,20 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float
 
 
 @app.get("/Datos/drift/fin/ARMA-dist")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-dist-fin.csv"
+    
+    return response 
 
 @app.get("/Plot/drift/fin/ARMA-dist")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -1033,9 +1197,18 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , des
 @app.get("/Datos/drift/periodos/ARMA-dist")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-dist-periodos.csv"
+    
+    return response 
 
 @app.get("/Plot/drift/periodos/ARMA-dist")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -1052,10 +1225,18 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float,
 @app.get("/Datos/drift/fin/ARMA-periodicos")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-periodicos-fin.csv"
+    
+    return response 
 
 @app.get("/Plot/drift/fin/ARMA-periodicos")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -1069,11 +1250,20 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/ARMA-periodicos")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-periodicos-periodos.csv"
+    
+    return response 
 
 @app.get("/Plot/drift/periodos/ARMA-periodicos")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -1087,12 +1277,19 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float 
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/ARMA-tendencia")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-tendencia-fin.csv"
+    
+    return response 
 
 @app.get("/Plot/drift/fin/ARMA-tendencia")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
@@ -1106,11 +1303,20 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , des
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/ARMA-tendencia")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-tendencia-periodos.csv"
+    
+    return response 
 
 @app.get("/Plot/drift/periodos/ARMA-tendencia")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
@@ -1124,12 +1330,19 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float 
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/periodico-periodico")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-periodico-periodico-fin.csv"
+    
+    return response 
 
 @app.get("/Plot/drift/fin/periodico-periodico")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -1144,11 +1357,21 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, di
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/periodico-periodico")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-periodico-periodico-periodos.csv"
+    
+    return response 
+
     
 @app.get("/Plot/drift/periodos/periodico-periodico")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -1164,13 +1387,21 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
 @app.get("/Datos/drift/fin/periodico-distr")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-periodico-dist-fin.csv"
+    
+    return response 
 
 
-@app.get("/Drift/drift/fin/periodico-distr")
+
+@app.get("/Plot/drift/fin/periodico-distr")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
@@ -1186,9 +1417,18 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, di
 @app.get("/Datos/drift/periodos/periodico-distr")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-periodico-dist-periodos.csv"
+    
+    return response 
     
 @app.get("/Plot/drift/periodos/periodico-distr")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -1203,12 +1443,19 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/periodico-ARMA")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-periodico-ARMA-fin.csv"
+    
+    return response
 
 @app.get("/Plot/drift/fin/periodico-ARMA")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -1222,11 +1469,20 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, di
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/periodico-ARMA")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-periodico-ARMA-periodos.csv"
+    
+    return response
 
 @app.get("/Plot/drift/periodos/periodico-ARMA")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -1241,12 +1497,19 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
     return StreamingResponse(buffer,media_type="image/png")
     
 @app.get("/Datos/drift/fin/periodico-tendencia")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-periodico-tendencia-fin.csv"
+    
+    return response 
 
 @app.get("/Plot/drift/fin/periodico-tendencia")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
@@ -1260,11 +1523,19 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, di
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/periodico-tendencia")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-periodico-tendencia-periodos.csv"
+    
+    return response
 
 @app.get("/Plot/drift/periodos/periodico-tendencia")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
@@ -1280,12 +1551,19 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
 
     
 @app.get("/Datos/drift/fin/tendencia-tendencia")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-tendencia-fin.csv"
+    
+    return response
 
 @app.get("/Plot/drift/fin/tendencia-tendencia")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
@@ -1302,9 +1580,18 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tip
 @app.get("/Datos/drift/periodos/tendencia-tendencia")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-tendencia-periodos.csv"
+    
+    return response
 
 @app.get("/Plot/drift/periodos/tendencia-tendencia")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
@@ -1320,10 +1607,17 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
 @app.get("/Datos/drift/fin/tendencia-distr")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-dist-fin.csv"
+    
+    return response
 
 @app.get("/Plot/drift/fin/tendencia-distr")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -1341,9 +1635,16 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,dis
 @app.get("/Datos/drift/periodos/tendencia-distr")
 def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-dist-periodos.csv"
+    return response 
 
 @app.get("/Plot/drift/periodos/tendencia-distr")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -1362,10 +1663,17 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
 @app.get("/Datos/drift/fin/tendencia-ARMA")
 def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-ARMA-fin.csv"
+    return response 
 
 @app.get("/Plot/drift/fin/tendencia-ARMA")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -1380,11 +1688,18 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/tendencia-ARMA")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift))
-    }
+    df =crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-ARMA-periodos.csv"
+    return response 
 
 @app.get("/Plot/drift/periodos/tendencia-ARMA")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -1399,12 +1714,18 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
     return StreamingResponse(buffer,media_type="image/png")
    
 @app.get("/Datos/drift/fin/tendencia-periodicos")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift))
+    df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
 
-    }
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-periodicos-fin.csv"
+    return response 
 
 @app.get("/Plot/drift/fin/tendencia-periodicos")
 async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
@@ -1419,11 +1740,21 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, ti
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/tendencia-periodicos")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
-    return {
-        pasar_csv(crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift))
-    }
+    df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-periodicos-periodos.csv"
+    return response 
+
+
 @app.get("/Plot/drift/periodos/tendencia-periodicos")
 async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
@@ -1459,8 +1790,15 @@ async def modify_item(a : float, b: float, indice:str, columna:str, file: Upload
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
     df1 = objetivo_lineal(df,a,b, columna)
-    result = pasar_csv(df1)
-    return {result}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-lineal.csv"
+    return response 
     
 @app.post("/Plot/Variables/Lineal")
 async def modify_item(a : float, b: float, indice:str, columna:str, file: UploadFile = File(...)) :
@@ -1508,8 +1846,15 @@ async def modify_item( indice:str, columna:str, a: List[float]= Query(...,descri
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = objetivo_polinomico(df,a, columna)
-    result = pasar_csv(df1)
-    return {result}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-polinomico.csv"
+    return response 
 
 @app.post("/Plot/Variables/Polinomico")
 async def modify_item( indice:str, columna:str, a: List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
@@ -1553,8 +1898,15 @@ async def modify_item( a:float,b:float,indice:str, columna:str, file: UploadFile
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
     df1 = objetivo_exp(df,a,b, columna)    
-    result = pasar_csv(df1)
-    return {result}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-exponencial.csv"
+    return response 
 
 @app.post("/Plot/Variables/Exponencial")
 async def modify_item( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
@@ -1599,8 +1951,15 @@ async def modify_item( a:float,b:float,indice:str, columna:str, file: UploadFile
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
     df1 = objetivo_log(df,a,b, columna)    
-    result = pasar_csv(df1)
-    return {result}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-logaritmico.csv"
+    return response 
 
 @app.post("/Plot/Variables/Logaritmica")
 async def modify_item( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
@@ -1647,8 +2006,16 @@ async def modify_item(a:float, indice:str, columna:str, b :List[float]= Query(..
 
     
     df1 = multivariante(df,a,b, columna)
-    result = pasar_csv(df1)
-    return {result}
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-multivariante.csv"
+    return response 
 
 @app.post("/Plot/Variables/Multivariante")
 async def modify_item(a:float, indice:str, columna:str, b :List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
@@ -1707,8 +2074,15 @@ async def modify_item(a:float, indice:str, columna:str, b: str, file: UploadFile
         for j in range(0,m.shape[1]):
             m[i][j] = b1[i][j]
     df1 = interaccion(df,a,m, columna)
-    result = pasar_csv(df1)
-    return {result}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-interaccion.csv"
+    return response 
 
 @app.post("/Plot/Variables/Interaccion")
 async def modify_item(a:float, indice:str, columna:str, b: str, file: UploadFile = File(...)) :
@@ -1736,8 +2110,6 @@ async def modify_item(a:float, indice:str, columna:str, b: str, file: UploadFile
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
-
 # Crea una columna Target: y = a / x ^ n
 
 def objetivo_prop_inversa(df_caract,a,n,columna):
@@ -1760,8 +2132,15 @@ async def modify_item(a:float, n:int , indice:str, columna:str, file: UploadFile
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
     df1 = objetivo_prop_inversa(df,a,n, columna)    
-    result = pasar_csv(df1)
-    return {result}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-inversa.csv"
+    return response 
 
 @app.post("/Plot/Variables/Inversa")
 async def modify_item(a:float, n:int , indice:str, columna:str, file: UploadFile = File(...)) :
@@ -1877,8 +2256,15 @@ async def modify_item(umbral:float, f: str,g:str , indice:str, columna:str, file
     f1 = elegir_funcion(f)
     g1 = elegir_funcion(g)
     df1 = objetivo_escalonada(df,f1,g1, umbral,columna)
-    result = pasar_csv(df1)
-    return {result}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-escalonada.csv"
+    return response 
 
 @app.post("/Plot/Variables/Escalonada")
 async def modify_item(umbral:float, f: str,g:str , indice:str, columna:str, file: UploadFile = File(...)) :
@@ -2188,8 +2574,15 @@ async def modify_item( funciones: List[str],condiciones: List[str] , indice:str,
         c.append(elegir_condicion(cond[k]))
         
     df1 = objetivo_condicional(df,columna,c,f)
-    result = pasar_csv(df1)
-    return {result}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-condicional.csv"
+    return response 
 
 @app.post("/Plot/Variables/Condicional")
 async def modify_item( funciones: List[str],condiciones: List[str] , indice:str, columna:str, file: UploadFile = File(...)) :
@@ -2252,8 +2645,15 @@ async def modify_item( funciones: str , indice:str, columna:str, file: UploadFil
 
     f = elegir_funcion_multi(funciones)
     df1 = objetivo_funcional(df,columna,f)
-    result = pasar_csv(df1)
-    return {result}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-funcional.csv"
+    return response 
 
 @app.post("/Plot/Variables/Funcional")
 async def modify_item( funciones: str , indice:str, columna:str, file: UploadFile = File(...)) :
@@ -2363,7 +2763,15 @@ async def modify_item(tipo : str, num: int, freq:str, indice:str, file: UploadFi
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = interpolacion_min(df,tipo,num,freq)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion-min.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Interpolacion/Min")
 async def modify_item(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
@@ -2404,7 +2812,15 @@ async def modify_item(tipo : str, num: int, freq:str, indice:str, file: UploadFi
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = interpolacion_max(df,tipo,num,freq)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion-max.csv"
+    return response 
 
 
 @app.post("/Plot/Aumentar/Interpolacion/Max")
@@ -2444,7 +2860,15 @@ async def modify_item(freq:str, indice:str, file: UploadFile = File(...)) :
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = punto_medio(df,freq)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion-medio.csv"
+    return response 
 
 
 @app.post("/Plot/Aumentar/Interpolacion/Medio")
@@ -2485,7 +2909,15 @@ async def modify_item(s:int, indice:str, file: UploadFile = File(...)) :
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = interpolacion_spline(df,s)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion-spline.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Interpolacion/Spline")
 async def modify_item(s:int, indice:str, file: UploadFile = File(...)) :
@@ -2539,7 +2971,15 @@ async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = sampling(df,size,freq)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-sampling.csv"
+    return response 
 
 
 @app.post("/Plot/Aumentar/Sampling")
@@ -2629,7 +3069,15 @@ async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = normal(df,freq,size)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-normal.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Normal")
 async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
@@ -2668,7 +3116,15 @@ async def modify_item(sigma:float, size:int,freq:str, indice:str, file: UploadFi
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = log_normal(df,freq,sigma,size)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-lognormal.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Lognormal")
 async def modify_item(sigma:float, size:int,freq:str, indice:str, file: UploadFile = File(...)) :
@@ -2708,7 +3164,15 @@ async def modify_item(size:int,freq:str, indice:str, file: UploadFile = File(...
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = box_muller(df,freq,size)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-muller.csv"
+    return response 
 
 
 @app.post("/Plot/Aumentar/Muller")
@@ -2766,7 +3230,15 @@ async def modify_item(freq:str, indice:str, file: UploadFile = File(...)) :
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = agregar_bootstrapping(df,freq)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-bootstrapping.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Bootstrap")
 async def modify_item(freq:str, indice:str, file: UploadFile = File(...)) :
@@ -2832,7 +3304,15 @@ async def modify_item(freq:str,duplication_factor:float, perturbation_std: float
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = duplicados(df,freq,duplication_factor,perturbation_std)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-duplicado.csv"
+    return response 
 
 
 
@@ -2900,7 +3380,15 @@ async def modify_item(freq:str,size:int, indice:str, file: UploadFile = File(...
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = agregar_comb(df,freq,size)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-comb-lineal.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Comb_lineal")
 async def modify_item(freq:str,size:int, indice:str, file: UploadFile = File(...)) :
@@ -2959,7 +3447,15 @@ async def modify_item(shift:float, freq:str, indice:str, file: UploadFile = File
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = traslacion(df,shift,freq)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-traslacion.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Traslacion")
 async def modify_item(shift:float, freq:str, indice:str, file: UploadFile = File(...)) :
@@ -3020,7 +3516,15 @@ async def modify_item(amplitude:float, frequency:float,freq:str, indice:str, fil
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = add_harmonic_noise(df,freq, amplitude, frequency)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-ruido-harmonico.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Harmonico")
 async def modify_item(amplitude:float, frequency:float,freq:str, indice:str, file: UploadFile = File(...)) :
@@ -3077,7 +3581,15 @@ async def modify_item(factor:float, freq:str, indice:str, file: UploadFile = Fil
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = escalado(df,freq,factor)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-escalado.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Escalado")
 async def modify_item(factor:float, freq:str, indice:str, file: UploadFile = File(...)) :
@@ -3138,7 +3650,15 @@ async def modify_item(num_saltos:int, amplitud:float, freq:str, indice:str, file
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     df1 = agregar_saltos(df,freq,num_saltos,amplitud)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-saltos.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Saltos")
 async def modify_item(num_saltos:int, amplitud:float, freq:str, indice:str, file: UploadFile = File(...)) :
@@ -3197,7 +3717,15 @@ async def modify_item(alpha:float, freq:str, indice:str, file: UploadFile = File
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = agregar_mixup(df,freq,alpha)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-mixup.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Mixup")
 async def modify_item(alpha:float, freq:str, indice:str, file: UploadFile = File(...)) :
@@ -3256,7 +3784,15 @@ async def modify_item(n_samples:int, freq:str, indice:str, file: UploadFile = Fi
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = agregar_random_mix(df,freq,n_samples)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-random-mix.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Random_mix")
 async def modify_item(n_samples:int, freq:str, indice:str, file: UploadFile = File(...)) :
@@ -3331,7 +3867,15 @@ async def modify_item(funcion:str, freq:str, indice:str,factor : Union[float,Non
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = agregar_matematica(df,freq,funcion,factor)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-matematica.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Matematica")
 async def modify_item(funcion:str, freq:str, indice:str,factor : Union[float,None] = 1, file: UploadFile = File(...)) :
@@ -3381,7 +3925,15 @@ async def modify_item(ventana:int, indice:str, file: UploadFile = File(...)) :
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
     df1 = ventanas(df,ventana)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-ventana.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Ventana")
 async def modify_item(ventana:int, indice:str, file: UploadFile = File(...)) :
@@ -3431,7 +3983,15 @@ async def modify_item(start:int,end:int, indice:str, file: UploadFile = File(...
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
     df1 = recorte(df,start,end)
-    return {pasar_csv(df1)}
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-recorte.csv"
+    return response 
 
 @app.post("/Plot/Aumentar/Recorte")
 async def modify_item(start:int,end:int, indice:str, file: UploadFile = File(...)) :
@@ -3452,3 +4012,5 @@ async def modify_item(start:int,end:int, indice:str, file: UploadFile = File(...
     buffer.seek(0)
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
+
+
