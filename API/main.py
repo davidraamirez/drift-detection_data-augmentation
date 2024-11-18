@@ -25,7 +25,7 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return {"Contenido": "Esto es una API para generar datos sintéticos a partir de ciertos parámetros"}
+    return {"Contenido": "Esto es una API para generar datos sintéticos a partir de ciertos parámetros, aumentación de datos y generación de variables objetivos."}
 
 # Creación de índices
 def series_fin(inicio, fin,freq):
@@ -57,15 +57,14 @@ def tendencia_determinista_exponencial(a,b,t,e=0):
     return math.exp(a+b*t+e)
 
 def tendencia_determinista_logaritmica(a,b,t,e=0):
-    return a + b * math.log(t)
+    return a + b * math.log(t) + e
 
 def tendencia_det(params,tipo,num_datos,coef_error=0):
     
     datos = np.zeros(num_datos)
     
     for t in range(1,num_datos+1):
-        if coef_error is None:
-            coef_error=0
+
         e = random() * coef_error
         
         if tipo==1:
@@ -99,26 +98,62 @@ def crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,coef_err
 def plot_df(df):
     plt.figure()
     df.plot(title="Serie temporal",figsize=(13,5))
-    plt.xlabel("Tiempo")      
+    plt.xlabel("Tiempo")  
+    
+@app.get("/Report/tendencia/fin")
+def obtener_report(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
+   if tipo == 1:
+       subtipo = "lineal"
+       tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params[0]) + " b = " +str (params[1]) +" e0 = " + str(error)
+   elif tipo ==2:
+       subtipo ="polinómica de grado "+ str(len(params)-1)
+       tendencia= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params)):
+           tendencia = " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia = tendencia + "donde a = " + str(params[0]) + " b[1] = " + str (params[1])
+       for k in range (2,len(params)):
+           tendencia = tendencia  + " b["+ str(k)+"] = " + str (params[k])
+       tendencia = tendencia +" e0 = " + str(error)
+   elif tipo == 3: 
+       subtipo ="exponencial"
+       tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params[0]) + ", b = " + str(params[1]) + " y e0 = " + str(error)
+   elif tipo == 4:
+       subtipo = "logaritmica" 
+       tendencia = "La serie es de tipo y = a + b * log(t) donde a = " + str(params[0]) + " b = " + str(params[1]) + " e0 = " + str(error)
+
+   tipos = "Modelo de tendencia determinista con tendencia " + subtipo
+   explicacion = "Inicio: fecha de inicio " + str(inicio)
+   explicacion = explicacion +" . Fin: fecha de fin --> "+ str(fin)
+   explicacion = explicacion + " . Freq: frequencia de la serie temporal --> " + str(freq)
+   explicacion = explicacion + ". Tipo: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo)
+   explicacion = explicacion + " . Error: coeficiente de error (e0) --> " + str(error)
+   explicacion = explicacion + " . Columna: nombre de la columnas --> " + columna[0]
+   for k in range (1, len (columna)):
+       explicacion = explicacion+", " + columna [k]
+   explicacion = explicacion + " . Params: parámetros de la tendencia, a = params [0] y b[k] = params[k] --> "+str(params [0])
+   for k in range (1, len (params)):
+       explicacion = explicacion+", " + str(params [k])
+   return {"Tipo": tipos, "Serie" : tendencia, "Parámetros" : explicacion }
 
 @app.get("/Datos/tendencia/fin")
-async def read_item(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
+async def obtener_serie(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
     
-    df = crear_df_fin_tend_det(inicio,fin,freq,columna,params,tipo,error);
+    df = crear_df_fin_tend_det(inicio,fin,freq,columna,params,tipo,error)
     
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
     df.to_csv(stream,index_label="Indice")
     stream.seek(0)
-
+    texto = "Probando"
     # Devolver el archivo CSV como respuesta
     response = StreamingResponse(stream, media_type="text/csv")
     response.headers["Content-Disposition"] = "attachment; filename=datos-tendencia-fin.csv"
+    response.headers["X-Text-Info"] = texto
     
     return response
 
 @app.get("/Plot/tendencia/fin")
-async def read_item(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
     
     df = crear_df_fin_tend_det(inicio,fin,freq,columna,params,tipo,error)
     plot_df(df)
@@ -129,8 +164,45 @@ async def read_item(inicio: str, fin:str, freq:str, tipo:int , error: Union[floa
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/tendencia/periodos")
+def obtener_report(inicio: str, periodos: int, freq:str, tipo:int , error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
+    if tipo == 1:
+        subtipo = "lineal"
+        tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params[0]) + " b = " +str (params[1]) +" e0 = " + str(error)
+    elif tipo ==2:
+        subtipo ="polinómica de grado "+ str(len(params)-1)
+        tendencia= "La serie es de tipo y = a + b[1] * t"  
+        for k in range (2,len(params)):
+            tendencia = tendencia+ " + b ["+str(k)+"] *  t ** " + str(k)
+        tendencia = " +e0"
+        tendencia = tendencia + " donde a = " + str(params[0]) + ", b[1] = " + str (params[1])
+        for k in range (2,len(params)):
+            tendencia = tendencia  + ", b["+ str(k)+"] = " + str (params[k])
+        tendencia = tendencia +" y e0 = " + str(error)
+    elif tipo == 3: 
+        subtipo ="exponencial"
+        tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params[0]) + ", b = " + str(params[1]) + " y e0 = " + str(error)
+    elif tipo == 4:
+        subtipo = "logaritmica" 
+        tendencia = "La serie es de tipo y = a + b * log(t) donde a = " + str(params[0]) + " b = " + str(params[1]) + " e0 = " + str(error)
+
+    tipos = "Modelo de tendencia determinista con tendencia " + subtipo
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Periodos: número de de periodos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". Tipo: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo)
+    explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(error)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros de la tendencia, a = params [0] y b[k] = params[k] --> "+str(params [0])
+    for k in range (1, len (params)):
+        explicacion = explicacion+", " + str(params [k])
+    return {"Tipo": tipos, "Serie" : tendencia, "Parámetros" : explicacion }
+
+
 @app.get("/Datos/tendencia/periodos")
-async def read_item(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
     
     df=crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,error)
     
@@ -146,7 +218,7 @@ async def read_item(inicio: str, periodos:int, freq:str, tipo:int , error: Union
     return response
 
 @app.get("/Plot/Tendencia/periodos")   
-async def read_item(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
 
     df = crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,error)
     plot_df(df)
@@ -292,8 +364,233 @@ def crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params):
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
+
+@app.get("/Report/distribuciones/fin")
+def obtener_report(inicio: str, fin: str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
+    
+    if distr == 1 :
+        subtipo = "normal"
+        parametros ="Modelo con media = params[0] y desviación típica = params[1]. La media es " + str(params[0])+ " y la desviación típica es " + str(params[1])
+        mean = params[0]
+        var = params[1] **2
+    elif distr ==2 :
+        subtipo = "binomial"
+        parametros = "Modelo con n = params[0] y p = params[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params[0])+" y el valor de p es "+str(params[1])+ ". Adicionalmente, se puede añadir un desplazamiento params[2] : "
+        if len(params)==2:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 3:
+            parametros += "en este caso es desplazamiento es de " + str(params[2])
+        mean, var = binom.stats(params[0], params[1], moments='mv')
+        if len (params) == 3 :
+           mean += params[2]
+    elif distr== 3 :
+        subtipo = "poisson"
+        parametros = "Modelo con mu = params[0] donde mu = parámetro de poisson . El valor de mu es " + str(params[0])+". Adicionalmente, se puede añadir un desplazamiento params[1] : "
+        if len(params)==1:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 2:
+            parametros += "en este caso es desplazamiento es de " + str(params[1])
+        mean, var= poisson.stats(params[0], moments='mv')
+        if len (params) == 2 :
+           mean += params[1]
+           
+    elif distr == 4 :
+        subtipo = "geométrica"
+        parametros = "Modelo con p = params[0] donde p = probabilidad de éxito. El valor de p es " + str(params[0])+". Adicionalmente, se puede añadir un desplazamiento params[1] : "
+        if len(params)==1:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 2:
+            parametros += "en este caso es desplazamiento es de " + str(params[1])
+        mean, var = geom.stats(params[0], moments='mv')
+        if len (params) == 2 :
+           mean += params[1]
+            
+    elif distr == 5:
+        subtipo = "hipergeométrica"
+        parametros = "Modelo con M = params[0], n = params[1] y N = params[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params[0])+", el valor de n es " + str(params[1])+" y el valor de N es " + str(params[2])+". Adicionalmente, se puede añadir un desplazamiento params[3] : "
+        if len(params)==3:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 4:
+            parametros += "en este caso es desplazamiento es de " + str(params[3])
+        mean, var= hypergeom.stats(params[0], params[1],params[2], moments='mv')
+        if len (params) == 4 :
+           mean += params[3]
+            
+    elif distr == 6: 
+        subtipo ="constante"
+        parametros = "Modelo con constante = " + str(params[0])
+        mean = params[0]
+        var = 0
+        
+    elif distr == 7:
+        subtipo = "uniforme"
+        parametros = "Modelo con parametros opcionales: despl = params[0] y escala = params[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params)==0:
+            parametros += " en este caso no hay desplazamiento ni escala "
+        elif len(params) == 1:
+            parametros += " en este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 2:
+            parametros += " en este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= uniform.stats( moments='mv')
+        if len (params) == 1 :
+           mean = mean + params[0]
+        elif len (params) == 2:
+            mean = mean* params[1]
+            mean += params[0]
+            var = params[1]**2/12
+            
+    elif distr == 8:
+        subtipo = "lognormal"
+        parametros = "Modelo con s = params[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params)==1:
+            parametros += " en este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += " en este caso el desplazamiento es de " + str(params[1])
+        elif len(params) == 3:
+            parametros += " en este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
+        mean, var= lognorm.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = lognorm.mean(params[0], loc=params[1])
+            var = lognorm.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = lognorm.mean(params[0], loc=params[1],scale=params[2])
+            var = lognorm.var(params[0], loc=params[1], scale=params[2])
+            
+    elif distr == 9: 
+        subtipo = "exponencial"
+        parametros = "Modelo con parametros opcionales: despl = params[0] y escala = params[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params)==0:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 1:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= expon.stats( moments='mv')
+        if len (params) == 1 :
+            mean = expon.mean(loc=params[0])
+        elif len (params) == 2:
+            mean = expon.mean(loc=params[0],scale=params[1])
+            var = expon.var(scale=params[1])
+            
+    elif distr == 10: 
+        subtipo = "gamma"
+        parametros = "Modelo con a = params[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
+        mean, var= gamma.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = gamma.mean(params[0], loc=params[1])
+            var = gamma.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = gamma.mean(params[0], loc=params[1],scale=params[2])
+            var = gamma.var(params[0], scale=params[2])
+            
+    elif distr == 11: 
+        subtipo = "beta"
+        parametros = "Modelo con a = params[0] y b = params[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params[0])+ "y el de b es "+ str(params[1])+ ". Además, posee los parametros opcionales: despl = params[] y escala = params[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params)==2:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[2])
+        elif len(params) == 4:
+            parametros += "En este caso el desplazamiento es de " + str(params[2]) +" y la escala de "+str(params[3])
+        mean, var= beta.stats(params[0],params[1], moments='mv')
+        if len (params) == 3:
+            mean = beta.mean(params[0],params[1], loc=params[2])
+            var = beta.var(params[0],params[1], loc = params[2])
+        elif len (params) == 4:
+            mean = beta.mean(params[0],params[1], loc=params[2],scale=params[3])
+            var = beta.var(params[0],params[1], loc=params[2], scale=params[3])
+            
+    elif distr == 12: 
+        subtipo = "chi cuadrado"
+        parametros = "Modelo con df = params[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params[0]) +". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
+
+        mean, var= chi2.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = chi2.mean(params[0], loc=params[1])
+            var = chi2.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = chi2.mean(params[0], loc=params[1],scale=params[2])
+            var = chi2.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 13: 
+        subtipo = "t-student"
+        parametros = "Modelo con v = params[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= t.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = t.mean(params[0], loc=params[1])
+            var = t.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = t.mean(params[0], loc=params[1],scale=params[2])
+            var = t.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 14: 
+        subtipo = "pareto"
+        parametros = "Modelo con b = params[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
+        mean, var= pareto.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = pareto.mean(params[0], loc=params[1])
+            var = pareto.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = pareto.mean(params[0], loc=params[1],scale=params[2])
+            var = pareto.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 15:
+        subtipo = "linealmente decreciente"
+        parametros = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params[0] = "+ str(params[0])+" y b = params[1] = "+ str(params[1])
+        mean = "Información no relevante"
+        var = "Información no relevante"
+            
+    elif distr == 16:
+        subtipo = "linealmente creciente"
+        parametros = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params[0] = "+ str(params[0])+" y b = params[1] = "+ str(params[1])
+        mean = "Información no relevante"
+        var = "Información no relevante"
+    
+    elif distr == 17:
+        subtipo = "random"
+        parametros = "Modelo con una distribución con valores aleatorios entre params[0] = " + str(params[0]) +" y params [1] =" + str(params[1])
+        mean = "Información no relevante"
+        var = "Información no relevante"
+
+    tipos = "Modelo con una distribución " + subtipo
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". Distr: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> " + str(distr)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros de la distribución --> "+str(params [0])
+    for k in range (1, len (params)):
+        explicacion = explicacion+", " + str(params [k])
+    return {"Tipo": tipos,"Parametros de la distribución": parametros, "Parámetros de la query" : explicacion, "Media" :mean, "Varianza" : var}
+
 @app.get("/Datos/distribucion/fin")
-async def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
 
     df = crear_df_fin_datos(inicio,fin,freq,columna,distr,params)
     
@@ -309,7 +606,7 @@ async def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[st
     return response
 
 @app.get("/Plot/distribuciones/fin")
-async def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     df = crear_df_fin_datos(inicio,fin,freq,columna,distr,params)
     plot_df(df)
     buffer = io.BytesIO()
@@ -319,8 +616,233 @@ async def read_item(inicio: str, fin:str, freq:str, distr:int , columna: List[st
 
     return StreamingResponse(buffer,media_type="image/png")
 
+
+@app.get("/Report/distribuciones/periodos")
+def obtener_report(inicio: str, periodos: int, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
+    
+    if distr == 1 :
+        subtipo = "normal"
+        parametros ="Modelo con media = params[0] y desviación típica = params[1]. La media es " + str(params[0])+ " y la desviación típica es " + str(params[1])
+        mean = params[0]
+        var = params[1] **2
+    elif distr ==2 :
+        subtipo = "binomial"
+        parametros = "Modelo con n = params[0] y p = params[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params[0])+" y el valor de p es "+str(params[1])+ ". Adicionalmente, se puede añadir un desplazamiento params[2] : "
+        if len(params)==2:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 3:
+            parametros += "en este caso es desplazamiento es de " + str(params[2])
+        mean, var = binom.stats(params[0], params[1], moments='mv')
+        if len (params) == 3 :
+           mean += params[2]
+    elif distr== 3 :
+        subtipo = "poisson"
+        parametros = "Modelo con mu = params[0] donde mu = parámetro de poisson . El valor de mu es " + str(params[0])+". Adicionalmente, se puede añadir un desplazamiento params[1] : "
+        if len(params)==1:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 2:
+            parametros += "en este caso es desplazamiento es de " + str(params[1])
+        mean, var= poisson.stats(params[0], moments='mv')
+        if len (params) == 2 :
+           mean += params[1]
+           
+    elif distr == 4 :
+        subtipo = "geométrica"
+        parametros = "Modelo con p = params[0] donde p = probabilidad de éxito. El valor de p es " + str(params[0])+". Adicionalmente, se puede añadir un desplazamiento params[1] : "
+        if len(params)==1:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 2:
+            parametros += "en este caso es desplazamiento es de " + str(params[1])
+        mean, var = geom.stats(params[0], moments='mv')
+        if len (params) == 2 :
+           mean += params[1]
+            
+    elif distr == 5:
+        subtipo = "hipergeométrica"
+        parametros = "Modelo con M = params[0], n = params[1] y N = params[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params[0])+", el valor de n es " + str(params[1])+" y el valor de N es " + str(params[2])+". Adicionalmente, se puede añadir un desplazamiento params[3] : "
+        if len(params)==3:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 4:
+            parametros += "en este caso es desplazamiento es de " + str(params[3])
+        mean, var= hypergeom.stats(params[0], params[1],params[2], moments='mv')
+        if len (params) == 4 :
+           mean += params[3]
+            
+    elif distr == 6: 
+        subtipo ="constante"
+        parametros = "Modelo con constante = " + str(params[0])
+        mean = params[0]
+        var = 0
+        
+    elif distr == 7:
+        subtipo = "uniforme"
+        parametros = "Modelo con parametros opcionales: despl = params[0] y escala = params[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params)==0:
+            parametros += " en este caso no hay desplazamiento ni escala "
+        elif len(params) == 1:
+            parametros += " en este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 2:
+            parametros += " en este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= uniform.stats( moments='mv')
+        if len (params) == 1 :
+           mean = mean + params[0]
+        elif len (params) == 2:
+            mean = mean* params[1]
+            mean += params[0]
+            var = params[1]**2/12
+            
+    elif distr == 8:
+        subtipo = "lognormal"
+        parametros = "Modelo con s = params[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params)==1:
+            parametros += " en este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += " en este caso el desplazamiento es de " + str(params[1])
+        elif len(params) == 3:
+            parametros += " en este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
+        mean, var= lognorm.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = lognorm.mean(params[0], loc=params[1])
+            var = lognorm.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = lognorm.mean(params[0], loc=params[1],scale=params[2])
+            var = lognorm.var(params[0], loc=params[1], scale=params[2])
+            
+    elif distr == 9: 
+        subtipo = "exponencial"
+        parametros = "Modelo con parametros opcionales: despl = params[0] y escala = params[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params)==0:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 1:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= expon.stats( moments='mv')
+        if len (params) == 1 :
+            mean = expon.mean(loc=params[0])
+        elif len (params) == 2:
+            mean = expon.mean(loc=params[0],scale=params[1])
+            var = expon.var(scale=params[1])
+            
+    elif distr == 10: 
+        subtipo = "gamma"
+        parametros = "Modelo con a = params[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= gamma.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = gamma.mean(params[0], loc=params[1])
+            var = gamma.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = gamma.mean(params[0], loc=params[1],scale=params[2])
+            var = gamma.var(params[0], scale=params[2])
+            
+    elif distr == 11: 
+        subtipo = "beta"
+        parametros = "Modelo con a = params[0] y b = params[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params[0])+ "y el de b es "+ str(params[1])+ ". Además, posee los parametros opcionales: despl = params[] y escala = params[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params)==2:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[2])
+        elif len(params) == 4:
+            parametros += "En este caso el desplazamiento es de " + str(params[2]) +" y la escala de "+str(params[3])
+        mean, var= beta.stats(params[0],params[1], moments='mv')
+        if len (params) == 3:
+            mean = beta.mean(params[0],params[1], loc=params[2])
+            var = beta.var(params[0],params[1], loc = params[2])
+        elif len (params) == 4:
+            mean = beta.mean(params[0],params[1], loc=params[2],scale=params[3])
+            var = beta.var(params[0],params[1], loc=params[2], scale=params[3])
+            
+    elif distr == 12: 
+        subtipo = "chi cuadrado"
+        parametros = "Modelo con df = params[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params[0]) +". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= chi2.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = chi2.mean(params[0], loc=params[1])
+            var = chi2.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = chi2.mean(params[0], loc=params[1],scale=params[2])
+            var = chi2.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 13: 
+        subtipo = "t-student"
+        parametros = "Modelo con v = params[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= t.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = t.mean(params[0], loc=params[1])
+            var = t.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = t.mean(params[0], loc=params[1],scale=params[2])
+            var = t.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 14: 
+        subtipo = "pareto"
+        parametros = "Modelo con b = params[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= pareto.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = pareto.mean(params[0], loc=params[1])
+            var = pareto.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = pareto.mean(params[0], loc=params[1],scale=params[2])
+            var = pareto.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 15:
+        subtipo = "linealmente decreciente"
+        parametros = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params[0] y b = params[1]"
+        mean = "Información no relevante"
+        var = "Información no relevante"
+            
+    elif distr == 16:
+        subtipo = "linealmente creciente"
+        parametros = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params[0] y b = params[1]"
+        mean = "Información no relevante"
+        var = "Información no relevante"
+    
+    elif distr == 17:
+        subtipo = "random"
+        parametros = "Modelo con una distribución con valores aleatorios entre params[0] = " + str(params[0]) +" y params [1] =" + str(params[1])
+        mean = "Información no relevante"
+        var = "Información no relevante"
+
+    tipos = "Modelo con una distribución " + subtipo
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de de periodos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". Distr: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> " + str(distr)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros de la distribución --> "+str(params [0])
+    for k in range (1, len (params)):
+        explicacion = explicacion+", " + str(params [k])
+    return {"Tipo": tipos,"Parametros de la distribución": parametros, "Parámetros de la query" : explicacion, "Media" :mean, "Varianza" : var}
+
+
 @app.get("/Datos/distribucion/periodos")
-async def read_item(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"),params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     
     df = crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params)
     
@@ -336,7 +858,7 @@ async def read_item(inicio: str, periodos:int, freq:str, distr:int,  columna: Li
     return response
 
 @app.get("/Plot/distribucion/periodos")
-async def read_item(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     df = crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params)
     plot_df(df)
     buffer = io.BytesIO()
@@ -394,11 +916,240 @@ def crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tip
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
+@app.get("/Report/periodicos/fin")
+async def obtener_serie(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
+
+    if tipo==1:
+        periodicidad = "periodos de amplitud " + str(p)
+    elif tipo==2 :
+        periodicidad = str(p)+ " periodos"
+    if distr == 1 :
+        subtipo = "normal"
+        parametros ="Modelo con media = params[0] y desviación típica = params[1]. La media es " + str(params[0])+ " y la desviación típica es " + str(params[1])
+        mean = params[0]
+        var = params[1] **2
+    elif distr ==2 :
+        subtipo = "binomial"
+        parametros = "Modelo con n = params[0] y p = params[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params[0])+" y el valor de p es "+str(params[1])+ ". Adicionalmente, se puede añadir un desplazamiento params[2] : "
+        if len(params)==2:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 3:
+            parametros += "en este caso es desplazamiento es de " + str(params[2])
+        mean, var = binom.stats(params[0], params[1], moments='mv')
+        if len (params) == 3 :
+           mean += params[2]
+    elif distr== 3 :
+        subtipo = "poisson"
+        parametros = "Modelo con mu = params[0] donde mu = parámetro de poisson . El valor de mu es " + str(params[0])+". Adicionalmente, se puede añadir un desplazamiento params[1] : "
+        if len(params)==1:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 2:
+            parametros += "en este caso es desplazamiento es de " + str(params[1])
+        mean, var= poisson.stats(params[0], moments='mv')
+        if len (params) == 2 :
+           mean += params[1]
+           
+    elif distr == 4 :
+        subtipo = "geométrica"
+        parametros = "Modelo con p = params[0] donde p = probabilidad de éxito. El valor de p es " + str(params[0])+". Adicionalmente, se puede añadir un desplazamiento params[1] : "
+        if len(params)==1:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 2:
+            parametros += "en este caso es desplazamiento es de " + str(params[1])
+        mean, var = geom.stats(params[0], moments='mv')
+        if len (params) == 2 :
+           mean += params[1]
+            
+    elif distr == 5:
+        subtipo = "hipergeométrica"
+        parametros = "Modelo con M = params[0], n = params[1] y N = params[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params[0])+", el valor de n es " + str(params[1])+" y el valor de N es " + str(params[2])+". Adicionalmente, se puede añadir un desplazamiento params[3] : "
+        if len(params)==3:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 4:
+            parametros += "en este caso es desplazamiento es de " + str(params[3])
+        mean, var= hypergeom.stats(params[0], params[1],params[2], moments='mv')
+        if len (params) == 4 :
+           mean += params[3]
+            
+    elif distr == 6: 
+        subtipo ="constante"
+        parametros = "Modelo con constante = " + str(params[0])
+        mean = params[0]
+        var = 0
+        
+    elif distr == 7:
+        subtipo = "uniforme"
+        parametros = "Modelo con parametros opcionales: despl = params[0] y escala = params[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params)==0:
+            parametros += " en este caso no hay desplazamiento ni escala "
+        elif len(params) == 1:
+            parametros += " en este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 2:
+            parametros += " en este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= uniform.stats( moments='mv')
+        if len (params) == 1 :
+           mean = mean + params[0]
+        elif len (params) == 2:
+            mean = mean* params[1]
+            mean += params[0]
+            var = params[1]**2/12
+            
+    elif distr == 8:
+        subtipo = "lognormal"
+        parametros = "Modelo con s = params[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params)==1:
+            parametros += " en este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += " en este caso el desplazamiento es de " + str(params[1])
+        elif len(params) == 3:
+            parametros += " en este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
+        mean, var= lognorm.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = lognorm.mean(params[0], loc=params[1])
+            var = lognorm.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = lognorm.mean(params[0], loc=params[1],scale=params[2])
+            var = lognorm.var(params[0], loc=params[1], scale=params[2])
+            
+    elif distr == 9: 
+        subtipo = "exponencial"
+        parametros = "Modelo con parametros opcionales: despl = params[0] y escala = params[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params)==0:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 1:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= expon.stats( moments='mv')
+        if len (params) == 1 :
+            mean = expon.mean(loc=params[0])
+        elif len (params) == 2:
+            mean = expon.mean(loc=params[0],scale=params[1])
+            var = expon.var(scale=params[1])
+            
+    elif distr == 10: 
+        subtipo = "gamma"
+        parametros = "Modelo con a = params[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= gamma.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = gamma.mean(params[0], loc=params[1])
+            var = gamma.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = gamma.mean(params[0], loc=params[1],scale=params[2])
+            var = gamma.var(params[0], scale=params[2])
+            
+    elif distr == 11: 
+        subtipo = "beta"
+        parametros = "Modelo con a = params[0] y b = params[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params[0])+ "y el de b es "+ str(params[1])+ ". Además, posee los parametros opcionales: despl = params[] y escala = params[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params)==2:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[2])
+        elif len(params) == 4:
+            parametros += "En este caso el desplazamiento es de " + str(params[2]) +" y la escala de "+str(params[3])
+        mean, var= beta.stats(params[0],params[1], moments='mv')
+        if len (params) == 3:
+            mean = beta.mean(params[0],params[1], loc=params[2])
+            var = beta.var(params[0],params[1], loc = params[2])
+        elif len (params) == 4:
+            mean = beta.mean(params[0],params[1], loc=params[2],scale=params[3])
+            var = beta.var(params[0],params[1], loc=params[2], scale=params[3])
+            
+    elif distr == 12: 
+        subtipo = "chi cuadrado"
+        parametros = "Modelo con df = params[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params[0]) +". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= chi2.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = chi2.mean(params[0], loc=params[1])
+            var = chi2.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = chi2.mean(params[0], loc=params[1],scale=params[2])
+            var = chi2.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 13: 
+        subtipo = "t-student"
+        parametros = "Modelo con v = params[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= t.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = t.mean(params[0], loc=params[1])
+            var = t.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = t.mean(params[0], loc=params[1],scale=params[2])
+            var = t.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 14: 
+        subtipo = "pareto"
+        parametros = "Modelo con b = params[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= pareto.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = pareto.mean(params[0], loc=params[1])
+            var = pareto.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = pareto.mean(params[0], loc=params[1],scale=params[2])
+            var = pareto.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 15:
+        subtipo = "linealmente decreciente"
+        parametros = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params[0] y b = params[1]"
+        mean = "Información no relevante"
+        var = "Información no relevante"
+            
+    elif distr == 16:
+        subtipo = "linealmente creciente"
+        parametros = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params[0] y b = params[1]"
+        mean = "Información no relevante"
+        var = "Información no relevante"
+    
+    elif distr == 17:
+        subtipo = "random"
+        parametros = "Modelo con una distribución con valores aleatorios entre params[0] = " + str(params[0]) +" y params [1] =" + str(params[1])
+        mean = "Información no relevante"
+        var = "Información no relevante"
+
+    tipos = "Modelo periodico siguiendo una distribución " + subtipo + " con " + periodicidad
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". Distr: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> " + str(distr)
+    explicacion += ". p: indica la amplitud del periodo (tipo 1) o la cantidad de periodos (tipo 2) --> " + str(p)
+    explicacion += ". Tipo: por amplitud (1) / por cantidad (2) --> "+ str(tipo)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros de la distribución --> "+str(params [0])
+    for k in range (1, len (params)):
+        explicacion = explicacion+", " + str(params[k])
+    return {"Tipo": tipos,"Parametros de la distribución": parametros, "Parámetros de la query" : explicacion, "Media" :mean, "Varianza" : var}
+
+
 @app.get("/Datos/periodicos/fin")
-async def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
 
     df =crear_df_fin_periodicos(inicio,fin,freq,columna,distr,params,p,tipo)
-
     
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
@@ -412,7 +1163,7 @@ async def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int,
     return response
 
 @app.get("/Plot/periodicos/fin")
-async def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     df = crear_df_fin_periodicos(inicio,fin,freq,columna,distr,params, p,tipo)
     plot_df(df)
     buffer = io.BytesIO()
@@ -422,8 +1173,238 @@ async def read_item(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int,
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/periodicos/periodos")
+async def obtener_serie(inicio: str, periodos:int, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
+
+    if tipo==1:
+        periodicidad = "periodos de amplitud " + str(p)
+    elif tipo==2 :
+        periodicidad = str(p)+ " periodos"
+        
+    if distr == 1 :
+        subtipo = "normal"
+        parametros ="Modelo con media = params[0] y desviación típica = params[1]. La media es " + str(params[0])+ " y la desviación típica es " + str(params[1])
+        mean = params[0]
+        var = params[1] **2
+    elif distr ==2 :
+        subtipo = "binomial"
+        parametros = "Modelo con n = params[0] y p = params[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params[0])+" y el valor de p es "+str(params[1])+ ". Adicionalmente, se puede añadir un desplazamiento params[2] : "
+        if len(params)==2:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 3:
+            parametros += "en este caso es desplazamiento es de " + str(params[2])
+        mean, var = binom.stats(params[0], params[1], moments='mv')
+        if len (params) == 3 :
+           mean += params[2]
+    elif distr== 3 :
+        subtipo = "poisson"
+        parametros = "Modelo con mu = params[0] donde mu = parámetro de poisson . El valor de mu es " + str(params[0])+". Adicionalmente, se puede añadir un desplazamiento params[1] : "
+        if len(params)==1:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 2:
+            parametros += "en este caso es desplazamiento es de " + str(params[1])
+        mean, var= poisson.stats(params[0], moments='mv')
+        if len (params) == 2 :
+           mean += params[1]
+           
+    elif distr == 4 :
+        subtipo = "geométrica"
+        parametros = "Modelo con p = params[0] donde p = probabilidad de éxito. El valor de p es " + str(params[0])+". Adicionalmente, se puede añadir un desplazamiento params[1] : "
+        if len(params)==1:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 2:
+            parametros += "en este caso es desplazamiento es de " + str(params[1])
+        mean, var = geom.stats(params[0], moments='mv')
+        if len (params) == 2 :
+           mean += params[1]
+            
+    elif distr == 5:
+        subtipo = "hipergeométrica"
+        parametros = "Modelo con M = params[0], n = params[1] y N = params[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params[0])+", el valor de n es " + str(params[1])+" y el valor de N es " + str(params[2])+". Adicionalmente, se puede añadir un desplazamiento params[3] : "
+        if len(params)==3:
+            parametros += "en este caso no hay desplazamiento"
+        elif len(params) == 4:
+            parametros += "en este caso es desplazamiento es de " + str(params[3])
+        mean, var= hypergeom.stats(params[0], params[1],params[2], moments='mv')
+        if len (params) == 4 :
+           mean += params[3]
+            
+    elif distr == 6: 
+        subtipo ="constante"
+        parametros = "Modelo con constante = " + str(params[0])
+        mean = params[0]
+        var = 0
+        
+    elif distr == 7:
+        subtipo = "uniforme"
+        parametros = "Modelo con parametros opcionales: despl = params[0] y escala = params[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params)==0:
+            parametros += " en este caso no hay desplazamiento ni escala "
+        elif len(params) == 1:
+            parametros += " en este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 2:
+            parametros += " en este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= uniform.stats( moments='mv')
+        if len (params) == 1 :
+           mean = mean + params[0]
+        elif len (params) == 2:
+            mean = mean* params[1]
+            mean += params[0]
+            var = params[1]**2/12
+            
+    elif distr == 8:
+        subtipo = "lognormal"
+        parametros = "Modelo con s = params[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params)==1:
+            parametros += " en este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += " en este caso el desplazamiento es de " + str(params[1])
+        elif len(params) == 3:
+            parametros += " en este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
+        mean, var= lognorm.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = lognorm.mean(params[0], loc=params[1])
+            var = lognorm.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = lognorm.mean(params[0], loc=params[1],scale=params[2])
+            var = lognorm.var(params[0], loc=params[1], scale=params[2])
+            
+    elif distr == 9: 
+        subtipo = "exponencial"
+        parametros = "Modelo con parametros opcionales: despl = params[0] y escala = params[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params)==0:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 1:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= expon.stats( moments='mv')
+        if len (params) == 1 :
+            mean = expon.mean(loc=params[0])
+        elif len (params) == 2:
+            mean = expon.mean(loc=params[0],scale=params[1])
+            var = expon.var(scale=params[1])
+            
+    elif distr == 10: 
+        subtipo = "gamma"
+        parametros = "Modelo con a = params[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= gamma.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = gamma.mean(params[0], loc=params[1])
+            var = gamma.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = gamma.mean(params[0], loc=params[1],scale=params[2])
+            var = gamma.var(params[0], scale=params[2])
+            
+    elif distr == 11: 
+        subtipo = "beta"
+        parametros = "Modelo con a = params[0] y b = params[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params[0])+ "y el de b es "+ str(params[1])+ ". Además, posee los parametros opcionales: despl = params[] y escala = params[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params)==2:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[2])
+        elif len(params) == 4:
+            parametros += "En este caso el desplazamiento es de " + str(params[2]) +" y la escala de "+str(params[3])
+        mean, var= beta.stats(params[0],params[1], moments='mv')
+        if len (params) == 3:
+            mean = beta.mean(params[0],params[1], loc=params[2])
+            var = beta.var(params[0],params[1], loc = params[2])
+        elif len (params) == 4:
+            mean = beta.mean(params[0],params[1], loc=params[2],scale=params[3])
+            var = beta.var(params[0],params[1], loc=params[2], scale=params[3])
+            
+    elif distr == 12: 
+        subtipo = "chi cuadrado"
+        parametros = "Modelo con df = params[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params[0]) +". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= chi2.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = chi2.mean(params[0], loc=params[1])
+            var = chi2.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = chi2.mean(params[0], loc=params[1],scale=params[2])
+            var = chi2.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 13: 
+        subtipo = "t-student"
+        parametros = "Modelo con v = params[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= t.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = t.mean(params[0], loc=params[1])
+            var = t.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = t.mean(params[0], loc=params[1],scale=params[2])
+            var = t.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 14: 
+        subtipo = "pareto"
+        parametros = "Modelo con b = params[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params) == 2:
+            parametros += "En este caso el desplazamiento es de " + str(params[0])
+        elif len(params) == 3:
+            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+        mean, var= pareto.stats(params[0], moments='mv')
+        if len (params) == 2:
+            mean = pareto.mean(params[0], loc=params[1])
+            var = pareto.var(params[0], loc = params[1])
+        elif len (params) == 3:
+            mean = pareto.mean(params[0], loc=params[1],scale=params[2])
+            var = pareto.var(params[0], loc=params[1],scale=params[2])
+            
+    elif distr == 15:
+        subtipo = "linealmente decreciente"
+        parametros = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params[0] y b = params[1]"
+        mean = "Información no relevante"
+        var = "Información no relevante"
+            
+    elif distr == 16:
+        subtipo = "linealmente creciente"
+        parametros = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params[0] y b = params[1]"
+        mean = "Información no relevante"
+        var = "Información no relevante"
+    
+    elif distr == 17:
+        subtipo = "random"
+        parametros = "Modelo con una distribución con valores aleatorios entre params[0] = " + str(params[0]) +" y params [1] =" + str(params[1])
+        mean = "Información no relevante"
+        var = "Información no relevante"
+
+    tipos = "Modelo periodico siguiendo una distribución " + subtipo + " con " + periodicidad
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". Distr: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> " + str(distr)
+    explicacion += ". p: indica la amplitud del periodo (tipo 1) o la cantidad de periodos (tipo 2) --> " + str(p)
+    explicacion += ". Tipo: por amplitud (1) / por cantidad (2) --> "+ str(tipo)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros de la distribución --> "+str(params [0])
+    for k in range (1, len (params)):
+        explicacion = explicacion+", " + str(params[k])
+    return {"Tipo": tipos,"Parametros de la distribución": parametros, "Parámetros de la query" : explicacion, "Media" :mean, "Varianza" : var}
+
 @app.get("/Datos/periodicos/periodos")
-async def read_item(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
 
     df= crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tipo)
     
@@ -439,7 +1420,7 @@ async def read_item(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:
     return response
  
 @app.get("/Plot/periodicos/periodos")
-async def read_item(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"),params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     df = crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tipo)
     plot_df(df)
     buffer = io.BytesIO()
@@ -599,8 +1580,6 @@ def creacion_modelos_ARMA(c,num_datos,desv,s=0,phi=[],teta=[],a=[]):
     return datos 
 
 def crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s=0,phi=[],teta=[],a=[]):
-    if s is None :
-        s = 0
     indice = series_fin(inicio,fin,freq)
     num_datos = indice.size
     datos=creacion_modelos_ARMA(c,num_datos,desv,s,phi,teta,a)
@@ -609,16 +1588,61 @@ def crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s=0,phi=[],teta=[],a=[]):
     return df 
 
 def crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s=0,phi=[],teta=[],a=[]):
-    if s is None :
-        s = 0
     indice = series_periodos(inicio,periodos,freq)
     datos=creacion_modelos_ARMA(c,periodos,desv,s,phi,teta,a)
     df = pd.DataFrame(data=datos,index=indice,columns=columna)
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
+
+@app.get("/Report/ARMA/fin")
+async def obtener_report(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+    
+    if phi == []:
+        subtipo = "de medias móviles"
+        parametros= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros = parametros  + " teta_"+ str(k)+" = " + str (teta[k])
+           
+    elif teta ==[]:
+        subtipo = "autorregresivo"
+        parametros= "La serie sigue una distribución autorregresiva con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros = parametros  + " phi_"+ str(k)+" = " + str (phi[k])
+    else: 
+        subtipo ="autorregresivo y de medias móviles"
+        parametros = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros = parametros  + " phi_"+ str(k)+" = " + str (phi[k])
+        parametros = parametros + " y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros = parametros  + " teta_"+ str(k)+" = " + str (teta[k])
+    if s != 0:
+        subtipo += " estacional con amplitud de la estación: " + str(s)
+    tipos = "Modelo " + subtipo
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". c: constante del modelo --> " + str(c)
+    explicacion = explicacion + ". s: amplitud de la estación --> " + str(s)
+    explicacion = explicacion + ". Desv: desviación típica del ruido blaco --> " + str(desv)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros del modelo, phi y teta --> "
+    if phi != []:
+        explicacion+= "phi : " + str(phi[0])
+        for k in range (1, len (phi)):
+            explicacion = explicacion+", " + str(phi[k])
+    if teta!=[]:
+        explicacion+= "teta : " + str(teta[0])
+        for k in range (1, len (teta)):
+            explicacion = explicacion+", " + str(teta[k])
+    return {"Tipo": tipos, "Parámetro del modelo" : parametros, "Parámetros de la query" : explicacion }
+
+
 @app.get("/Datos/ARMA/fin")
-async def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_serie(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
       
     df = crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s,phi,teta)
     
@@ -634,7 +1658,7 @@ async def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Unio
     return response
 
 @app.get("/Plot/ARMA/fin")
-async def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_grafica(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     df = crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s,phi,teta)
     plot_df(df)
     buffer = io.BytesIO()
@@ -645,8 +1669,53 @@ async def read_item(inicio: str, fin:str, freq:str,c:float, desv:float, s : Unio
     return StreamingResponse(buffer,media_type="image/png")
 
 
+@app.get("/Report/ARMA/periodos")
+async def obtener_report(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+    
+    if phi == []:
+        subtipo = "de medias móviles"
+        parametros= "La serie sigue una distribución de medias móviles con constante c "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros = parametros  + " teta_"+ str(k)+" = " + str (teta[k])
+           
+    elif teta ==[]:
+        subtipo = "autorregresivo"
+        parametros= "La serie sigue una distribución autorregresiva con constante c "+ str(c)+" valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros = parametros  + " phi_"+ str(k)+" = " + str (phi[k])
+    else: 
+        subtipo ="autorregresivo y de medias móviles"
+        parametros = "La serie sigue una distribución autorregresiva y de medias móviles con constante c "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros = parametros  + " phi_"+ str(k)+" = " + str (phi[k])
+        parametros = parametros + " y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros = parametros  + " teta_"+ str(k)+" = " + str (teta[k])
+    if s != 0:
+        subtipo += " estacional con amplitud de la estación: " + str(s)
+    tipos = "Modelo " + subtipo
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar  --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". c: constante del modelo --> " + str(c)
+    explicacion = explicacion + ". s: amplitud de la estación --> " + str(s)
+    explicacion = explicacion + ". Desv: desviación típica del ruido blaco --> " + str(desv)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros del modelo, phi y teta --> "
+    if phi != []:
+        explicacion+= "phi : " + str(phi[0])
+        for k in range (1, len (phi)):
+            explicacion = explicacion+", " + str(phi[k])
+    if teta!=[]:
+        explicacion+= "teta : " + str(teta[0])
+        for k in range (1, len (teta)):
+            explicacion = explicacion+", " + str(teta[k])
+    return {"Tipo": tipos, "Parámetro del modelo" : parametros, "Parámetros de la query" : explicacion }
+
 @app.get("/Datos/ARMA/periodos")
-async def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_serie(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     df = crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s,phi,teta)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
@@ -660,7 +1729,7 @@ async def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s :
     return response
  
 @app.get("/Plot/ARMA/periodos") 
-async def read_item(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
     df = crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s,phi,teta)
     plot_df(df)
@@ -884,11 +1953,10 @@ def crear_df_periodos_DRIFT(inicio,periodos,freq,columna,params1,params2,tipo,nu
     datos = crear_drift(params1,params2,tipo,num_drift,periodos)
     df = pd.DataFrame(data=datos,index=indice,columns=columna)
     df.plot(title='Serie Temporal',figsize=(13,5))
-    return df 
-
+    return df  
 
 @app.get("/Datos/drift/fin/dist-dist")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
      # Convertir el DataFrame a un buffer de CSV
@@ -903,7 +1971,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, di
     return response
 
 @app.get("/Plot/drift/fin/dist-dist")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
     plot_df(df)
@@ -916,7 +1984,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, di
 
 
 @app.get("/Datos/drift/periodos/dist-dist")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
     
@@ -932,7 +2000,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
     return response
 
 @app.get("/Plot/drift/periodos/dist-dist")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna, [dist1,params1],[dist2,params2],1,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -944,7 +2012,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
 
 
 @app.get("/Datos/drift/fin/dist-ARMA")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
     
@@ -960,7 +2028,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:
     return response
 
 @app.get("/Plot/drift/fin/dist-ARMA")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
     plot_df(df)
@@ -972,7 +2040,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/dist-ARMA")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
 
@@ -988,7 +2056,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
     return response  
 
 @app.get("/Plot/drift/periodos/dist-ARMA")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1000,7 +2068,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
 
 
 @app.get("/Datos/drift/fin/dist-periodico")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1016,7 +2084,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, ti
     
 
 @app.get("/Plot/drift/fin/dist-periodico")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna, [dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1028,7 +2096,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, ti
 
 
 @app.get("/Datos/drift/periodos/dist-periodico")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1043,7 +2111,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
     return response  
 
 @app.get("/Plot/drift/periodos/dist-periodico")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1055,7 +2123,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
 
     
 @app.get("/Datos/drift/fin/dist-tendencia")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
     
@@ -1071,7 +2139,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, ti
     return response  
 
 @app.get("/Plot/drift/fin/dist-tendencia")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1082,7 +2150,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, ti
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/dist-tendencia")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1097,7 +2165,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
     return response 
 
 @app.get("/Plot/drift/periodos/dist-tendencia")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1109,7 +2177,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, dist1:in
 
     
 @app.get("/Datos/drift/fin/ARMA-ARMA")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
     
@@ -1126,7 +2194,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , de
 
 
 @app.get("/Plot/drift/fin/ARMA-ARMA")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_gráfica(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1138,7 +2206,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , de
 
 
 @app.get("/Datos/drift/periodos/ARMA-ARMA")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float , desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float , desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
     
@@ -1154,7 +2222,7 @@ def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , des
     return response 
 
 @app.get("/Plot/drift/periodos/ARMA-ARMA")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float , desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_gráfica(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float , desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
     plot_df(df)
@@ -1167,7 +2235,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float
 
 
 @app.get("/Datos/drift/fin/ARMA-dist")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
     
@@ -1183,7 +2251,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , des
     return response 
 
 @app.get("/Plot/drift/fin/ARMA-dist")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1195,7 +2263,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , des
 
 
 @app.get("/Datos/drift/periodos/ARMA-dist")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
     
@@ -1211,7 +2279,7 @@ def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:
     return response 
 
 @app.get("/Plot/drift/periodos/ARMA-dist")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
     plot_df(df)
@@ -1223,7 +2291,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float,
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/ARMA-periodicos")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     
@@ -1239,7 +2307,7 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float
     return response 
 
 @app.get("/Plot/drift/fin/ARMA-periodicos")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1250,7 +2318,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/ARMA-periodicos")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     
@@ -1266,7 +2334,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float 
     return response 
 
 @app.get("/Plot/drift/periodos/ARMA-periodicos")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1277,7 +2345,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float 
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/ARMA-tendencia")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1292,7 +2360,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , des
     return response 
 
 @app.get("/Plot/drift/fin/ARMA-tendencia")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1303,7 +2371,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int ,c:float , des
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/ARMA-tendencia")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
     
@@ -1319,7 +2387,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float 
     return response 
 
 @app.get("/Plot/drift/periodos/ARMA-tendencia")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1330,7 +2398,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int ,c:float 
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/periodico-periodico")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1345,7 +2413,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, di
     return response 
 
 @app.get("/Plot/drift/fin/periodico-periodico")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     plot_df(df)
@@ -1357,7 +2425,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, di
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/periodico-periodico")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     
@@ -1374,7 +2442,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
 
     
 @app.get("/Plot/drift/periodos/periodico-periodico")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1385,7 +2453,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/periodico-distr")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1402,7 +2470,7 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:i
 
 
 @app.get("/Plot/drift/fin/periodico-distr")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
 
@@ -1415,7 +2483,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, di
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/periodico-distr")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
     
@@ -1431,7 +2499,7 @@ def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dis
     return response 
     
 @app.get("/Plot/drift/periodos/periodico-distr")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
     plot_df(df)
@@ -1443,7 +2511,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/periodico-ARMA")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1458,7 +2526,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, di
     return response
 
 @app.get("/Plot/drift/fin/periodico-ARMA")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1469,7 +2537,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, di
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/periodico-ARMA")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
     
@@ -1485,7 +2553,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
     return response
 
 @app.get("/Plot/drift/periodos/periodico-ARMA")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
     plot_df(df)
@@ -1497,7 +2565,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
     return StreamingResponse(buffer,media_type="image/png")
     
 @app.get("/Datos/drift/fin/periodico-tendencia")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1512,7 +2580,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, di
     return response 
 
 @app.get("/Plot/drift/fin/periodico-tendencia")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1523,7 +2591,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, di
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/periodico-tendencia")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1538,7 +2606,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
     return response
 
 @app.get("/Plot/drift/periodos/periodico-tendencia")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     plot_df(df)
@@ -1551,7 +2619,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
 
     
 @app.get("/Datos/drift/fin/tendencia-tendencia")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1566,7 +2634,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tip
     return response
 
 @app.get("/Plot/drift/fin/tendencia-tendencia")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     plot_df(df)
@@ -1578,7 +2646,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tip
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/tendencia-tendencia")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     
@@ -1594,7 +2662,7 @@ def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tip
     return response
 
 @app.get("/Plot/drift/periodos/tendencia-tendencia")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1605,7 +2673,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/fin/tendencia-distr")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1620,7 +2688,7 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:in
     return response
 
 @app.get("/Plot/drift/fin/tendencia-distr")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
     plot_df(df)
@@ -1633,7 +2701,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,dis
 
 
 @app.get("/Datos/drift/periodos/tendencia-distr")
-def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1647,7 +2715,7 @@ def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dis
     return response 
 
 @app.get("/Plot/drift/periodos/tendencia-distr")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
@@ -1661,7 +2729,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
 
 
 @app.get("/Datos/drift/fin/tendencia-ARMA")
-def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
     
@@ -1676,7 +2744,7 @@ def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,
     return response 
 
 @app.get("/Plot/drift/fin/tendencia-ARMA")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
     plot_df(df)
@@ -1688,7 +2756,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/tendencia-ARMA")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df =crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1702,7 +2770,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
     return response 
 
 @app.get("/Plot/drift/periodos/tendencia-ARMA")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
     plot_df(df)
@@ -1714,7 +2782,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
     return StreamingResponse(buffer,media_type="image/png")
    
 @app.get("/Datos/drift/fin/tendencia-periodicos")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -1728,7 +2796,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, ti
     return response 
 
 @app.get("/Plot/drift/fin/tendencia-periodicos")
-async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
     plot_df(df)
@@ -1740,7 +2808,7 @@ async def read_item(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, ti
     return StreamingResponse(buffer,media_type="image/png")
 
 @app.get("/Datos/drift/periodos/tendencia-periodicos")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
     
@@ -1756,7 +2824,7 @@ async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:in
 
 
 @app.get("/Plot/drift/periodos/tendencia-periodicos")
-async def read_item(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
     plot_df(df)
@@ -2188,7 +3256,7 @@ def polinomica3(x):
 def polinomica4(x):
     return 3 * x **4 - 5 * x ** 3 + 2 * x ** 2 -10 * x + 3
 
-def expon(x):
+def expon1(x):
     return math.exp(x-2) + 7
 
 def expon2(x):
@@ -2211,7 +3279,7 @@ def elegir_funcion(funcion):
     elif funcion == 'Polinomica4':
         return polinomica4
     elif funcion == 'Exponencial':
-        return expon
+        return expon1
     elif funcion == 'Exponencial2':
         return expon2
     elif funcion == 'Log':
