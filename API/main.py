@@ -109,8 +109,9 @@ def obtener_report(inicio: str, fin:str, freq:str, tipo:int , error: Union[float
        subtipo ="polinómica de grado "+ str(len(params)-1)
        tendencia= "La serie es de tipo y = a + b[1] * t + e0"  
        for k in range (2,len(params)):
-           tendencia = " + b ["+str(k)+"] *  t ** " + str(k)
-       tendencia = tendencia + "donde a = " + str(params[0]) + " b[1] = " + str (params[1])
+           tendencia += " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia = tendencia + " +e0"
+       tendencia = tendencia + " donde a = " + str(params[0]) + " b[1] = " + str (params[1])
        for k in range (2,len(params)):
            tendencia = tendencia  + " b["+ str(k)+"] = " + str (params[k])
        tendencia = tendencia +" e0 = " + str(error)
@@ -123,14 +124,14 @@ def obtener_report(inicio: str, fin:str, freq:str, tipo:int , error: Union[float
 
    tipos = "Modelo de tendencia determinista con tendencia " + subtipo
    explicacion = "Inicio: fecha de inicio " + str(inicio)
-   explicacion = explicacion +" . Fin: fecha de fin --> "+ str(fin)
-   explicacion = explicacion + " . Freq: frequencia de la serie temporal --> " + str(freq)
+   explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+   explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
    explicacion = explicacion + ". Tipo: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo)
-   explicacion = explicacion + " . Error: coeficiente de error (e0) --> " + str(error)
-   explicacion = explicacion + " . Columna: nombre de la columnas --> " + columna[0]
+   explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(error)
+   explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
    for k in range (1, len (columna)):
        explicacion = explicacion+", " + columna [k]
-   explicacion = explicacion + " . Params: parámetros de la tendencia, a = params [0] y b[k] = params[k] --> "+str(params [0])
+   explicacion = explicacion + ". Params: parámetros de la tendencia, a = params [0] y b[k] = params[k] --> "+str(params [0])
    for k in range (1, len (params)):
        explicacion = explicacion+", " + str(params [k])
    return {"Tipo": tipos, "Serie" : tendencia, "Parámetros" : explicacion }
@@ -174,7 +175,7 @@ def obtener_report(inicio: str, periodos: int, freq:str, tipo:int , error: Union
         tendencia= "La serie es de tipo y = a + b[1] * t"  
         for k in range (2,len(params)):
             tendencia = tendencia+ " + b ["+str(k)+"] *  t ** " + str(k)
-        tendencia = " +e0"
+        tendencia = tendencia + " +e0"
         tendencia = tendencia + " donde a = " + str(params[0]) + ", b[1] = " + str (params[1])
         for k in range (2,len(params)):
             tendencia = tendencia  + ", b["+ str(k)+"] = " + str (params[k])
@@ -530,9 +531,9 @@ def obtener_report(inicio: str, fin: str, freq:str, distr:int , columna: List[st
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
         mean, var= t.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = t.mean(params[0], loc=params[1])
@@ -730,9 +731,9 @@ def obtener_report(inicio: str, periodos: int, freq:str, distr:int , columna: Li
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
         mean, var= gamma.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = gamma.mean(params[0], loc=params[1])
@@ -764,9 +765,10 @@ def obtener_report(inicio: str, periodos: int, freq:str, distr:int , columna: Li
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
+
         mean, var= chi2.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = chi2.mean(params[0], loc=params[1])
@@ -781,9 +783,9 @@ def obtener_report(inicio: str, periodos: int, freq:str, distr:int , columna: Li
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
         mean, var= t.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = t.mean(params[0], loc=params[1])
@@ -798,9 +800,9 @@ def obtener_report(inicio: str, periodos: int, freq:str, distr:int , columna: Li
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
         mean, var= pareto.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = pareto.mean(params[0], loc=params[1])
@@ -1033,9 +1035,9 @@ async def obtener_serie(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
         mean, var= gamma.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = gamma.mean(params[0], loc=params[1])
@@ -1067,9 +1069,10 @@ async def obtener_serie(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
+
         mean, var= chi2.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = chi2.mean(params[0], loc=params[1])
@@ -1084,9 +1087,9 @@ async def obtener_serie(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
         mean, var= t.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = t.mean(params[0], loc=params[1])
@@ -1101,9 +1104,9 @@ async def obtener_serie(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
         mean, var= pareto.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = pareto.mean(params[0], loc=params[1])
@@ -1291,9 +1294,9 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, distr:int, p: int, 
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
         mean, var= gamma.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = gamma.mean(params[0], loc=params[1])
@@ -1325,9 +1328,10 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, distr:int, p: int, 
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
+
         mean, var= chi2.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = chi2.mean(params[0], loc=params[1])
@@ -1342,9 +1346,9 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, distr:int, p: int, 
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
         mean, var= t.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = t.mean(params[0], loc=params[1])
@@ -1359,9 +1363,9 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, distr:int, p: int, 
         if len(params)==1:
             parametros += "En este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
-            parametros += "En este caso el desplazamiento es de " + str(params[0])
+            parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
-            parametros += "En este caso el desplazamiento es de " + str(params[0]) +" y la escala de "+str(params[1])
+            parametros += "En este caso el desplazamiento es de " + str(params[1]) +" y la escala de "+str(params[2])
         mean, var= pareto.stats(params[0], moments='mv')
         if len (params) == 2:
             mean = pareto.mean(params[0], loc=params[1])
@@ -1629,13 +1633,13 @@ async def obtener_report(inicio: str, fin:str, freq:str,c:float, desv:float, s :
     explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
     for k in range (1, len (columna)):
         explicacion = explicacion+", " + columna [k]
-    explicacion = explicacion + ". Params: parámetros del modelo, phi y teta --> "
+    explicacion = explicacion + ". Params: parámetros del modelo, phi y teta -->"
     if phi != []:
-        explicacion+= "phi : " + str(phi[0])
+        explicacion+= " phi : " + str(phi[0])
         for k in range (1, len (phi)):
             explicacion = explicacion+", " + str(phi[k])
     if teta!=[]:
-        explicacion+= "teta : " + str(teta[0])
+        explicacion+= " teta : " + str(teta[0])
         for k in range (1, len (teta)):
             explicacion = explicacion+", " + str(teta[k])
     return {"Tipo": tipos, "Parámetro del modelo" : parametros, "Parámetros de la query" : explicacion }
@@ -1703,13 +1707,13 @@ async def obtener_report(inicio: str, periodos:int, freq:str,c:float, desv:float
     explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
     for k in range (1, len (columna)):
         explicacion = explicacion+", " + columna [k]
-    explicacion = explicacion + ". Params: parámetros del modelo, phi y teta --> "
+    explicacion = explicacion + ". Params: parámetros del modelo, phi y teta -->"
     if phi != []:
-        explicacion+= "phi : " + str(phi[0])
+        explicacion+= " phi : " + str(phi[0])
         for k in range (1, len (phi)):
             explicacion = explicacion+", " + str(phi[k])
     if teta!=[]:
-        explicacion+= "teta : " + str(teta[0])
+        explicacion+= " teta : " + str(teta[0])
         for k in range (1, len (teta)):
             explicacion = explicacion+", " + str(teta[k])
     return {"Tipo": tipos, "Parámetro del modelo" : parametros, "Parámetros de la query" : explicacion }
@@ -1955,8 +1959,452 @@ def crear_df_periodos_DRIFT(inicio,periodos,freq,columna,params1,params2,tipo,nu
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df  
 
+
+@app.get("/Report/drift/fin/dist-dist")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+    
+    
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros1 opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+
+
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+        
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego una segunda distribución "+ subtipo2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1 y Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> Dist1: " + str(dist1) +" y Dist2: "+ str(dist2) 
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+    return {"Tipo": tipos,"Parametros de la primera distribución": parametros1, "Parámetros de la segunda distribución": parametros2, "Parámetros de la query" : explicacion, "Media primera distribución" :mean1, "Varianza de la primera distribución" : var1, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
+
 @app.get("/Datos/drift/fin/dist-dist")
-async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
      # Convertir el DataFrame a un buffer de CSV
@@ -1971,7 +2419,7 @@ async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int
     return response
 
 @app.get("/Plot/drift/fin/dist-dist")
-async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
     plot_df(df)
@@ -1982,9 +2430,450 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/periodos/dist-dist")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la distribución")):
+    
+    
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros1 opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+        
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego una segunda distribución "+ subtipo2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1 y Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> Dist1: " + str(dist1) +" y Dist2: "+ str(dist2) 
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+    return {"Tipo": tipos,"Parametros de la primera distribución": parametros1, "Parámetros de la segunda distribución": parametros2, "Parámetros de la query" : explicacion, "Media primer distribución" :mean1, "Varianza de la primera distribución" : var1, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
 
 @app.get("/Datos/drift/periodos/dist-dist")
-async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
     
@@ -2000,7 +2889,7 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist
     return response
 
 @app.get("/Plot/drift/periodos/dist-dist")
-async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int,dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna, [dist1,params1],[dist2,params2],1,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2011,8 +2900,269 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
     return StreamingResponse(buffer,media_type="image/png")
 
 
+@app.get("/Report/drift/fin/dist-ARMA")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros1 opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+    if phi == []:
+        subtipo2 = "de medias móviles"
+        parametros2= "La serie sigue una distribución de medias móviles con constante c "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros2 = parametros2  + " teta_"+ str(k)+" = " + str (teta[k])
+           
+    elif teta ==[]:
+        subtipo2 = "autorregresivo"
+        parametros2= "La serie sigue una distribución autorregresiva con constante c "+ str(c)+" valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros2 = parametros2  + " phi_"+ str(k)+" = " + str (phi[k])
+    else: 
+        subtipo2 ="autorregresivo y de medias móviles"
+        parametros2 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros2 = parametros2  + " phi_"+ str(k)+" = " + str (phi[k])
+        parametros2 = parametros2 + " y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros2 = parametros2  + " teta_"+ str(k)+" = " + str (teta[k])
+    if s != 0:
+        subtipo2 += " estacional con amplitud de la estación: " + str(s)
+    
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego un modelo "+ subtipo2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> Dist1: " + str(dist1) +" y Dist2: "+ str(dist2) 
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". c: constante del modelo 2--> " + str(c)
+    explicacion = explicacion + ". s: amplitud de la estación del modelo 2--> " + str(s)
+    explicacion = explicacion + ". Desv: desviación típica del ruido blaco del modelo 2 --> " + str(desv)
+    explicacion = explicacion + ". Params: parámetros del modelo 2, phi y teta --> "
+    if phi != []:
+        explicacion+= "phi : " + str(phi[0])
+        for k in range (1, len (phi)):
+            explicacion = explicacion+", " + str(phi[k])
+    if teta!=[]:
+        explicacion+= "teta : " + str(teta[0])
+        for k in range (1, len (teta)):
+            explicacion = explicacion+", " + str(teta[k])
+    return {"Tipo": tipos,"Parametros de la primera distribución": parametros1, "Parámetros del segundo modelo": parametros2, "Parámetros de la query" : explicacion, "Media primer distribución" :mean1, "Varianza de la primera distribución" : var1, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
+
 @app.get("/Datos/drift/fin/dist-ARMA")
-async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
     
@@ -2028,7 +3178,7 @@ async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int
     return response
 
 @app.get("/Plot/drift/fin/dist-ARMA")
-async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
     plot_df(df)
@@ -2039,8 +3189,269 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/periodos/dist-ARMA")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros1 opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+    if phi == []:
+        subtipo2 = "de medias móviles"
+        parametros2= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros2 = parametros2  + " teta_"+ str(k)+" = " + str (teta[k])
+           
+    elif teta ==[]:
+        subtipo2 = "autorregresivo"
+        parametros2= "La serie sigue una distribución autorregresiva con constante c "+ str(c)+" valores de phi: phi_0 = " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros2 = parametros2  + " phi_"+ str(k)+" = " + str (phi[k])
+    else: 
+        subtipo2 ="autorregresivo y de medias móviles"
+        parametros2 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c)+" y con valores de phi: phi_0 = " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros2 = parametros2  + " phi_"+ str(k)+" = " + str (phi[k])
+        parametros2 = parametros2 + " y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros2 = parametros2  + " teta_"+ str(k)+" = " + str (teta[k])
+    if s != 0:
+        subtipo2 += " estacional con amplitud de la estación: " + str(s)
+    
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego un modelo "+ subtipo2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> " + str(dist1)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". c: constante del modelo 2--> " + str(c)
+    explicacion = explicacion + ". s: amplitud de la estación del modelo 2--> " + str(s)
+    explicacion = explicacion + ". Desv: desviación típica del ruido blaco del modelo 2 --> " + str(desv)
+    explicacion = explicacion + ". Params: parámetros del modelo 2, phi y teta --> "
+    if phi != []:
+        explicacion+= "phi : " + str(phi[0])
+        for k in range (1, len (phi)):
+            explicacion = explicacion+", " + str(phi[k])
+    if teta!=[]:
+        explicacion+= "teta : " + str(teta[0])
+        for k in range (1, len (teta)):
+            explicacion = explicacion+", " + str(teta[k])
+    return {"Tipo": tipos,"Parametros de la primera distribución": parametros1, "Parámetros del segundo modelo": parametros2, "Parámetros de la query" : explicacion, "Media primer distribución" :mean1, "Varianza de la primera distribución" :var1}
+
 @app.get("/Datos/drift/periodos/dist-ARMA")
-async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
 
@@ -2056,7 +3467,7 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist
     return response  
 
 @app.get("/Plot/drift/periodos/dist-ARMA")
-async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2067,8 +3478,457 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
     return StreamingResponse(buffer,media_type="image/png")
 
 
+@app.get("/Report/drift/fin/dist-periodico")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros1 opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+    if tipo2==1:
+        periodicidad = "periodos de amplitud " + str(p2)
+    elif tipo2==2 :
+        periodicidad = str(p2)+ " periodos"
+        
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 - b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 + b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+
+    tipos2 = "modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad
+
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1 y Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> Dist1: " + str(dist1) +" y Dist2: "+ str(dist2) 
+    explicacion += ". p: indica la amplitud del periodo (tipo2 1) o la cantidad de periodos (tipo2 2) --> " + str(p2)
+    explicacion += ". tipo2: por amplitud (1) / por cantidad (2) --> "+ str(tipo2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+    return {"Tipo": tipos,"Parametros de la primera distribución": parametros1, "Parámetros de la segunda distribución": parametros2, "Parámetros de la query" : explicacion, "Media primer distribución" :mean1, "Varianza de la primera distribución" : var1, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
+
 @app.get("/Datos/drift/fin/dist-periodico")
-async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), pparams2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -2084,7 +3944,7 @@ async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int
     
 
 @app.get("/Plot/drift/fin/dist-periodico")
-async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna, [dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2095,8 +3955,457 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
     return StreamingResponse(buffer,media_type="image/png")
 
 
+@app.get("/Report/drift/periodos/dist-periodico")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros1 opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+    if tipo2==1:
+        periodicidad = "periodos de amplitud " + str(p2)
+    elif tipo2==2 :
+        periodicidad = str(p2)+ " periodos"
+        
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 - b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 + b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+
+    tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad
+
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1 y Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> Dist1: " + str(dist1) +" y Dist2: "+ str(dist2) 
+    explicacion += ". p2: indica la amplitud del periodo (tipo2 1) o la cantidad de periodos (tipo2 2) --> " + str(p2)
+    explicacion += ". tipo2: por amplitud (1) / por cantidad (2) --> "+ str(tipo2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+    return {"Tipo": tipos,"Parametros de la primera distribución": parametros1, "Parámetros de la segunda distribución": parametros2, "Parámetros de la query" : explicacion, "Media primer distribución" :mean1, "Varianza de la primera distribución" : var1, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
+
 @app.get("/Datos/drift/periodos/dist-periodico")
-async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -2111,7 +4420,7 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist
     return response  
 
 @app.get("/Plot/drift/periodos/dist-periodico")
-async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2121,9 +4430,263 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/fin/dist-tendencia")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros1 opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+        
+        
+    if tipo2 == 1:
+       subtipo2 = "lineal"
+       tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params2[0]) + " b = " +str (params2[1]) +" e0 = " + str(coef_error)
+    elif tipo2 ==2:
+       subtipo2 ="polinómica de grado "+ str(len(params2)-1)
+       tendencia= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params2)):
+           tendencia = tendencia + " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia = tendencia + " donde a = " + str(params2[0]) + " b[1] = " + str (params2[1])
+       for k in range (2,len(params2)):
+           tendencia = tendencia  + " b["+ str(k)+"] = " + str (params2[k])
+       tendencia = tendencia +" e0 = " + str(coef_error)
+    elif tipo2 == 3: 
+       subtipo2 ="exponencial"
+       tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params2[0]) + ", b = " + str(params2[1]) + " y e0 = " + str(coef_error)
+    elif tipo2 == 4:
+       subtipo2 = "logaritmica" 
+       tendencia = "La serie es de tipo y = a + b * log(t) + e0 donde a = " + str(params2[0]) + " b = " + str(params2[1]) + " e0 = " + str(coef_error)
+
+    tipos2 = "modelo de tendencia determinista con tendencia " + subtipo2
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist1)  
+    explicacion = explicacion + ". Tipo2: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo2)
+    explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(coef_error)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". params2: parámetros de la tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params2 [0])
+    for k in range (1, len (params2)):
+        explicacion = explicacion+", " + str(params2 [k])
+    return {"Tipo": tipos,"Parametros de la primera distribución": parametros1, "Parámetros de la segunda distribución": tendencia, "Parámetros de la query" : explicacion, "Media primera distribución" :mean1, "Varianza de la primera distribución" : var1}
+
+
     
 @app.get("/Datos/drift/fin/dist-tendencia")
-async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
     
@@ -2139,7 +4702,7 @@ async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, dist1:int
     return response  
 
 @app.get("/Plot/drift/fin/dist-tendencia")
-async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2149,8 +4712,265 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
+
+@app.get("/Report/drift/periodos/dist-tendencia")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[int,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros1 opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params1[0] = "+ str(params1[0])+" y b = params1[1] = "+ str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+        
+        
+    if tipo2 == 1:
+       subtipo2 = "lineal"
+       tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params2[0]) + " b = " +str (params2[1]) +" e0 = " + str(coef_error)
+    elif tipo2 ==2:
+       subtipo2 ="polinómica de grado "+ str(len(params2)-1)
+       tendencia= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params2)):
+           tendencia = tendencia + " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia = tendencia + " donde a = " + str(params2[0]) + " b[1] = " + str (params2[1])
+       for k in range (2,len(params2)):
+           tendencia = tendencia  + " b["+ str(k)+"] = " + str (params2[k])
+       tendencia = tendencia +" e0 = " + str(coef_error)
+    elif tipo2 == 3: 
+       subtipo2 ="exponencial"
+       tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params2[0]) + ", b = " + str(params2[1]) + " y e0 = " + str(coef_error)
+    elif tipo2 == 4:
+       subtipo2 = "logaritmica" 
+       tendencia = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params2[0]) + " b = " + str(params2[1]) + " e0 = " + str(coef_error)
+
+    tipos2 = "modelo de tendencia determinista con tendencia " + subtipo2
+        
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist1)  
+    explicacion = explicacion + ". Tipo2: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo2)
+    explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(coef_error)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". params2: parámetros de la tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params2 [0])
+    for k in range (1, len (params2)):
+        explicacion = explicacion+", " + str(params2 [k])
+    return {"Tipo": tipos,"Parametros de la primera distribución": parametros1, "Parámetros de la segunda distribución": tendencia, "Parámetros de la query" : explicacion, "Media primera distribución" :mean1, "Varianza de la primera distribución" : var1}
+
+
 @app.get("/Datos/drift/periodos/dist-tendencia")
-async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -2165,7 +4985,7 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, dist
     return response 
 
 @app.get("/Plot/drift/periodos/dist-tendencia")
-async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[int,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2175,6 +4995,82 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/fin/ARMA-ARMA")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    if phi1 == []:
+        subtipo1 = "de medias móviles"
+        parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c1)+" y con valores de teta1: teta1_0 " + str(teta1[0])
+        for k in range (1,len(teta1)):
+           parametros1 = parametros1  + " teta1_"+ str(k)+" = " + str (teta1[k])    
+    elif teta1 ==[]:
+        subtipo1 = "autorregresivo"
+        parametros1= "La serie sigue una distribución autorregresiva con constante c = "+ str(c1)+" y con valores de phi1: phi1_0 " + str(phi1[0])
+        for k in range (1,len(phi1)):
+           parametros1 = parametros1  + " phi1_"+ str(k)+" = " + str (phi1[k])
+    else: 
+        subtipo1 ="autorregresivo y de medias móviles"
+        parametros1 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c1)+" y con valores de phi1: phi1_0 " + str(phi1[0])
+        for k in range (1,len(phi1)):
+           parametros1 = parametros1  + " phi1_"+ str(k)+" = " + str (phi1[k])
+        parametros1 = parametros1 + " y con valores de teta1: teta1_0 " + str(teta1[0])
+        for k in range (1,len(teta1)):
+           parametros1 = parametros1  + " teta1_"+ str(k)+" = " + str (teta1[k])
+    if s1 != 0:
+        subtipo1 += " estacional con amplitud de la estación: " + str(s1)
+    
+    if phi2 == []:
+        subtipo2 = "de medias móviles"
+        parametros2= "La serie sigue una distribución de medias móviles con constante c = "+ str(c2)+" y con valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+           
+    elif teta2 ==[]:
+        subtipo2 = "autorregresivo"
+        parametros2= "La serie sigue una distribución autorregresiva con constante c = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+    else: 
+        subtipo2 ="autorregresivo y de medias móviles"
+        parametros2 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+        parametros2 = parametros2 + " y con valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+    if s2 != 0:
+        subtipo2 += " estacional con amplitud de la estación: " + str(s2)
+    
+    
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con un modelo " + subtipo1 + " y luego un modelo "+ subtipo2
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". c1, c2: constante del modelo 1 y 2--> c1: " + str(c1)+ " c2: "+ str(c2)
+    explicacion = explicacion + ". s1, s2: amplitud de la estación del modelo 1 y 2--> s1: " + str(s1)+ " s2: "+ str(s2)
+    explicacion = explicacion + ". Desv1, Desv2 : desviaciones típica del ruido blanco de ambos modelos --> desv1:" + str(desv1) + " desv2: " + str(desv2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Parámetros del modelo 1: phi1 y teta1 -->"
+    if phi1 != []:
+        explicacion+= " phi1 : " + str(phi1[0])
+        for k in range (1, len (phi1)):
+            explicacion = explicacion+", " + str(phi1[k])
+    if teta1!=[]:
+        explicacion+= " teta1 : " + str(teta1[0])
+        for k in range (1, len (teta1)):
+            explicacion = explicacion+", " + str(teta1[k])
+    explicacion = explicacion + ". Parámetros del modelo 2: phi2 y teta2 -->"
+    if phi2 != []:
+        explicacion+= " phi2 : " + str(phi2[0])
+        for k in range (1, len (phi2)):
+            explicacion = explicacion+", " + str(phi2[k])
+    if teta2!=[]:
+        explicacion+= " teta2 : " + str(teta2[0])
+        for k in range (1, len (teta2)):
+            explicacion = explicacion+", " + str(teta2[k])
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1, "Parámetro del modelo 2" : parametros2, "Parámetros de la query" : explicacion }
     
 @app.get("/Datos/drift/fin/ARMA-ARMA")
 async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -2204,6 +5100,83 @@ async def obtener_gráfica(inicio: str, fin:str, freq:str, num_drift:int ,c1:flo
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/periodos/ARMA-ARMA")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    if phi1 == []:
+        subtipo1 = "de medias móviles"
+        parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c1)+" y con valores de teta1: teta1_0 " + str(teta1[0])
+        for k in range (1,len(teta1)):
+           parametros1 = parametros1  + " teta1_"+ str(k)+" = " + str (teta1[k])    
+    elif teta1 ==[]:
+        subtipo1 = "autorregresivo"
+        parametros1= "La serie sigue una distribución autorregresiva con constante c = "+ str(c1)+" y con valores de phi1: phi1_0 " + str(phi1[0])
+        for k in range (1,len(phi1)):
+           parametros1 = parametros1  + " phi1_"+ str(k)+" = " + str (phi1[k])
+    else: 
+        subtipo1 ="autorregresivo y de medias móviles"
+        parametros1 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c1)+" y con valores de phi1: phi1_0 " + str(phi1[0])
+        for k in range (1,len(phi1)):
+           parametros1 = parametros1  + " phi1_"+ str(k)+" = " + str (phi1[k])
+        parametros1 = parametros1 + " y con valores de teta1: teta1_0 " + str(teta1[0])
+        for k in range (1,len(teta1)):
+           parametros1 = parametros1  + " teta1_"+ str(k)+" = " + str (teta1[k])
+    if s1 != 0:
+        subtipo1 += " estacional con amplitud de la estación: " + str(s1)
+    
+    if phi2 == []:
+        subtipo2 = "de medias móviles"
+        parametros2= "La serie sigue una distribución de medias móviles con constante c = "+ str(c2)+" y con valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+           
+    elif teta2 ==[]:
+        subtipo2 = "autorregresivo"
+        parametros2= "La serie sigue una distribución autorregresiva con constante c = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+    else: 
+        subtipo2 ="autorregresivo y de medias móviles"
+        parametros2 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+        parametros2 = parametros2 + " y con valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+    if s2 != 0:
+        subtipo2 += " estacional con amplitud de la estación: " + str(s2)
+
+    
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con un modelo " + subtipo1 + " y luego un modelo "+ subtipo2
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar--> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". c1, c2: constante del modelo 1 y 2--> c1: " + str(c1)+ " c2: "+ str(c2)
+    explicacion = explicacion + ". s1, s2: amplitud de la estación del modelo 1 y 2--> s1: " + str(s1)+ " s2: "+ str(s2)
+    explicacion = explicacion + ". Desv1, Desv2 : desviaciones típica del ruido blanco de ambos modelos --> desv1:" + str(desv1) + " desv2: " + str(desv2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Parámetros del modelo 1: phi1 y teta1 -->"
+    if phi1 != []:
+        explicacion+= " phi1 : " + str(phi1[0])
+        for k in range (1, len (phi1)):
+            explicacion = explicacion+", " + str(phi1[k])
+    if teta1!=[]:
+        explicacion+= " teta1 : " + str(teta1[0])
+        for k in range (1, len (teta1)):
+            explicacion = explicacion+", " + str(teta1[k])
+    explicacion = explicacion + ". Parámetros del modelo 2: phi2 y teta2 --> "
+    if phi2 != []:
+        explicacion+= "phi2 : " + str(phi2[0])
+        for k in range (1, len (phi2)):
+            explicacion = explicacion+", " + str(phi2[k])
+    if teta2!=[]:
+        explicacion+= "teta2 : " + str(teta2[0])
+        for k in range (1, len (teta2)):
+            explicacion = explicacion+", " + str(teta2[k])
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1, "Parámetro del modelo 2" : parametros2, "Parámetros de la query" : explicacion }
+    
 
 @app.get("/Datos/drift/periodos/ARMA-ARMA")
 def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float , desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -2234,8 +5207,268 @@ async def obtener_gráfica(inicio: str, periodos:int, freq:str, num_drift:int ,c
     return StreamingResponse(buffer,media_type="image/png")
 
 
+@app.get("/Report/drift/fin/ARMA-dist")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+    if phi == []:
+        subtipo1 = "de medias móviles"
+        parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+           
+    elif teta ==[]:
+        subtipo1 = "autorregresivo"
+        parametros1= "La serie sigue una distribución autorregresiva con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+    else: 
+        subtipo1 ="autorregresivo y de medias móviles"
+        parametros1 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+        parametros1 = parametros1 + " y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+    if s != 0:
+        subtipo1 += " estacional con amplitud de la estación: " + str(s)
+    
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+        
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un modelo " + subtipo1 + " y luego una distribucion "+ subtipo2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". c: constante del modelo 1 --> " + str(c)
+    explicacion = explicacion + ". s: amplitud de la estación del modelo 1 --> " + str(s)
+    explicacion = explicacion + ". Desv: desviación típica del ruido blanco del modelo 1--> " + str(desv)
+    explicacion = explicacion + ". Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist2) 
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros del modelo 1, phi y teta -->"
+    if phi != []:
+        explicacion+= " phi : " + str(phi[0])
+        for k in range (1, len (phi)):
+            explicacion = explicacion+", " + str(phi[k])
+    if teta!=[]:
+        explicacion+= " teta : " + str(teta[0])
+        for k in range (1, len (teta)):
+            explicacion = explicacion+", " + str(teta[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+        
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
 @app.get("/Datos/drift/fin/ARMA-dist")
-async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
     
@@ -2251,7 +5484,7 @@ async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int ,c:float ,
     return response 
 
 @app.get("/Plot/drift/fin/ARMA-dist")
-async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2261,9 +5494,269 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/periodos/ARMA-dist")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+    if phi == []:
+        subtipo1 = "de medias móviles"
+        parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+           
+    elif teta ==[]:
+        subtipo1 = "autorregresivo"
+        parametros1= "La serie sigue una distribución autorregresiva con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+    else: 
+        subtipo1 ="autorregresivo y de medias móviles"
+        parametros1 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+        parametros1 = parametros1 + " y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+    if s != 0:
+        subtipo1 += " estacional con amplitud de la estación: " + str(s)
+    
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+        
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un modelo " + subtipo1 + " y luego una distribucion "+ subtipo2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". c: constante del modelo 1--> " + str(c)
+    explicacion = explicacion + ". s: amplitud de la estación del modelo 1--> " + str(s)
+    explicacion = explicacion + ". Desv: desviación típica del ruido blanco del modelo 1--> " + str(desv)
+    explicacion = explicacion + ". Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist2) 
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros del modelo 1, phi y teta -->"
+    if phi != []:
+        explicacion+= " phi : " + str(phi[0])
+        for k in range (1, len (phi)):
+            explicacion = explicacion+", " + str(phi[k])
+    if teta!=[]:
+        explicacion+= " teta : " + str(teta[0])
+        for k in range (1, len (teta)):
+            explicacion = explicacion+", " + str(teta[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+        
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
 
 @app.get("/Datos/drift/periodos/ARMA-dist")
-async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
     
@@ -2279,7 +5772,7 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c:fl
     return response 
 
 @app.get("/Plot/drift/periodos/ARMA-dist")
-async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
     plot_df(df)
@@ -2290,8 +5783,279 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/fin/ARMA-periodicos")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, dist2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+
+    if phi == []:
+        subtipo1 = "de medias móviles"
+        parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+           
+    elif teta ==[]:
+        subtipo1 = "autorregresivo"
+        parametros1= "La serie sigue una distribución autorregresiva con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+    else: 
+        subtipo1 ="autorregresivo y de medias móviles"
+        parametros1 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+        parametros1 = parametros1 + " y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+    if s != 0:
+        subtipo1 += " estacional con amplitud de la estación: " + str(s)
+    
+    
+    if tipo2==1:
+        periodicidad = "periodos de amplitud " + str(p2)
+    elif tipo2==2 :
+        periodicidad = str(p2)+ " periodos"
+        
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 - b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 + b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+
+    tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un modelo " + subtipo1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". c: constante del modelo 1--> " + str(c)
+    explicacion = explicacion + ". s: amplitud de la estación del modelo 1--> " + str(s)
+    explicacion = explicacion + ". Desv: desviación típica del ruido blanco del modelo 1--> " + str(desv)
+    explicacion = explicacion + ". Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist2) 
+    explicacion += ". p2: indica la amplitud del periodo (tipo2 1) o la cantidad de periodos (tipo2 2) --> " + str(p2)
+    explicacion += ". tipo2: por amplitud (1) / por cantidad (2) --> "+ str(tipo2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros del modelo 1, phi y teta -->"
+    if phi != []:
+        explicacion+= " phi : " + str(phi[0])
+        for k in range (1, len (phi)):
+            explicacion = explicacion+", " + str(phi[k])
+    if teta!=[]:
+        explicacion+= " teta : " + str(teta[0])
+        for k in range (1, len (teta)):
+            explicacion = explicacion+", " + str(teta[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+        
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
+
 @app.get("/Datos/drift/fin/ARMA-periodicos")
-async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     
@@ -2307,7 +6071,7 @@ async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, c:float, 
     return response 
 
 @app.get("/Plot/drift/fin/ARMA-periodicos")
-async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2317,8 +6081,278 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, c:float
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/periodos/ARMA-periodicos")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, c:float, desv:float, tipo2:int, dist2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+
+    if phi == []:
+        subtipo1 = "de medias móviles"
+        parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+           
+    elif teta ==[]:
+        subtipo1 = "autorregresivo"
+        parametros1= "La serie sigue una distribución autorregresiva con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+    else: 
+        subtipo1 ="autorregresivo y de medias móviles"
+        parametros1 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+        parametros1 = parametros1 + " y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+    if s != 0:
+        subtipo1 += " estacional con amplitud de la estación: " + str(s)
+    
+    
+    if tipo2==1:
+        periodicidad = "periodos de amplitud " + str(p2)
+    elif tipo2==2 :
+        periodicidad = str(p2)+ " periodos"
+        
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 - b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 + b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+
+    tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un modelo " + subtipo1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". c: constante del modelo 1--> " + str(c)
+    explicacion = explicacion + ". s: amplitud de la estación del modelo 1--> " + str(s)
+    explicacion = explicacion + ". Desv: desviación típica del ruido blanco del modelo 1--> " + str(desv)
+    explicacion = explicacion + ". Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist2) 
+    explicacion += ". p2: indica la amplitud del periodo (tipo2 1) o la cantidad de periodos (tipo2 2) --> " + str(p2)
+    explicacion += ". tipo2: por amplitud (1) / por cantidad (2) --> "+ str(tipo2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros del modelo 1, phi y teta -->"
+    if phi != []:
+        explicacion+= " phi : " + str(phi[0])
+        for k in range (1, len (phi)):
+            explicacion = explicacion+", " + str(phi[k])
+    if teta!=[]:
+        explicacion+= " teta : " + str(teta[0])
+        for k in range (1, len (teta)):
+            explicacion = explicacion+", " + str(teta[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+        
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
 @app.get("/Datos/drift/periodos/ARMA-periodicos")
-async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     
@@ -2334,7 +6368,7 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c:fl
     return response 
 
 @app.get("/Plot/drift/periodos/ARMA-periodicos")
-async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2344,8 +6378,80 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/fin/ARMA-tendencia")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+
+    if phi == []:
+        subtipo1 = "de medias móviles"
+        parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+           
+    elif teta ==[]:
+        subtipo1 = "autorregresivo"
+        parametros1= "La serie sigue una distribución autorregresiva con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+    else: 
+        subtipo1 ="autorregresivo y de medias móviles"
+        parametros1 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+        parametros1 = parametros1 + " y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+    if s != 0:
+        subtipo1 += " estacional con amplitud de la estación: " + str(s)
+        
+    if tipo2 == 1:
+       subtipo2 = "lineal"
+       tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params2[0]) + " b = " +str (params2[1]) +" e0 = " + str(coef_error)
+    elif tipo2 ==2:
+       subtipo2 ="polinómica de grado "+ str(len(params2)-1)
+       tendencia= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params2)):
+           tendencia = tendencia + " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia = tendencia + " donde a = " + str(params2[0]) + " b[1] = " + str (params2[1])
+       for k in range (2,len(params2)):
+           tendencia = tendencia  + " b["+ str(k)+"] = " + str (params2[k])
+       tendencia = tendencia +" e0 = " + str(coef_error)
+    elif tipo2 == 3: 
+       subtipo2 ="exponencial"
+       tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params2[0]) + ", b = " + str(params2[1]) + " y e0 = " + str(coef_error)
+    elif tipo2 == 4:
+       subtipo2 = "logaritmica" 
+       tendencia = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params2[0]) + " b = " + str(params2[1]) + " e0 = " + str(coef_error)
+
+    tipos2 = "modelo de tendencia determinista con tendencia " + subtipo2
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " siguiendo un primer modelo " + subtipo1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". c: constante del modelo --> " + str(c)
+    explicacion = explicacion + ". s: amplitud de la estación --> " + str(s)
+    explicacion = explicacion + ". Desv: desviación típica del ruido blaco --> " + str(desv)
+    explicacion = explicacion + ". Tipo2: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo2)
+    explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(coef_error)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros del modelo 1, phi y teta -->"
+    if phi != []:
+        explicacion+= " phi : " + str(phi[0])
+        for k in range (1, len (phi)):
+            explicacion = explicacion+", " + str(phi[k])
+    if teta!=[]:
+        explicacion+= " teta : " + str(teta[0])
+        for k in range (1, len (teta)):
+            explicacion = explicacion+", " + str(teta[k])
+            
+    explicacion = explicacion + ". params2: parámetros de la tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params2 [0])
+    for k in range (1, len (params2)):
+        explicacion = explicacion+", " + str(params2 [k])
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1, "Parámetro del modelo 2" : tendencia, "Parámetros de la query" : explicacion }
+
 @app.get("/Datos/drift/fin/ARMA-tendencia")
-async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -2369,6 +6475,78 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float
     plt.close()
 
     return StreamingResponse(buffer,media_type="image/png")
+
+@app.get("/Report/drift/periodos/ARMA-tendencia")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+
+    if phi == []:
+        subtipo1 = "de medias móviles"
+        parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+           
+    elif teta ==[]:
+        subtipo1 = "autorregresivo"
+        parametros1= "La serie sigue una distribución autorregresiva con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+    else: 
+        subtipo1 ="autorregresivo y de medias móviles"
+        parametros1 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c = "+ str(c)+" y con valores de phi: phi_0 " + str(phi[0])
+        for k in range (1,len(phi)):
+           parametros1 = parametros1  + " phi_"+ str(k)+" = " + str (phi[k])
+        parametros1 = parametros1 + " y con valores de teta: teta_0 " + str(teta[0])
+        for k in range (1,len(teta)):
+           parametros1 = parametros1  + " teta_"+ str(k)+" = " + str (teta[k])
+    if s != 0:
+        subtipo1 += " estacional con amplitud de la estación: " + str(s)
+        
+    if tipo2 == 1:
+       subtipo2 = "lineal"
+       tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params2[0]) + " b = " +str (params2[1]) +" e0 = " + str(coef_error)
+    elif tipo2 ==2:
+       subtipo2 ="polinómica de grado "+ str(len(params2)-1)
+       tendencia= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params2)):
+           tendencia = tendencia + " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia = tendencia + " donde a = " + str(params2[0]) + " b[1] = " + str (params2[1])
+       for k in range (2,len(params2)):
+           tendencia = tendencia  + " b["+ str(k)+"] = " + str (params2[k])
+       tendencia = tendencia +" e0 = " + str(coef_error)
+    elif tipo2 == 3: 
+       subtipo2 ="exponencial"
+       tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params2[0]) + ", b = " + str(params2[1]) + " y e0 = " + str(coef_error)
+    elif tipo2 == 4:
+       subtipo2 = "logaritmica" 
+       tendencia = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params2[0]) + " b = " + str(params2[1]) + " e0 = " + str(coef_error)
+
+    tipos2 = "modelo de tendencia determinista con tendencia " + subtipo2
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " siguiendo un primer modelo " + subtipo1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". c: constante del modelo --> " + str(c)
+    explicacion = explicacion + ". s: amplitud de la estación --> " + str(s)
+    explicacion = explicacion + ". Desv: desviación típica del ruido blaco --> " + str(desv)
+    explicacion = explicacion + ". Tipo2: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo2)
+    explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(coef_error)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros del modelo 1, phi y teta -->"
+    if phi != []:
+        explicacion+= " phi : " + str(phi[0])
+        for k in range (1, len (phi)):
+            explicacion = explicacion+", " + str(phi[k])
+    if teta!=[]:
+        explicacion+= " teta : " + str(teta[0])
+        for k in range (1, len (teta)):
+            explicacion = explicacion+", " + str(teta[k])
+            
+    explicacion = explicacion + ". params2: parámetros de la tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params2 [0])
+    for k in range (1, len (params2)):
+        explicacion = explicacion+", " + str(params2 [k])
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1, "Parámetro del modelo 2" : tendencia, "Parámetros de la query" : explicacion }
 
 @app.get("/Datos/drift/periodos/ARMA-tendencia")
 async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
@@ -2397,8 +6575,463 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/fin/periodico-periodico")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+    
+    if tipo1==1:
+        periodicidad1 = "periodos de amplitud " + str(p1)
+    elif tipo1==2 :
+        periodicidad1 = str(p1)+ " periodos"
+        
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson. El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 - b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 + b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+    
+    if tipo2==1:
+        periodicidad2 = "periodos de amplitud " + str(p2)
+    elif tipo2==2 :
+        periodicidad2 = str(p2)+ " periodos"
+        
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 - b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 + b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
+    tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad2
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1, Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> Dist1: "+ str(dist1) +" Dist2: "+ str(dist2) 
+    explicacion += ". p1, p2: indica la amplitud del periodo (tipo=1) o la cantidad de periodos (tipo=2) --> p1: " + str(p1) +" p2: " + str(p2)
+    explicacion += ". tipo1,tipo2: por amplitud (1) / por cantidad (2) --> tipo1: "+ str(tipo1) +" tipo2: "+ str(tipo2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params2: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1[0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+        
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros del modelo 2: " : parametros2, "Parámetros de la query" : explicacion,"Media primera distribución" :mean1, "Varianza de la primera distribución" : var1, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
+
 @app.get("/Datos/drift/fin/periodico-periodico")
-async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -2413,7 +7046,7 @@ async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     return response 
 
 @app.get("/Plot/drift/fin/periodico-periodico")
-async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     plot_df(df)
@@ -2424,8 +7057,462 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
+
+@app.get("/Report/drift/periodos/periodico-periodico")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+    if tipo1==1:
+        periodicidad1 = "periodos de amplitud " + str(p1)
+    elif tipo1==2 :
+        periodicidad1 = str(p1)+ " periodos"
+        
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 - b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 + b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+    
+    if tipo2==1:
+        periodicidad2 = "periodos de amplitud " + str(p2)
+    elif tipo2==2 :
+        periodicidad2 = str(p2)+ " periodos"
+        
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 - b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 + b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
+    tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad2
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1, Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> Dist1: "+ str(dist1) +" Dist2: "+ str(dist2) 
+    explicacion += ". p1, p2: indica la amplitud del periodo (tipo=1) o la cantidad de periodos (tipo=2) --> p1: " + str(p1) +" p2: " + str(p2)
+    explicacion += ". tipo1,tipo2: por amplitud (1) / por cantidad (2) --> tipo1: "+ str(tipo1) +" tipo2: "+ str(tipo2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params2: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1[0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+        
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros del modelo 2: " : parametros2, "Parámetros de la query" : explicacion,"Media primera distribución" :mean1, "Varianza de la primera distribución" : var1, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
 @app.get("/Datos/drift/periodos/periodico-periodico")
-async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     
@@ -2442,7 +7529,7 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo
 
     
 @app.get("/Plot/drift/periodos/periodico-periodico")
-async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2452,8 +7539,459 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
+
+
+@app.get("/Report/drift/fin/periodico-distr")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+
+
+    if tipo1==1:
+        periodicidad1 = "periodos de amplitud " + str(p1)
+    elif tipo1==2 :
+        periodicidad1 = str(p1)+ " periodos"
+        
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson. El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 - b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 + b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+        
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 - b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 + b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego una distribucion "+ subtipo2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1, Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> Dist1: "+ str(dist1) +" Dist2: "+ str(dist2) 
+    explicacion += ". p1 : indica la amplitud del periodo (tipo=1) o la cantidad de periodos (tipo=2) --> p1: " + str(p1) 
+    explicacion += ". tipo1 : por amplitud (1) / por cantidad (2) --> tipo1: "+ str(tipo1)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params2: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1[0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+        
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion,"Media primera distribución" :mean1, "Varianza de la primera distribución" : var1, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
+
 @app.get("/Datos/drift/fin/periodico-distr")
-async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -2470,7 +8008,7 @@ async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
 
 
 @app.get("/Plot/drift/fin/periodico-distr")
-async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
 
@@ -2482,8 +8020,458 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
+
+
+@app.get("/Report/drift/periodos/periodico-distr")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+
+    if tipo1==1:
+        periodicidad1 = "periodos de amplitud " + str(p1)
+    elif tipo1==2 :
+        periodicidad1 = str(p1)+ " periodos"
+        
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson. El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 - b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 + b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+        
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ " y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 - b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo2: y_i = y_i-1 + b, y_0 = a donde a = params2[0] y b = params2[1]"
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego una distribucion "+ subtipo2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Dist1, Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> Dist1: "+ str(dist1) +" Dist2: "+ str(dist2) 
+    explicacion += ". p1 : indica la amplitud del periodo (tipo=1) o la cantidad de periodos (tipo=2) --> p1: " + str(p1) 
+    explicacion += ". tipo1 : por amplitud (1) / por cantidad (2) --> tipo1: "+ str(tipo1)
+    explicacion = explicacion + ". Columna: nombre de las columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params2: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1[0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+        
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion,"Media primera distribución" :mean1, "Varianza de la primera distribución" : var1, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
+
 @app.get("/Datos/drift/periodos/periodico-distr")
-async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
     
@@ -2499,7 +8487,7 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo
     return response 
     
 @app.get("/Plot/drift/periodos/periodico-distr")
-async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, distr2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
     plot_df(df)
@@ -2510,8 +8498,278 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
+
+@app.get("/Report/drift/fin/periodico-ARMA")
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    if tipo1==1:
+        periodicidad1 = "periodos de amplitud " + str(p1)
+    elif tipo1==2 :
+        periodicidad1 = str(p1)+ " periodos"
+        
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 - b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 + b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+    if phi2 == []:
+        subtipo2 = "de medias móviles"
+        parametros2= "La serie sigue una distribución de medias móviles con constante c2 = "+ str(c2)+" y con valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+           
+    elif teta2 ==[]:
+        subtipo2 = "autorregresivo"
+        parametros2= "La serie sigue una distribución autorregresiva con constante c2 = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+    else: 
+        subtipo2 ="autorregresivo y de medias móviles"
+        parametros2 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c2 = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+        parametros2 = parametros2 + " y con valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+    if s2 != 0:
+        subtipo2 += " estacional con amplitud de la estación: " + str(s2)
+        
+    tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un modelo "+ subtipo2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". dist1: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist1) 
+    explicacion += ". p1: indica la amplitud del periodo (tipo1 1) o la cantidad de periodos (tipo1 2) --> " + str(p1)
+    explicacion += ". tipo1: por amplitud (1) / por cantidad (2) --> "+ str(tipo1)
+    explicacion = explicacion + ". c2: constante del modelo 2--> " + str(c2)
+    explicacion = explicacion + ". s2: amplitud de la estación del modelo 2--> " + str(s2)
+    explicacion = explicacion + ". Desv2: desviación típica del ruido blanco del modelo 2--> " + str(desv2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". Params: parámetros del modelo 2, phi y teta -->"
+    if phi2 != []:
+        explicacion+= " phi : " + str(phi2[0])
+        for k in range (1, len (phi2)):
+            explicacion = explicacion+", " + str(phi2[k])
+    if teta2!=[]:
+        explicacion+= " teta : " + str(teta2[0])
+        for k in range (1, len (teta2)):
+            explicacion = explicacion+", " + str(teta2[k])  
+
+
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion,"Media primera distribución" :mean1, "Varianza de la primera distribución" : var1}
+
 @app.get("/Datos/drift/fin/periodico-ARMA")
-async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -2526,7 +8784,7 @@ async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     return response
 
 @app.get("/Plot/drift/fin/periodico-ARMA")
-async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2536,8 +8794,277 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
+
+@app.get("/Report/drift/periodos/periodico-ARMA")
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    if tipo1==1:
+        periodicidad1 = "periodos de amplitud " + str(p1)
+    elif tipo1==2 :
+        periodicidad1 = str(p1)+ " periodos"
+        
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 - b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 + b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+    if phi2 == []:
+        subtipo2 = "de medias móviles"
+        parametros2= "La serie sigue una distribución de medias móviles con constante c2 = "+ str(c2)+" y con valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+           
+    elif teta2 ==[]:
+        subtipo2 = "autorregresivo"
+        parametros2= "La serie sigue una distribución autorregresiva con constante c2 = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+    else: 
+        subtipo2 ="autorregresivo y de medias móviles"
+        parametros2 = "La serie sigue una distribución autorregresiva y de medias móviles con constante c2 = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+        parametros2 = parametros2 + " y con valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+    if s2 != 0:
+        subtipo2 += " estacional con amplitud de la estación: " + str(s2)
+        
+    tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un modelo "+ subtipo2
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". dist1: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist1) 
+    explicacion += ". p1: indica la amplitud del periodo (tipo1 1) o la cantidad de periodos (tipo1 2) --> " + str(p1)
+    explicacion += ". tipo1: por amplitud (1) / por cantidad (2) --> "+ str(tipo1)
+    explicacion = explicacion + ". c2: constante del modelo 2--> " + str(c2)
+    explicacion = explicacion + ". s2: amplitud de la estación del modelo 2--> " + str(s2)
+    explicacion = explicacion + ". Desv2: desviación típica del ruido blanco del modelo 2--> " + str(desv2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". Params: parámetros del modelo 2, phi y teta -->"
+    if phi2 != []:
+        explicacion+= " phi : " + str(phi2[0])
+        for k in range (1, len (phi2)):
+            explicacion = explicacion+", " + str(phi2[k])
+    if teta2!=[]:
+        explicacion+= " teta : " + str(teta2[0])
+        for k in range (1, len (teta2)):
+            explicacion = explicacion+", " + str(teta2[k])  
+
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion,"Media primera distribución" :mean1, "Varianza de la primera distribución" : var1}
+
 @app.get("/Datos/drift/periodos/periodico-ARMA")
-async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
     
@@ -2553,7 +9080,7 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo
     return response
 
 @app.get("/Plot/drift/periodos/periodico-ARMA")
-async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
     plot_df(df)
@@ -2563,9 +9090,270 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
     plt.close()
 
     return StreamingResponse(buffer,media_type="image/png")
+
+@app.get("/Report/drift/fin/periodico-tendencia")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+
+    if tipo1==1:
+        periodicidad1 = "periodos de amplitud " + str(p1)
+    elif tipo1==2 :
+        periodicidad1 = str(p1)+ " periodos"
+        
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 - b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 + b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
     
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+    if tipo2 == 1:
+       subtipo2 = "lineal"
+       tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params2[0]) + " b = " +str (params2[1]) +" e0 = " + str(coef_error)
+    elif tipo2 ==2:
+       subtipo2 ="polinómica de grado "+ str(len(params2)-1)
+       tendencia= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params2)):
+           tendencia = tendencia + " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia = tendencia + " donde a = " + str(params2[0]) + " b[1] = " + str (params2[1])
+       for k in range (2,len(params2)):
+           tendencia = tendencia  + " b["+ str(k)+"] = " + str (params2[k])
+       tendencia = tendencia +" e0 = " + str(coef_error)
+    elif tipo2 == 3: 
+       subtipo2 ="exponencial"
+       tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params2[0]) + ", b = " + str(params2[1]) + " y e0 = " + str(coef_error)
+    elif tipo2 == 4:
+       subtipo2 = "logaritmica" 
+       tendencia = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params2[0]) + " b = " + str(params2[1]) + " e0 = " + str(coef_error)
+    
+       
+    tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un modelo de tendencia determinista con tendencia "+subtipo2 
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". dist1: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist1) 
+    explicacion += ". p1: indica la amplitud del periodo (tipo1 1) o la cantidad de periodos (tipo1 2) --> " + str(p1)
+    explicacion += ". tipo1: por amplitud (1) / por cantidad (2) --> "+ str(tipo1)
+    explicacion = explicacion + ". Tipo2: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo2)
+    explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(coef_error)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". params2: parámetros de la tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params2 [0])
+    for k in range (1, len (params2)):
+        explicacion = explicacion+", " + str(params2 [k])
+
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda distribución: " : tendencia, "Parámetros de la query" : explicacion,"Media primera distribución" :mean1, "Varianza de la primera distribución" : var1}
+
+
 @app.get("/Datos/drift/fin/periodico-tendencia")
-async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -2580,7 +9368,7 @@ async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     return response 
 
 @app.get("/Plot/drift/fin/periodico-tendencia")
-async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -2590,8 +9378,270 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/periodos/periodico-tendencia")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+
+    if tipo1==1:
+        periodicidad1 = "periodos de amplitud " + str(p1)
+    elif tipo1==2 :
+        periodicidad1 = str(p1)+ " periodos"
+        
+    if dist1 == 1 :
+        subtipo1 = "normal"
+        parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
+        mean1 = params1[0]
+        var1 = params1[1] **2
+    elif dist1 ==2 :
+        subtipo1 = "binomial"
+        parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
+        if len(params1)==2:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 3:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[2])
+        mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
+        if len (params1) == 3 :
+           mean1 += params1[2]
+    elif dist1== 3 :
+        subtipo1 = "poisson"
+        parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1= poisson.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+           
+    elif dist1 == 4 :
+        subtipo1 = "geométrica"
+        parametros1 = "Modelo con p = params1[0] donde p = probabilidad de éxito. El valor de p es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
+        if len(params1)==1:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 2:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[1])
+        mean1, var1 = geom.stats(params1[0], moments='mv')
+        if len (params1) == 2 :
+           mean1 += params1[1]
+            
+    elif dist1 == 5:
+        subtipo1 = "hipergeométrica"
+        parametros1 = "Modelo con M = params1[0], n = params1[1] y N = params1[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params1[0])+", el valor de n es " + str(params1[1])+" y el valor de N es " + str(params1[2])+". Adicionalmente, se puede añadir un desplazamiento params1[3] : "
+        if len(params1)==3:
+            parametros1 += "en este caso no hay desplazamiento"
+        elif len(params1) == 4:
+            parametros1 += "en este caso es desplazamiento es de " + str(params1[3])
+        mean1, var1= hypergeom.stats(params1[0], params1[1],params1[2], moments='mv')
+        if len (params1) == 4 :
+           mean1 += params1[3]
+            
+    elif dist1 == 6: 
+        subtipo1 ="constante"
+        parametros1 = "Modelo con constante = " + str(params1[0])
+        mean1 = params1[0]
+        var1 = 0
+        
+    elif dist1 == 7:
+        subtipo1 = "uniforme"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params1)==0:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= uniform.stats( moments='mv')
+        if len (params1) == 1 :
+           mean1 = mean1 + params1[0]
+        elif len (params1) == 2:
+            mean1 = mean1* params1[1]
+            mean1 += params1[0]
+            var1 = params1[1]**2/12
+            
+    elif dist1 == 8:
+        subtipo1 = "lognormal"
+        parametros1 = "Modelo con s = params1[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params1)==1:
+            parametros1 += " en este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += " en este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= lognorm.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = lognorm.mean(params1[0], loc=params1[1])
+            var1 = lognorm.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = lognorm.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = lognorm.var(params1[0], loc=params1[1], scale=params1[2])
+            
+    elif dist1 == 9: 
+        subtipo1 = "exponencial"
+        parametros1 = "Modelo con parametros opcionales: despl = params1[0] y escala = params1[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params1)==0:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 1:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0])
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[0]) +" y la escala de "+str(params1[1])
+        mean1, var1= expon.stats( moments='mv')
+        if len (params1) == 1 :
+            mean1 = expon.mean(loc=params1[0])
+        elif len (params1) == 2:
+            mean1 = expon.mean(loc=params1[0],scale=params1[1])
+            var1 = expon.var(scale=params1[1])
+            
+    elif dist1 == 10: 
+        subtipo1 = "gamma"
+        parametros1 = "Modelo con a = params1[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= gamma.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = gamma.mean(params1[0], loc=params1[1])
+            var1 = gamma.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = gamma.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = gamma.var(params1[0], scale=params1[2])
+            
+    elif dist1 == 11: 
+        subtipo1 = "beta"
+        parametros1 = "Modelo con a = params1[0] y b = params1[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params1[0])+ "y el de b es "+ str(params1[1])+ ". Además, posee los parametros opcionales: despl = params1[] y escala = params1[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params1)==2:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2])
+        elif len(params1) == 4:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[2]) +" y la escala de "+str(params1[3])
+        mean1, var1= beta.stats(params1[0],params1[1], moments='mv')
+        if len (params1) == 3:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2])
+            var1 = beta.var(params1[0],params1[1], loc = params1[2])
+        elif len (params1) == 4:
+            mean1 = beta.mean(params1[0],params1[1], loc=params1[2],scale=params1[3])
+            var1 = beta.var(params1[0],params1[1], loc=params1[2], scale=params1[3])
+            
+    elif dist1 == 12: 
+        subtipo1 = "chi cuadrado"
+        parametros1 = "Modelo con df = params1[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params1[0]) +". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= chi2.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = chi2.mean(params1[0], loc=params1[1])
+            var1 = chi2.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = chi2.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = chi2.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 13: 
+        subtipo1 = "t-student"
+        parametros1 = "Modelo con v = params1[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= t.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = t.mean(params1[0], loc=params1[1])
+            var1 = t.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = t.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = t.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 14: 
+        subtipo1 = "pareto"
+        parametros1 = "Modelo con b = params1[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params1[0])+ ". Además, posee los parametros opcionales: despl = params1[1] y escala = params1[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params1)==1:
+            parametros1 += "En este caso no hay desplazamiento ni escala "
+        elif len(params1) == 2:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1])
+        elif len(params1) == 3:
+            parametros1 += "En este caso el desplazamiento es de " + str(params1[1]) +" y la escala de "+str(params1[2])
+        mean1, var1= pareto.stats(params1[0], moments='mv')
+        if len (params1) == 2:
+            mean1 = pareto.mean(params1[0], loc=params1[1])
+            var1 = pareto.var(params1[0], loc = params1[1])
+        elif len (params1) == 3:
+            mean1 = pareto.mean(params1[0], loc=params1[1],scale=params1[2])
+            var1 = pareto.var(params1[0], loc=params1[1],scale=params1[2])
+            
+    elif dist1 == 15:
+        subtipo1 = "linealmente decreciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 - b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+            
+    elif dist1 == 16:
+        subtipo1 = "linealmente creciente"
+        parametros1 = "Modelo de tipo1: y_i = y_i-1 + b, y_0 = a donde a = params1[0] y b = params1[1]"
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+    
+    elif dist1 == 17:
+        subtipo1 = "random"
+        parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
+        mean1 = "Información no relevante"
+        var1 = "Información no relevante"
+
+    if tipo2 == 1:
+       subtipo2 = "lineal"
+       tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params2[0]) + " b = " +str (params2[1]) +" e0 = " + str(coef_error)
+    elif tipo2 ==2:
+       subtipo2 ="polinómica de grado "+ str(len(params2)-1)
+       tendencia= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params2)):
+           tendencia = tendencia + " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia = tendencia + " donde a = " + str(params2[0]) + " b[1] = " + str (params2[1])
+       for k in range (2,len(params2)):
+           tendencia = tendencia  + " b["+ str(k)+"] = " + str (params2[k])
+       tendencia = tendencia +" e0 = " + str(coef_error)
+    elif tipo2 == 3: 
+       subtipo2 ="exponencial"
+       tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params2[0]) + ", b = " + str(params2[1]) + " y e0 = " + str(coef_error)
+    elif tipo2 == 4:
+       subtipo2 = "logaritmica" 
+       tendencia = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params2[0]) + " b = " + str(params2[1]) + " e0 = " + str(coef_error)
+    
+       
+    tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un modelo de tendencia determinista con tendencia "+subtipo2 
+    explicacion = "Inicio: fecha de inicio --> " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". dist1: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist1) 
+    explicacion += ". p1: indica la amplitud del periodo (tipo1 1) o la cantidad de periodos (tipo1 2) --> " + str(p1)
+    explicacion += ". tipo1: por amplitud (1) / por cantidad (2) --> "+ str(tipo1)
+    explicacion = explicacion + ". Tipo2: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo2)
+    explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(coef_error)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". params1: parámetros de la primera distribución --> "
+    if len(params1)>0: 
+        explicacion +=str(params1 [0])
+        for k in range (1, len (params1)):
+            explicacion = explicacion+", " + str(params1[k])
+    explicacion = explicacion + ". params2: parámetros de la tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params2 [0])
+    for k in range (1, len (params2)):
+        explicacion = explicacion+", " + str(params2 [k])
+
+    return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda tendencia: " : tendencia, "Parámetros de la query" : explicacion,"Media primera distribución" :mean1, "Varianza de la primera distribución" : var1}
+
+
+
 @app.get("/Datos/drift/periodos/periodico-tendencia")
-async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -2606,7 +9656,7 @@ async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo
     return response
 
 @app.get("/Plot/drift/periodos/periodico-tendencia")
-async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     plot_df(df)
@@ -2617,7 +9667,70 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
-    
+@app.get("/Report/drift/fin/tendencia-tendencia")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+
+    if tipo1 == 1:
+       subtipo1 = "lineal"
+       tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + " b = " +str (params1[1]) +" e0 = " + str(coef_error1)
+    elif tipo1 ==2:
+       subtipo1 ="polinómica de grado "+ str(len(params1)-1)
+       tendencia1= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1+ " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia1 = tendencia1 +  " donde a = " + str(params1[0]) + " b[1] = " + str (params1[1])
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1  + " b["+ str(k)+"] = " + str (params1[k])
+       tendencia1 = tendencia1 +" e0 = " + str(coef_error1)
+    elif tipo1 == 3: 
+       subtipo1 ="exponencial"
+       tendencia1 = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params1[0]) + ", b = " + str(params1[1]) + " y e0 = " + str(coef_error1)
+    elif tipo1 == 4:
+       subtipo1 = "logaritmica" 
+       tendencia1 = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params1[0]) + " b = " + str(params1[1]) + " e0 = " + str(coef_error1)
+
+    if tipo2 == 1:
+       subtipo2 = "lineal"
+       tendencia2= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params2[0]) + " b = " +str (params2[1]) +" e0 = " + str(coef_error2)
+    elif tipo2 ==2:
+       subtipo2 ="polinómica de grado "+ str(len(params2)-1)
+       tendencia2= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params2)):
+           tendencia2 = tendencia2+ " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia2 = tendencia2 +  " donde a = " + str(params2[0]) + " b[1] = " + str (params2[1])
+       for k in range (2,len(params2)):
+           tendencia2 = tendencia2  + " b["+ str(k)+"] = " + str (params2[k])
+       tendencia2 = tendencia2 +" e0 = " + str(coef_error2)
+    elif tipo2 == 3: 
+       subtipo2 ="exponencial"
+       tendencia2 = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params2[0]) + ", b = " + str(params2[1]) + " y e0 = " + str(coef_error2)
+    elif tipo2 == 4:
+       subtipo2 = "logaritmica" 
+       tendencia2 = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params2[0]) + " b = " + str(params2[1]) + " e0 = " + str(coef_error2)
+
+    tipos1 = "modelo de tendencia determinista con tendencia " + subtipo1
+    tipos2 = "modelo de tendencia determinista con tendencia " + subtipo2
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " siguiendo un primer " + tipos1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". Tipo1, Tipo2: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> tipo1: " + str(tipo1) + " tipo2: " + str(tipo2)
+    explicacion = explicacion + ". coef_error1, coef_error2: coeficientes de errores de ambas tendencias (e0) --> coef_error1: " + str(coef_error1)+ " coef_error2: " + str(coef_error2)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". params1: parámetros de la primera tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params1[0])
+    for k in range (1, len (params1)):
+        explicacion = explicacion+", " + str(params1[k])       
+    explicacion = explicacion + ". params2: parámetros de la segunda tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params2 [0])
+    for k in range (1, len (params2)):
+        explicacion = explicacion+", " + str(params2 [k])
+
+    return {"Tipo": tipos, "Parámetro de la primera tendencia" : tendencia1,"Parámetros de la segunda tendencia: " : tendencia2, "Parámetros de la query" : explicacion}
+  
+   
+ 
 @app.get("/Datos/drift/fin/tendencia-tendencia")
 async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
@@ -2645,6 +9758,68 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/periodos/tendencia-tendencia")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+
+    if tipo1 == 1:
+       subtipo1 = "lineal"
+       tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + " b = " +str (params1[1]) +" e0 = " + str(coef_error1)
+    elif tipo1 ==2:
+       subtipo1 ="polinómica de grado "+ str(len(params1)-1)
+       tendencia1= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1+ " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia1 = tendencia1 +  " donde a = " + str(params1[0]) + " b[1] = " + str (params1[1])
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1  + " b["+ str(k)+"] = " + str (params1[k])
+       tendencia1 = tendencia1 +" e0 = " + str(coef_error1)
+    elif tipo1 == 3: 
+       subtipo1 ="exponencial"
+       tendencia1 = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params1[0]) + ", b = " + str(params1[1]) + " y e0 = " + str(coef_error1)
+    elif tipo1 == 4:
+       subtipo1 = "logaritmica" 
+       tendencia1 = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params1[0]) + " b = " + str(params1[1]) + " e0 = " + str(coef_error1)
+
+    if tipo2 == 1:
+       subtipo2 = "lineal"
+       tendencia2= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params2[0]) + " b = " +str (params2[1]) +" e0 = " + str(coef_error2)
+    elif tipo2 ==2:
+       subtipo2 ="polinómica de grado "+ str(len(params2)-1)
+       tendencia2= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params2)):
+           tendencia2 = tendencia2+ " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia2 = tendencia2 +  " donde a = " + str(params2[0]) + " b[1] = " + str (params2[1])
+       for k in range (2,len(params2)):
+           tendencia2 = tendencia2  + " b["+ str(k)+"] = " + str (params2[k])
+       tendencia2 = tendencia2 +" e0 = " + str(coef_error2)
+    elif tipo2 == 3: 
+       subtipo2 ="exponencial"
+       tendencia2 = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params2[0]) + ", b = " + str(params2[1]) + " y e0 = " + str(coef_error2)
+    elif tipo2 == 4:
+       subtipo2 = "logaritmica" 
+       tendencia2 = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params2[0]) + " b = " + str(params2[1]) + " e0 = " + str(coef_error2)
+
+    tipos1 = "modelo de tendencia determinista con tendencia " + subtipo1
+    tipos2 = "modelo de tendencia determinista con tendencia " + subtipo2
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " siguiendo un primer " + tipos1 + " y luego un "+ tipos2
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". Tipo1, Tipo2: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> tipo1: " + str(tipo1) + " tipo2: " + str(tipo2)
+    explicacion = explicacion + ". coef_error1, coef_error2: coeficientes de errores de ambas tendencias (e0) --> coef_error1: " + str(coef_error1)+ " coef_error2: " + str(coef_error2)
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". params1: parámetros de la primera tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params1[0])
+    for k in range (1, len (params1)):
+        explicacion = explicacion+", " + str(params1[k])       
+    explicacion = explicacion + ". params2: parámetros de la segunda tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params2 [0])
+    for k in range (1, len (params2)):
+        explicacion = explicacion+", " + str(params2 [k])
+
+    return {"Tipo": tipos, "Parámetro de la primera tendencia" : tendencia1,"Parámetros de la segunda tendencia: " : tendencia2, "Parámetros de la query" : explicacion}
+  
 @app.get("/Datos/drift/periodos/tendencia-tendencia")
 async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
 
@@ -2672,6 +9847,258 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/fin/tendencia-distr")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,dist2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+
+    if tipo1 == 1:
+       subtipo1 = "lineal"
+       tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + " b = " +str (params1[1]) +" e0 = " + str(coef_error1)
+    elif tipo1 ==2:
+       subtipo1 ="polinómica de grado "+ str(len(params1)-1)
+       tendencia1= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1+ " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia1 = tendencia1 +  " donde a = " + str(params1[0]) + " b[1] = " + str (params1[1])
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1  + " b["+ str(k)+"] = " + str (params1[k])
+       tendencia1 = tendencia1 +" e0 = " + str(coef_error1)
+    elif tipo1 == 3: 
+       subtipo1 ="exponencial"
+       tendencia1 = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params1[0]) + ", b = " + str(params1[1]) + " y e0 = " + str(coef_error1)
+    elif tipo1 == 4:
+       subtipo1 = "logaritmica" 
+       tendencia1 = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params1[0]) + " b = " + str(params1[1]) + " e0 = " + str(coef_error1)
+
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+        
+    
+    tipos1 = "modelo de tendencia determinista con tendencia " + subtipo1
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " siguiendo un primer " + tipos1 + " y luego una distribución "+ subtipo2
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". Tipo1: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> tipo1: " + str(tipo1)
+    explicacion = explicacion + ". coef_error1: coeficientes de errores de e la tendencia (e0) --> coef_error1: " + str(coef_error1)
+    explicacion = explicacion + ". Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist2) 
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". params1: parámetros de la primera tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params1[0])
+    for k in range (1, len (params1)):
+        explicacion = explicacion+", " + str(params1[k])    
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+    return {"Tipo": tipos, "Parámetro del modelo 1" : tendencia1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
+
 @app.get("/Datos/drift/fin/tendencia-distr")
 async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
 
@@ -2698,6 +10125,258 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     plt.close()
 
     return StreamingResponse(buffer,media_type="image/png")
+
+@app.get("/Report/drift/periodos/tendencia-distr")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,dist2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+
+    if tipo1 == 1:
+       subtipo1 = "lineal"
+       tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + " b = " +str (params1[1]) +" e0 = " + str(coef_error1)
+    elif tipo1 ==2:
+       subtipo1 ="polinómica de grado "+ str(len(params1)-1)
+       tendencia1= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1+ " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia1 = tendencia1 +  " donde a = " + str(params1[0]) + " b[1] = " + str (params1[1])
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1  + " b["+ str(k)+"] = " + str (params1[k])
+       tendencia1 = tendencia1 +" e0 = " + str(coef_error1)
+    elif tipo1 == 3: 
+       subtipo1 ="exponencial"
+       tendencia1 = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params1[0]) + ", b = " + str(params1[1]) + " y e0 = " + str(coef_error1)
+    elif tipo1 == 4:
+       subtipo1 = "logaritmica" 
+       tendencia1 = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params1[0]) + " b = " + str(params1[1]) + " e0 = " + str(coef_error1)
+
+    if dist2 == 1 :
+        subtipo2 = "normal"
+        parametros2 ="Modelo con media = params2[0] y desviación típica = params2[1]. La media es " + str(params2[0])+ " y la desviación típica es " + str(params2[1])
+        mean2 = params2[0]
+        var2 = params2[1] **2
+    elif dist2 ==2 :
+        subtipo2 = "binomial"
+        parametros2 = "Modelo con n = params2[0] y p = params2[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params2[0])+" y el valor de p es "+str(params2[1])+ ". Adicionalmente, se puede añadir un desplazamiento params2[2] : "
+        if len(params2)==2:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 3:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[2])
+        mean2, var2 = binom.stats(params2[0], params2[1], moments='mv')
+        if len (params2) == 3 :
+           mean2 += params2[2]
+    elif dist2== 3 :
+        subtipo2 = "poisson"
+        parametros2 = "Modelo con mu = params2[0] donde mu = parámetro de poisson . El valor de mu es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2= poisson.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+           
+    elif dist2 == 4 :
+        subtipo2 = "geométrica"
+        parametros2 = "Modelo con p = params2[0] donde p = probabilidad de éxito. El valor de p es " + str(params2[0])+". Adicionalmente, se puede añadir un desplazamiento params2[1] : "
+        if len(params2)==1:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 2:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[1])
+        mean2, var2 = geom.stats(params2[0], moments='mv')
+        if len (params2) == 2 :
+           mean2 += params2[1]
+            
+    elif dist2 == 5:
+        subtipo2 = "hipergeométrica"
+        parametros2 = "Modelo con M = params2[0], n = params2[1] y N = params2[2], donde M = tamaño población, n = exitosos en la población y N = tamaño muesta. El valor de M es " + str(params2[0])+", el valor de n es " + str(params2[1])+" y el valor de N es " + str(params2[2])+". Adicionalmente, se puede añadir un desplazamiento params2[3] : "
+        if len(params2)==3:
+            parametros2 += "en este caso no hay desplazamiento"
+        elif len(params2) == 4:
+            parametros2 += "en este caso es desplazamiento es de " + str(params2[3])
+        mean2, var2= hypergeom.stats(params2[0], params2[1],params2[2], moments='mv')
+        if len (params2) == 4 :
+           mean2 += params2[3]
+            
+    elif dist2 == 6: 
+        subtipo2 ="constante"
+        parametros2 = "Modelo con constante = " + str(params2[0])
+        mean2 = params2[0]
+        var2 = 0
+        
+    elif dist2 == 7:
+        subtipo2 = "uniforme"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución uniforme y obteniendo una distribucion uniforme [despl,despl+escala],"
+        if len(params2)==0:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= uniform.stats( moments='mv')
+        if len (params2) == 1 :
+           mean2 = mean2 + params2[0]
+        elif len (params2) == 2:
+            mean2 = mean2* params2[1]
+            mean2 += params2[0]
+            var2 = params2[1]**2/12
+            
+    elif dist2 == 8:
+        subtipo2 = "lognormal"
+        parametros2 = "Modelo con s = params2[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución "
+        if len(params2)==1:
+            parametros2 += " en este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += " en este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= lognorm.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = lognorm.mean(params2[0], loc=params2[1])
+            var2 = lognorm.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = lognorm.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = lognorm.var(params2[0], loc=params2[1], scale=params2[2])
+            
+    elif dist2 == 9: 
+        subtipo2 = "exponencial"
+        parametros2 = "Modelo con parametros opcionales: despl = params2[0] y escala = params2[1], donde despl= desplazamiento de la distribución exponencial y escala = escalado de la distribución. "
+        if len(params2)==0:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 1:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0])
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[0]) +" y la escala de "+str(params2[1])
+        mean2, var2= expon.stats( moments='mv')
+        if len (params2) == 1 :
+            mean2 = expon.mean(loc=params2[0])
+        elif len (params2) == 2:
+            mean2 = expon.mean(loc=params2[0],scale=params2[1])
+            var2 = expon.var(scale=params2[1])
+            
+    elif dist2 == 10: 
+        subtipo2 = "gamma"
+        parametros2 = "Modelo con a = params2[0] donde a es el parámetro de la distribución gamma. El valor de a es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución gamma y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= gamma.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = gamma.mean(params2[0], loc=params2[1])
+            var2 = gamma.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = gamma.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = gamma.var(params2[0], scale=params2[2])
+            
+    elif dist2 == 11: 
+        subtipo2 = "beta"
+        parametros2 = "Modelo con a = params2[0] y b = params2[1] donde a y b son los parámetros de la distribución beta. El valor de a es "+ str(params2[0])+ "y el de b es "+ str(params2[1])+ ". Además, posee los parametros opcionales: despl = params2[] y escala = params2[1], donde despl= desplazamiento de la distribución beta y escala = escalado de la distribución. "
+        if len(params2)==2:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2])
+        elif len(params2) == 4:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[2]) +" y la escala de "+str(params2[3])
+        mean2, var2= beta.stats(params2[0],params2[1], moments='mv')
+        if len (params2) == 3:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2])
+            var2 = beta.var(params2[0],params2[1], loc = params2[2])
+        elif len (params2) == 4:
+            mean2 = beta.mean(params2[0],params2[1], loc=params2[2],scale=params2[3])
+            var2 = beta.var(params2[0],params2[1], loc=params2[2], scale=params2[3])
+            
+    elif dist2 == 12: 
+        subtipo2 = "chi cuadrado"
+        parametros2 = "Modelo con df = params2[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params2[0]) +". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= chi2.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = chi2.mean(params2[0], loc=params2[1])
+            var2 = chi2.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = chi2.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = chi2.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 13: 
+        subtipo2 = "t-student"
+        parametros2 = "Modelo con v = params2[0] donde v es el parámetro de la distribución t-student. El valor de t es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= t.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = t.mean(params2[0], loc=params2[1])
+            var2 = t.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = t.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = t.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 14: 
+        subtipo2 = "pareto"
+        parametros2 = "Modelo con b = params2[0] donde b es el parámetro de la distribución pareto. El valor de b es "+ str(params2[0])+ ". Además, posee los parametros opcionales: despl = params2[1] y escala = params2[2], donde despl= desplazamiento de la distribución t-student y escala = escalado de la distribución. "
+        if len(params2)==1:
+            parametros2 += "En este caso no hay desplazamiento ni escala "
+        elif len(params2) == 2:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1])
+        elif len(params2) == 3:
+            parametros2 += "En este caso el desplazamiento es de " + str(params2[1]) +" y la escala de "+str(params2[2])
+        mean2, var2= pareto.stats(params2[0], moments='mv')
+        if len (params2) == 2:
+            mean2 = pareto.mean(params2[0], loc=params2[1])
+            var2 = pareto.var(params2[0], loc = params2[1])
+        elif len (params2) == 3:
+            mean2 = pareto.mean(params2[0], loc=params2[1],scale=params2[2])
+            var2 = pareto.var(params2[0], loc=params2[1],scale=params2[2])
+            
+    elif dist2 == 15:
+        subtipo2 = "linealmente decreciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+            
+    elif dist2 == 16:
+        subtipo2 = "linealmente creciente"
+        parametros2 = "Modelo de tipo: y_i = y_i-1 + b, y_0 = a donde a = params2[0] = "+ str(params2[0])+" y b = params2[1] = "+ str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+    
+    elif dist2 == 17:
+        subtipo2 = "random"
+        parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
+        mean2 = "Información no relevante"
+        var2 = "Información no relevante"
+        
+    
+    tipos1 = "modelo de tendencia determinista con tendencia " + subtipo1
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " siguiendo un primer " + tipos1 + " y luego una distribución "+ subtipo2
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". Tipo1: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> tipo1: " + str(tipo1)
+    explicacion = explicacion + ". coef_error1: coeficientes de errores de e la tendencia (e0) --> coef_error1: " + str(coef_error1)
+    explicacion = explicacion + ". Dist2: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta (11), chi cuadrado (12), t-student(13), pareto (14), linealmente decreciente(15), linealmente creciente (16) y random (17) --> "+ str(dist2) 
+    explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". params1: parámetros de la primera tendencia, a = params2 [0] y b[k] = params2[k] --> "+str(params1[0])
+    for k in range (1, len (params1)):
+        explicacion = explicacion+", " + str(params1[k])    
+    explicacion = explicacion + ". Params2: parámetros de la segunda distribución --> "
+    if len(params2)>0: 
+        explicacion +=str(params2 [0])
+        for k in range (1, len (params2)):
+            explicacion = explicacion+", " + str(params2[k])
+    return {"Tipo": tipos, "Parámetro del modelo 1" : tendencia1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
 
 
 @app.get("/Datos/drift/periodos/tendencia-distr")
@@ -2727,7 +10406,85 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
+@app.get("/Report/drift/fin/tendencia-ARMA")
+async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
+    if tipo1 == 1:
+       subtipo1 = "lineal"
+       tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + " b = " +str (params1[1]) +" e0 = " + str(coef_error1)
+    elif tipo1 ==2:
+       subtipo1 ="polinómica de grado "+ str(len(params1)-1)
+       tendencia1= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1+ " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia1 = tendencia1 +  " donde a = " + str(params1[0]) + " b[1] = " + str (params1[1])
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1  + " b["+ str(k)+"] = " + str (params1[k])
+       tendencia1 = tendencia1 +" e0 = " + str(coef_error1)
+    elif tipo1 == 3: 
+       subtipo1 ="exponencial"
+       tendencia1 = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params1[0]) + ", b = " + str(params1[1]) + " y e0 = " + str(coef_error1)
+    elif tipo1 == 4:
+       subtipo1 = "logaritmica" 
+       tendencia1 = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params1[0]) + " b = " + str(params1[1]) + " e0 = " + str(coef_error1)
+       
+       
+    if phi2 == []:
+        subtipo2 = "de medias móviles"
+        parametros2= "La serie sigue una distribuc2ión de medias móviles con constante c2 = "+ str(c2)+" y con valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+           
+    elif teta2 ==[]:
+        subtipo2 = "autorregresivo"
+        parametros2= "La serie sigue una distribuc2ión autorregresiva con constante c2 = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+    else: 
+        subtipo2 ="autorregresivo y de medias móviles"
+        parametros2 = "La serie sigue una distribuc2ión autorregresiva y de medias móviles con constante c2 = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+        parametros2 = parametros2 + " y c2on valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+    if s2 != 0:
+        subtipo2 += " estac2ional c2on amplitud de la estac2ión: " + str(s2) 
+        
+    tipos1 = "modelo de tendencia determinista con tendencia " + subtipo1
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " siguiendo un primer modelo " + tipos1 + " y luego un modelo "+ subtipo2
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". tipo1: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo1)
+    explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(coef_error1)
+    explicacion = explicacion + ". c2: constante del modelo 2--> " + str(c2)
+    explicacion = explicacion + ". s2: amplitud de la estación del modelo 2 --> " + str(s2)
+    explicacion = explicacion + ". Desv2: desviación típica del ruido blanco del modelo 2--> " + str(desv2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". params1: parámetros de la tendencia, a = params1 [0] y b[k] = params1[k] --> "+str(params1 [0])
+    for k in range (1, len (params1)):
+        explicacion = explicacion+", " + str(params1 [k])
+    explicacion = explicacion + ". Params: parámetros del modelo 1, phi y teta -->"
+    if phi2 != []:
+        explicacion+= " phi : " + str(phi2[0])
+        for k in range (1, len (phi2)):
+            explicacion = explicacion+", " + str(phi2[k])
+    if teta2!=[]:
+        explicacion+= " teta : " + str(teta2[0])
+        for k in range (1, len (teta2)):
+            explicacion = explicacion+", " + str(teta2[k])
+            
+    explicacion = explicacion + ". params1: parámetros de la tendencia, a = params1 [0] y b[k] = params1[k] --> "+str(params1 [0])
+    for k in range (1, len (params1)):
+        explicacion = explicacion+", " + str(params1 [k])
+
+    return {"Tipo": tipos, "Parámetro del modelo 1" : tendencia1,"Parámetros del modelo 2" : parametros2, "Parámetros de la query" : explicacion}
+
+    
+        
 @app.get("/Datos/drift/fin/tendencia-ARMA")
 async def obtener_serie(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
 
@@ -2754,6 +10511,83 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     plt.close()
 
     return StreamingResponse(buffer,media_type="image/png")
+
+@app.get("/Report/drift/periodos/tendencia-ARMA")
+async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+
+    if tipo1 == 1:
+       subtipo1 = "lineal"
+       tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + " b = " +str (params1[1]) +" e0 = " + str(coef_error1)
+    elif tipo1 ==2:
+       subtipo1 ="polinómica de grado "+ str(len(params1)-1)
+       tendencia1= "La serie es de tipo y = a + b[1] * t + e0"  
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1+ " + b ["+str(k)+"] *  t ** " + str(k)
+       tendencia1 = tendencia1 +  " donde a = " + str(params1[0]) + " b[1] = " + str (params1[1])
+       for k in range (2,len(params1)):
+           tendencia1 = tendencia1  + " b["+ str(k)+"] = " + str (params1[k])
+       tendencia1 = tendencia1 +" e0 = " + str(coef_error1)
+    elif tipo1 == 3: 
+       subtipo1 ="exponencial"
+       tendencia1 = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params1[0]) + ", b = " + str(params1[1]) + " y e0 = " + str(coef_error1)
+    elif tipo1 == 4:
+       subtipo1 = "logaritmica" 
+       tendencia1 = "La serie es de tipo y = a + b * log(t) +e0 donde a = " + str(params1[0]) + " b = " + str(params1[1]) + " e0 = " + str(coef_error1)
+       
+       
+    if phi2 == []:
+        subtipo2 = "de medias móviles"
+        parametros2= "La serie sigue una distribuc2ión de medias móviles con constante c2 = "+ str(c2)+" y con valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+           
+    elif teta2 ==[]:
+        subtipo2 = "autorregresivo"
+        parametros2= "La serie sigue una distribuc2ión autorregresiva con constante c2 = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+    else: 
+        subtipo2 ="autorregresivo y de medias móviles"
+        parametros2 = "La serie sigue una distribuc2ión autorregresiva y de medias móviles con constante c2 = "+ str(c2)+" y con valores de phi2: phi2_0 " + str(phi2[0])
+        for k in range (1,len(phi2)):
+           parametros2 = parametros2  + " phi2_"+ str(k)+" = " + str (phi2[k])
+        parametros2 = parametros2 + " y c2on valores de teta2: teta2_0 " + str(teta2[0])
+        for k in range (1,len(teta2)):
+           parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
+    if s2 != 0:
+        subtipo2 += " estac2ional c2on amplitud de la estac2ión: " + str(s2) 
+        
+    tipos1 = "modelo de tendencia determinista con tendencia " + subtipo1
+    tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " siguiendo un primer modelo " + tipos1 + " y luego un modelo "+ subtipo2
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". tipo1: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo1)
+    explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(coef_error1)
+    explicacion = explicacion + ". c2: constante del modelo 2--> " + str(c2)
+    explicacion = explicacion + ". s2: amplitud de la estación del modelo 2 --> " + str(s2)
+    explicacion = explicacion + ". Desv2: desviación típica del ruido blanco del modelo 2--> " + str(desv2)
+    explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". params1: parámetros de la tendencia, a = params1 [0] y b[k] = params1[k] --> "+str(params1 [0])
+    for k in range (1, len (params1)):
+        explicacion = explicacion+", " + str(params1 [k])
+    explicacion = explicacion + ". Params: parámetros del modelo 1, phi y teta -->"
+    if phi2 != []:
+        explicacion+= " phi : " + str(phi2[0])
+        for k in range (1, len (phi2)):
+            explicacion = explicacion+", " + str(phi2[k])
+    if teta2!=[]:
+        explicacion+= " teta : " + str(teta2[0])
+        for k in range (1, len (teta2)):
+            explicacion = explicacion+", " + str(teta2[k])
+            
+    explicacion = explicacion + ". params1: parámetros de la tendencia, a = params1 [0] y b[k] = params1[k] --> "+str(params1 [0])
+    for k in range (1, len (params1)):
+        explicacion = explicacion+", " + str(params1 [k])
+
+    return {"Tipo": tipos, "Parámetro del modelo 1" : tendencia1,"Parámetros del modelo 2" : parametros2, "Parámetros de la query" : explicacion}
 
 @app.get("/Datos/drift/periodos/tendencia-ARMA")
 async def obtener_serie(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
