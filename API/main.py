@@ -1,6 +1,5 @@
 from functools import partial
 from io import StringIO
-from skforecast.Sarimax import Sarimax
 from sklearn import metrics
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
@@ -25,8 +24,26 @@ import math
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, ExtraTreesRegressor
+from skforecast.model_selection import grid_search_forecaster
+from sklearn.metrics import mean_squared_error
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
+from sklearn.linear_model import Ridge
+from prophet import Prophet
+from sklearn.preprocessing import StandardScaler
+from scipy import stats  
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import GridSearchCV
+#from skforecast.ForecasterRnn import ForecasterRnn
+#from skforecast.ForecasterRnn.utils import create_and_compile_model
+#from sklearn.preprocessing import MinMaxScaler
+#from skforecast.model_selection_multiseries import backtesting_forecaster_multiseries
 
 app = FastAPI()
+
+
 
 @app.get("/")
 def read_root():
@@ -3960,7 +3977,7 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:in
 
 
 @app.get("/Datos/drift/fin/dist-periodico")
-async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), pparams2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
 
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -13661,17 +13678,873 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
     
-    fig, ax = plt.subplots(figsize=(6, 3))
     train = int(df.shape[0]*0.8)
     df_test = df[train:]
     predicciones_m1=plot_prediccion_autorregresivos(df,df[:train],df_test, df.columns[0])
+    result = pd.merge(df_test, predicciones_m1, left_index=True, right_index=True)
     plt.figure()
-    ax=df_test.plot(ax=ax, label='test')
-    predicciones_m1 = predicciones_m1.rename(columns={'pred': 'grid search'})
-    predicciones_m1.plot(ax=ax)
-    ax.set_title('Predicciones de backtesting con un modelo SARIMA')
-    ax.legend()
-    plt.xlabel("Tiempo")
+    result.plot(title="Predicciones Sarimax",figsize=(13,5))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
+def error_backtesting_forecasterAutoreg(datos_train,datos_test,lags,steps):
+
+    forecaster = ForecasterAutoreg(
+                    regressor = RandomForestRegressor(random_state=123),
+                    lags      = lags
+                )
+    # Valores candidatos de lags
+    lags_grid = [10, 20]
+
+    # Valores candidatos de hiperparámetros del regresor
+    param_grid = {
+         'n_estimators': [100, 175,250,450],
+         'max_depth': [3, 5, 10,15,20]
+    }
+
+    resultados_grid = grid_search_forecaster(
+                        forecaster         = forecaster,
+                        y                  = datos_train[datos_train.columns[0]],
+                        param_grid         = param_grid,
+                        lags_grid          = lags_grid,
+                        steps              = steps,
+                        refit              = False,
+                        metric             = 'mean_squared_error',
+                        initial_train_size = int(len(datos_train)*0.8),
+                        fixed_train_size   = False,
+                        return_best        = True,
+                        n_jobs             = 'auto',
+                        verbose            = False
+                    )
+
+    # Predicciones
+    # ==============================================================================
+    predicciones = forecaster.predict(steps=len(datos_test))
+
+    # Error de test
+    # ==============================================================================
+    error_mse = mean_squared_error(
+                    y_true = datos_test,
+                    y_pred = predicciones
+                )
+
+    return error_mse
+
+def plot_backtesting_forecasterAutoreg(datos_train,datos_test,lags,steps):
+
+    forecaster = ForecasterAutoreg(
+                    regressor = RandomForestRegressor(random_state=123),
+                    lags      = lags
+                )
+    # Valores candidatos de lags
+    lags_grid = [10, 20]
+
+    # Valores candidatos de hiperparámetros del regresor
+    param_grid = {
+         'n_estimators': [100, 175,250,450],
+         'max_depth': [3, 5, 10,15,20]
+    }
+
+    resultados_grid = grid_search_forecaster(
+                        forecaster         = forecaster,
+                        y                  = datos_train[datos_train.columns[0]],
+                        param_grid         = param_grid,
+                        lags_grid          = lags_grid,
+                        steps              = steps,
+                        refit              = False,
+                        metric             = 'mean_squared_error',
+                        initial_train_size = int(len(datos_train)*0.8),
+                        fixed_train_size   = False,
+                        return_best        = True,
+                        n_jobs             = 'auto',
+                        verbose            = False
+                    )
+
+    # Predicciones
+    # ==============================================================================
+    predicciones = forecaster.predict(steps=len(datos_test))
+
+    return predicciones
+
+@app.post("/Modelo/ForasterRF")
+async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    train = int(df.shape[0]*0.8)
+    return {error_backtesting_forecasterAutoreg(df[:train],df[train:],10,180) }
+
+
+@app.post("/Plot/Modelo/ForasterRF")
+async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    train = int(df.shape[0]*0.8)
+    df_test = df[train:]
+    predicciones_m1=plot_backtesting_forecasterAutoreg(df[:train],df[train:],10,180)
+    result = pd.merge(df_test, predicciones_m1, left_index=True, right_index=True)
+    plt.figure()
+    result.plot(title="Predicciones Modelo Autoregresivo Random Forest",figsize=(13,7))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
+def error_backtesting_forecasterAutoregDirect(datos_train,datos_test,steps,lags):
+
+    forecaster = ForecasterAutoregDirect(
+                regressor     = Ridge(random_state=123),
+                transformer_y = StandardScaler(),
+                steps         = steps,
+                lags          = lags
+             )
+
+    # Valores candidatos de lags
+    lags_grid = [5, 12, 20]
+
+    # Valores candidatos de hiperparámetros del regresor
+    param_grid = {'alpha': np.logspace(-5, 5, 10)}
+
+    resultados_grid = grid_search_forecaster(
+                        forecaster         = forecaster,
+                        y                  = datos_train[datos_train.columns[0]],
+                        param_grid         = param_grid,
+                        lags_grid          = lags_grid,
+                        steps              = steps,
+                        refit              = False,
+                        metric             = 'mean_squared_error',
+                        initial_train_size = int(len(datos_train)*0.8),
+                        fixed_train_size   = False,
+                        return_best        = True,
+                        n_jobs             = 'auto',
+                        verbose            = False
+                    )
+
+    # Predicciones
+    # ==============================================================================
+    predicciones = forecaster.predict()
+
+    # Error de test
+    # ==============================================================================
+    error_mse = mean_squared_error(
+                    y_true = datos_test,
+                    y_pred = predicciones
+                )
+
+    return error_mse
+
+def predicciones_backtesting_forecasterAutoregDirect(datos_train,datos_test,steps,lags):
+
+    forecaster = ForecasterAutoregDirect(
+                regressor     = Ridge(random_state=123),
+                transformer_y = StandardScaler(),
+                steps         = steps,
+                lags          = lags
+             )
+
+    # Valores candidatos de lags
+    lags_grid = [5, 12, 20]
+
+    # Valores candidatos de hiperparámetros del regresor
+    param_grid = {'alpha': np.logspace(-5, 5, 10)}
+
+    resultados_grid = grid_search_forecaster(
+                        forecaster         = forecaster,
+                        y                  = datos_train[datos_train.columns[0]],
+                        param_grid         = param_grid,
+                        lags_grid          = lags_grid,
+                        steps              = steps,
+                        refit              = False,
+                        metric             = 'mean_squared_error',
+                        initial_train_size = int(len(datos_train)*0.8),
+                        fixed_train_size   = False,
+                        return_best        = True,
+                        n_jobs             = 'auto',
+                        verbose            = False
+                    )
+
+    # Predicciones
+    # ==============================================================================
+    predicciones = forecaster.predict()
+
+    # Error de test
+    # ==============================================================================
+    return predicciones
+
+@app.post("/Modelo/AutoregRidge")
+async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    train = int(df.shape[0]*0.8)
+    return {error_backtesting_forecasterAutoregDirect(df[:train],df[train:], df[train:].shape[0],5) }
+
+@app.post("/Plot/Modelo/AutoregRidge")
+async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    
+    train = int(df.shape[0]*0.8)
+    df_test = df[train:]
+    predicciones_m1=predicciones_backtesting_forecasterAutoregDirect(df[:train],df[train:], df[train:].shape[0],5)
+    result = pd.merge(df_test, predicciones_m1, left_index=True, right_index=True)
+    plt.figure()
+    result.plot(title="Predicciones Modelo Autoregresivo Directo Ridge",figsize=(13,7))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
+# Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test
+def error_prophet_prediccion(data_train,data_test):
+    
+    data_train=data_train.reset_index()
+    data_train.rename(columns={data_train.columns[0] : 'ds', data_train.columns[1]: 'y'}, inplace=True)
+    model = Prophet()
+    model.fit(data_train)
+    
+    future = model.make_future_dataframe(periods=len(data_test),freq='M')
+    forecast=model.predict(future)
+    
+    y_true=data_test.values
+    y_pred=forecast['yhat'][len(data_train):].values
+    
+    mae = mean_squared_error(y_true,y_pred)
+    return mae
+
+
+
+# Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test
+def pred_prophet_prediccion(data_train,data_test):
+    
+    data_train=data_train.reset_index()
+    data_train.rename(columns={data_train.columns[0] : 'ds', data_train.columns[1]: 'y'}, inplace=True)
+    model = Prophet()
+    model.fit(data_train)
+    
+    future = model.make_future_dataframe(periods=len(data_test),freq='M')
+    forecast=model.predict(future)
+    
+    y_pred=forecast['yhat'][len(data_train):].values
+    
+    return y_pred
+
+
+@app.post("/Modelo/Prophet")
+async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    train = int(df.shape[0]*0.8)
+    return {error_prophet_prediccion(df[:train],df[train:]) }
+
+@app.post("/Plot/Modelo/Prophet")
+async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    
+    train = int(df.shape[0]*0.8)
+    y_pred=pred_prophet_prediccion(df[:train],df[train:])
+    plt.figure()
+    y_true=df[train:].values
+    result = pd.DataFrame({
+    'Valores Reales': y_true.reshape(-1),
+    'Predicciones': y_pred
+    })
+    result.index=df[train:].index
+    result.plot(title="Predicciones Modelo Prophet",figsize=(13,7))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
+def error_entrenar_linearReg(df,columns_predict):
+    modelo = LinearRegression()
+    l = int(df.shape[0]*0.8)
+    modelo.fit(X=df[:l].drop(columns=columns_predict),y=df[columns_predict][:l])
+    df_pred = df[l:].copy()
+    df_pred['Predicciones'] = modelo.predict(df[l:].drop(columns=columns_predict))
+    mse = mean_squared_error(df_pred['Predicciones'].values,df_pred[columns_predict].values)
+    return mse 
+    
+def pred_entrenar_linearReg(df,columns_predict):
+    modelo = LinearRegression()
+    l = int(df.shape[0]*0.8)
+    modelo.fit(X=df[:l].drop(columns=columns_predict),y=df[columns_predict][:l])
+    df_pred = df[l:].copy()
+    df_pred['Predicciones'] = modelo.predict(df[l:].drop(columns=columns_predict))
+    return df_pred
+
+@app.post("/Modelo/RegLineal")
+async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    return {error_entrenar_linearReg(df,columna) }
+
+@app.post("/Plot/Modelo/RegLineal")
+async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    
+    result = pred_entrenar_linearReg(df,columna)
+    plt.figure()
+    result[[columna,'Predicciones']].plot(title="Predicciones Modelo Regresión Lineal",figsize=(13,7))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+def error_entrenar_TreeReg(df,columns_predict):
+    
+    l = int(df.shape[0]*0.8)
+    X_train=df[:l].drop(columns=columns_predict)
+    y_train=df[columns_predict][:l]
+    
+    modelo = DecisionTreeRegressor(random_state=42)
+    param_grid = {
+        'max_depth': [None, 5, 10, 20, 30],
+        'min_samples_split': [2, 5, 10, 15],
+        'min_samples_leaf': [1, 2, 5, 10],
+        'max_features': [None, 'sqrt', 'log2']
+    }  
+    grid_search = GridSearchCV(estimator=modelo, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+
+    best_params = grid_search.best_params_
+
+    optimized_model = DecisionTreeRegressor(**best_params, random_state=42) 
+    optimized_model.fit(X_train, y_train)
+    
+    df_pred = df[l:].copy()
+    df_pred['Predicciones'] = optimized_model.predict(df[l:].drop(columns=columns_predict))
+    mse = mean_squared_error(df_pred['Predicciones'].values,df_pred[columns_predict].values)
+    return mse
+
+def pred_entrenar_TreeReg(df,columns_predict):
+    
+    l = int(df.shape[0]*0.8)
+    X_train=df[:l].drop(columns=columns_predict)
+    y_train=df[columns_predict][:l]
+    
+    modelo = DecisionTreeRegressor(random_state=42)
+    param_grid = {
+        'max_depth': [None, 5, 10, 20, 30],
+        'min_samples_split': [2, 5, 10, 15],
+        'min_samples_leaf': [1, 2, 5, 10],
+        'max_features': [None, 'sqrt', 'log2']
+    }  
+    grid_search = GridSearchCV(estimator=modelo, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+
+    best_params = grid_search.best_params_
+
+    optimized_model = DecisionTreeRegressor(**best_params, random_state=42) 
+    optimized_model.fit(X_train, y_train)
+    
+    df_pred = df[l:].copy()
+    df_pred['Predicciones'] = optimized_model.predict(df[l:].drop(columns=columns_predict))
+    
+    return df_pred
+
+@app.post("/Modelo/DecisionTree")
+async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    return {error_entrenar_TreeReg(df,columna) }
+
+@app.post("/Plot/Modelo/DecisionTree")
+async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    
+    result = pred_entrenar_TreeReg(df,columna)
+    plt.figure()
+    result[[columna,'Predicciones']].plot(title="Predicciones Modelo Regresivo Arbol Decisión",figsize=(13,7))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
+def error_entrenar_RandomForestReg(df,columns_predict):
+    
+    l = int(df.shape[0]*0.8)
+    X_train=df[:l].drop(columns=columns_predict)
+    y_train=df[columns_predict][:l]
+    
+    modelo = RandomForestRegressor(random_state=42)
+    param_grid = {
+        'n_estimators': [100, 200, 500],
+        'max_depth': [ 10, 20, 30],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4],
+        'max_features': [None, 'sqrt', 'log2'],
+    } 
+    grid_search = GridSearchCV(estimator=modelo, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+
+    best_params = grid_search.best_params_
+
+    optimized_model = RandomForestRegressor(**best_params, random_state=42) 
+    optimized_model.fit(X_train, y_train)
+    
+    df_pred = df[l:].copy()
+    df_pred['Predicciones'] = optimized_model.predict(df[l:].drop(columns=columns_predict))
+    
+    mse = mean_squared_error(df_pred['Predicciones'].values,df_pred[columns_predict].values)
+    
+    return mse
+
+def pred_entrenar_RandomForestReg(df,columns_predict):
+    
+    l = int(df.shape[0]*0.8)
+    X_train=df[:l].drop(columns=columns_predict)
+    y_train=df[columns_predict][:l]
+    
+    modelo = RandomForestRegressor(random_state=42)
+    param_grid = {
+        'n_estimators': [100, 200, 500],
+        'max_depth': [ 10, 20, 30],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4],
+        'max_features': [None, 'sqrt', 'log2'],
+    } 
+    grid_search = GridSearchCV(estimator=modelo, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+
+    best_params = grid_search.best_params_
+
+    optimized_model = RandomForestRegressor(**best_params, random_state=42) 
+    optimized_model.fit(X_train, y_train)
+    
+    df_pred = df[l:].copy()
+    df_pred['Predicciones'] = optimized_model.predict(df[l:].drop(columns=columns_predict))
+    
+    return df_pred
+
+@app.post("/Modelo/RandomForest")
+async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    return {error_entrenar_RandomForestReg(df,columna) }
+
+@app.post("/Plot/Modelo/RandomForest")
+async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    
+    result = pred_entrenar_RandomForestReg(df,columna)
+    plt.figure()
+    result[[columna,'Predicciones']].plot(title="Predicciones Modelo Regresivo Random Forest",figsize=(13,7))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
+def error_entrenar_GradientBoostReg(df,columns_predict):
+    
+    l = int(df.shape[0]*0.8)
+    X_train=df[:l].drop(columns=columns_predict)
+    y_train=df[columns_predict][:l]
+    
+    modelo = GradientBoostingRegressor(random_state=42)
+    param_grid = {
+        'n_estimators': [100, 200, 300],
+        'learning_rate': [0.01, 0.1, 1.0],
+        'max_depth': [3, 5, 7],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4],
+        'max_features': [None, 'sqrt', 'log2']
+    } 
+    grid_search = GridSearchCV(estimator=modelo, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+
+    best_params = grid_search.best_params_
+
+    optimized_model = GradientBoostingRegressor(**best_params, random_state=42) 
+    optimized_model.fit(X_train, y_train)
+    
+    df_pred = df[l:].copy()
+    df_pred['Predicciones'] = optimized_model.predict(df[l:].drop(columns=columns_predict))
+    
+    mse = mean_squared_error(df_pred['Predicciones'].values,df_pred[columns_predict].values)
+    
+    return mse
+
+
+def pred_entrenar_GradientBoostReg(df,columns_predict):
+    
+    l = int(df.shape[0]*0.8)
+    X_train=df[:l].drop(columns=columns_predict)
+    y_train=df[columns_predict][:l]
+    
+    modelo = GradientBoostingRegressor(random_state=42)
+    param_grid = {
+    'n_estimators': [100, 200, 300],
+    'learning_rate': [0.01, 0.1, 1.0],
+    'max_depth': [3, 5, 7],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4],
+    'max_features': [None, 'sqrt', 'log2']
+    } 
+    grid_search = GridSearchCV(estimator=modelo, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+
+    best_params = grid_search.best_params_
+
+    optimized_model = GradientBoostingRegressor(**best_params, random_state=42) 
+    optimized_model.fit(X_train, y_train)
+    
+    df_pred = df[l:].copy()
+    df_pred['Predicciones'] = optimized_model.predict(df[l:].drop(columns=columns_predict))
+    
+    return df_pred
+
+@app.post("/Modelo/GradientBoosting")
+async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    return {error_entrenar_GradientBoostReg(df,columna) }
+
+@app.post("/Plot/Modelo/GradientBoosting")
+async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    
+    result = pred_entrenar_GradientBoostReg(df,columna)
+    plt.figure()
+    result[[columna,'Predicciones']].plot(title="Predicciones Modelo Regresivo Gradient Boosting",figsize=(13,7))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+def error_entrenar_ExtraTreeReg(df,columns_predict):
+    
+    l = int(df.shape[0]*0.8)
+    X_train=df[:l].drop(columns=columns_predict)
+    y_train=df[columns_predict][:l]
+    
+    modelo = ExtraTreesRegressor(random_state=42)
+    param_grid = {
+        'n_estimators': [100, 200, 500],
+        'max_depth': [ 10, 20, 30],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4],
+        'max_features': [None, 'sqrt', 'log2'],
+    } 
+    grid_search = GridSearchCV(estimator=modelo, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+
+    best_params = grid_search.best_params_
+
+    optimized_model = ExtraTreesRegressor(**best_params, random_state=42) 
+    optimized_model.fit(X_train, y_train)
+    
+    df_pred = df[l:].copy()
+    df_pred['Predicciones'] = optimized_model.predict(df[l:].drop(columns=columns_predict))
+    
+    mse = mean_squared_error(df_pred['Predicciones'].values,df_pred[columns_predict].values)
+    
+    return mse
+
+def pred_entrenar_ExtraTreeReg(df,columns_predict):
+    
+    l = int(df.shape[0]*0.8)
+    X_train=df[:l].drop(columns=columns_predict)
+    y_train=df[columns_predict][:l]
+    
+    modelo = ExtraTreesRegressor(random_state=42)
+    param_grid = {
+        'n_estimators': [100, 200, 500],
+        'max_depth': [ 10, 20, 30],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4],
+        'max_features': [None, 'sqrt', 'log2'],
+    } 
+    grid_search = GridSearchCV(estimator=modelo, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+
+    best_params = grid_search.best_params_
+
+    optimized_model = ExtraTreesRegressor(**best_params, random_state=42) 
+    optimized_model.fit(X_train, y_train)
+    
+    df_pred = df[l:].copy()
+    df_pred['Predicciones'] = optimized_model.predict(df[l:].drop(columns=columns_predict))
+    return df_pred
+
+@app.post("/Modelo/ExtraTree")
+async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    return {error_entrenar_ExtraTreeReg(df,columna) }
+
+@app.post("/Plot/Modelo/ExtraTree")
+async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    
+    result = pred_entrenar_ExtraTreeReg(df,columna)
+    plt.figure()
+    result[[columna,'Predicciones']].plot(title="Predicciones Modelo Regresivo ExtraTree",figsize=(13,7))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+@app.post("/Modelos/Error")
+async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    
+    return {"Error regresión Lineal":error_entrenar_linearReg(df,columna) ,
+            "Error árbol de decisión":error_entrenar_TreeReg(df,columna),
+            "Error random forest":error_entrenar_RandomForestReg(df,columna),
+            "Error gradient boosting":error_entrenar_GradientBoostReg(df,columna),
+            "Error extra tree":error_entrenar_ExtraTreeReg(df,columna)}
+    
+@app.post("/Plot/Modelos")
+async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    
+    result1 = pred_entrenar_linearReg(df,columna)
+    res1 = result1['Predicciones'].values.reshape(-1)
+    result2 = pred_entrenar_TreeReg(df,columna)
+    res2 = result2['Predicciones'].values.reshape(-1)
+
+    result3 = pred_entrenar_RandomForestReg(df,columna)
+    res3 = result3['Predicciones'].values.reshape(-1)
+
+    result4 = pred_entrenar_GradientBoostReg(df,columna)
+    res4 = result4['Predicciones'].values.reshape(-1)
+
+    result5 = pred_entrenar_ExtraTreeReg(df,columna)
+    res5 = result5['Predicciones'].values.reshape(-1)
+
+    result = pd.DataFrame({
+        'Valores Reales': result1[columna].values.reshape(-1),
+        'Predicciones regresión lineal': res1,
+        'Predicciones árbol decisión': res2,
+        'Predicciones random forest': res3,
+        'Predicciones gradient boosting': res4,
+        'Predicciones extra tree': res5
+    })
+    result.index = result1.index
+    plt.figure()
+    result.plot(title="Predicciones Modelos",figsize=(13,7))
+    plt.xlabel("Tiempo")  
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
     buffer.seek(0)
