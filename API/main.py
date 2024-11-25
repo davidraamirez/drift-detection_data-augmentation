@@ -1,3 +1,5 @@
+# Imports
+
 from functools import partial
 from io import StringIO
 from sklearn import metrics
@@ -5,19 +7,15 @@ from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.model_selection_sarimax import backtesting_sarimax
 from skforecast.model_selection_sarimax import grid_search_sarimax
-
 import io
 import json
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Union
 from fastapi import FastAPI, Query, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from typing import List
 from fastapi.responses import StreamingResponse
-
-# Imports
 import pandas as pd
 import numpy as np
-from pathlib import Path  
 from scipy.stats import binom,poisson,geom,hypergeom,uniform,expon, gamma, beta,chi2,t,pareto,lognorm
 from random import randrange, random
 import math
@@ -42,8 +40,6 @@ from sklearn.model_selection import GridSearchCV
 #from skforecast.model_selection_multiseries import backtesting_forecaster_multiseries
 
 app = FastAPI()
-
-
 
 @app.get("/")
 def read_root():
@@ -117,19 +113,23 @@ def crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,coef_err
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df
 
+# Función que realiza un plot del dataframe
 def plot_df(df):
     plt.figure()
     df.plot(title="Serie temporal",figsize=(13,5))
     plt.xlabel("Tiempo")  
-    
+
+# Report estadístico del modelo de tendencia determinista
 @app.get("/Report/tendencia/fin")
 def obtener_report(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
+   
    if tipo == 1:
        subtipo = "lineal"
        tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params[0]) + ", b = " +str (params[1]) +" y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+
    elif tipo ==2:
        subtipo ="polinómica de grado "+ str(len(params)-1)
-       tendencia= "La serie es de tipo y = a + b[1] * t + e0"  
+       tendencia= "La serie es de tipo y = a + b[1] * t"  
        for k in range (2,len(params)):
            tendencia += " + b ["+str(k)+"] * t ** " + str(k)
        tendencia = tendencia + " + e0"
@@ -137,12 +137,14 @@ def obtener_report(inicio: str, fin:str, freq:str, tipo:int , error: Union[float
        for k in range (2,len(params)):
            tendencia = tendencia  + ", b["+ str(k)+"] = " + str (params[k])
        tendencia = tendencia +" y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+   
    elif tipo == 3: 
        subtipo ="exponencial"
        tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params[0]) + ", b = " + str(params[1]) + " y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+   
    elif tipo == 4:
        subtipo = "logaritmica" 
-       tendencia = "La serie es de tipo y = a + b * log(t) + e0 donde a = " + str(params[0]) + " b = " + str(params[1]) + " e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+       tendencia = "La serie es de tipo y = a + b * log(t) + e0 donde a = " + str(params[0]) + " b = " + str(params[1]) + " y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
 
    tipos = "Modelo de tendencia determinista con tendencia " + subtipo
    explicacion = "Inicio: fecha de inicio " + str(inicio)
@@ -158,6 +160,7 @@ def obtener_report(inicio: str, fin:str, freq:str, tipo:int , error: Union[float
        explicacion = explicacion+", " + str(params [k])
    return {"Tipo": tipos, "Serie" : tendencia, "Parámetros" : explicacion }
 
+# Creación de un csv con datos de una serie temporal con tendencia determinista
 @app.get("/Datos/tendencia/fin")
 async def obtener_datos(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
     
@@ -175,6 +178,7 @@ async def obtener_datos(inicio: str, fin:str, freq:str, tipo:int , error: Union[
     
     return response
 
+# Gráfica con el modelo de tendencia determinista 
 @app.get("/Plot/tendencia/fin")
 async def obtener_grafica(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
     
@@ -187,11 +191,14 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, tipo:int , error: Unio
 
     return StreamingResponse(buffer,media_type="image/png")
 
+# Report estadístico de un modelo de tendencia determinista
 @app.get("/Report/tendencia/periodos")
 def obtener_report(inicio: str, periodos: int, freq:str, tipo:int , error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
+    
     if tipo == 1:
         subtipo = "lineal"
         tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params[0]) + ", b = " +str (params[1]) +" y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+    
     elif tipo ==2:
         subtipo ="polinómica de grado "+ str(len(params)-1)
         tendencia= "La serie es de tipo y = a + b[1] * t"  
@@ -202,12 +209,14 @@ def obtener_report(inicio: str, periodos: int, freq:str, tipo:int , error: Union
         for k in range (2,len(params)):
             tendencia = tendencia  + ", b["+ str(k)+"] = " + str (params[k])
         tendencia = tendencia +" y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+    
     elif tipo == 3: 
         subtipo ="exponencial"
         tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params[0]) + ", b = " + str(params[1]) + " y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+    
     elif tipo == 4:
         subtipo = "logaritmica" 
-        tendencia = "La serie es de tipo y = a + b * log(t) + e0 donde a = " + str(params[0]) + ", b = " + str(params[1]) + " e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+        tendencia = "La serie es de tipo y = a + b * log(t) + e0 donde a = " + str(params[0]) + ", b = " + str(params[1]) + " y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
 
     tipos = "Modelo de tendencia determinista con tendencia " + subtipo
     explicacion = "Inicio: fecha de inicio " + str(inicio)
@@ -223,7 +232,7 @@ def obtener_report(inicio: str, periodos: int, freq:str, tipo:int , error: Union
         explicacion = explicacion+", " + str(params [k])
     return {"Tipo": tipos, "Serie" : tendencia, "Parámetros" : explicacion }
 
-
+# Creación del csv con los datos de una serie temporal con tendencia determinista
 @app.get("/Datos/tendencia/periodos")
 async def obtener_datos(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
     
@@ -240,6 +249,7 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, tipo:int , error: U
     
     return response
 
+# Gráfica de una serie temporal de tendencia determinista
 @app.get("/Plot/Tendencia/periodos")   
 async def obtener_grafica(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
 
@@ -252,7 +262,6 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, tipo:int , error:
     return StreamingResponse( buffer,media_type="image/png")
 
 # Modelos con ciertas distribuciones:
-
 def crear_datos(distr,params,num_datos):
     
     if distr == 1 :
@@ -260,9 +269,9 @@ def crear_datos(distr,params,num_datos):
         
     elif distr ==2 :
         if len(params)==2:
-            datos = binom.rvs(params[0],params[1],size=num_datos)
+            datos = binom.rvs(int(params[0]),params[1],size=num_datos)
         elif len(params) == 3:
-            datos = binom.rvs(params[0],params[1],params[2],size=num_datos)
+            datos = binom.rvs(int(params[0]),params[1],params[2],size=num_datos)
             
     elif distr== 3 :
         if len(params)==1:
@@ -278,9 +287,9 @@ def crear_datos(distr,params,num_datos):
             
     elif distr == 5:
         if len(params)==3:
-            datos = hypergeom.rvs(params[0],params[1],params[2],size=num_datos)
+            datos = hypergeom.rvs(int(params[0]),int(params[1]),int(params[2]),size=num_datos)
         elif len(params) == 4:
-            datos = hypergeom.rvs(params[0],params[1],params[2],params[3],size=num_datos)
+            datos = hypergeom.rvs(int(params[0]),int(params[1]),int(params[2]),params[3],size=num_datos)
             
     elif distr == 6: 
         datos = np.zeros(num_datos) + params[0]
@@ -370,6 +379,7 @@ def crear_datos(distr,params,num_datos):
         
     return datos
 
+# Creación de dataframe con datos obtenidos a partir de ciertas distribuciones 
 def crear_df_fin_datos(inicio,fin,freq,columna,distr,params):
     
     indice = series_fin(inicio,fin,freq)
@@ -387,7 +397,7 @@ def crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params):
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
-
+# Report estadístico de un modelo que sigue cierta distribución
 @app.get("/Report/distribuciones/fin")
 def obtener_report(inicio: str, fin: str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     
@@ -396,17 +406,19 @@ def obtener_report(inicio: str, fin: str, freq:str, distr:int , columna: List[st
         parametros ="Modelo con media = params[0] y desviación típica = params[1]. La media es " + str(params[0])+ " y la desviación típica es " + str(params[1])
         mean = params[0]
         var = params[1] **2
+        
     elif distr ==2 :
         subtipo = "binomial"
         parametros = "Modelo con n = params[0] y p = params[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params[0])+" y el valor de p es "+str(params[1])+ ". Adicionalmente, se puede añadir un desplazamiento params[2]: "
         if len(params)==2:
-            parametros += "en este caso no hay desplazamiento"
+            parametros = parametros + "en este caso no hay desplazamiento"
         elif len(params) == 3:
-            parametros += "en este caso el desplazamiento es de " + str(params[2])
-        mean, var = binom.stats(params[0], params[1], moments='mv')
+            parametros = parametros + "en este caso el desplazamiento es de " + str(params[2])
+        mean, var = binom.stats(float(params[0]),float(params[1]), moments='mv')
         if len (params) == 3 :
-           mean += params[2]
-    elif distr== 3 :
+           mean = mean + params[2]
+           
+    elif distr == 3 :
         subtipo = "poisson"
         parametros = "Modelo con mu = params[0] donde mu = parámetro de poisson. El valor de mu es " + str(params[0])+". Adicionalmente, se puede añadir un desplazamiento params[1] : "
         if len(params)==1:
@@ -447,7 +459,7 @@ def obtener_report(inicio: str, fin: str, freq:str, distr:int , columna: List[st
         
     elif distr == 7:
         subtipo = "uniforme"
-        parametros = "Modelo con parametros opcionales: despl = params[0] y escala = params[1], donde despl= desplazamiento de la distribución uniforme y obtenemos una distribucion uniforme [despl,despl+escala],"
+        parametros = "Modelo con parametros opcionales: despl = params[0] y escala = params[1], donde despl = desplazamiento de la distribución uniforme y obtenemos una distribucion uniforme [despl,despl+escala],"
         if len(params)==0:
             parametros += " en este caso no hay desplazamiento ni escala "
         elif len(params) == 1:
@@ -464,7 +476,7 @@ def obtener_report(inicio: str, fin: str, freq:str, distr:int , columna: List[st
             
     elif distr == 8:
         subtipo = "lognormal"
-        parametros = "Modelo con s = params[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl= desplazamiento de la distribución lognormal y escala = escalado de la distribución,"
+        parametros = "Modelo con s = params[0] donde s es el parámetro de la distribución lognormal. El valor de s es "+ str(params[0])+ ". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl = desplazamiento de la distribución lognormal y escala = escalado de la distribución,"
         if len(params)==1:
             parametros += " en este caso no hay desplazamiento ni escala "
         elif len(params) == 2:
@@ -533,7 +545,7 @@ def obtener_report(inicio: str, fin: str, freq:str, distr:int , columna: List[st
         subtipo = "chi cuadrado"
         parametros = "Modelo con df = params[0] donde df es el parámetro de la distribución chi cuadrado. El valor de df es "+ str(params[0]) +". Además, posee los parametros opcionales: despl = params[1] y escala = params[2], donde despl = desplazamiento de la distribución chi2 y escala = escalado de la distribución. "
         if len(params)==1:
-            parametros += "En este caso no hay desplazamiento ni escala "
+            parametros += "En este caso no hay desplazamiento ni escala"
         elif len(params) == 2:
             parametros += "En este caso el desplazamiento es de " + str(params[1])
         elif len(params) == 3:
@@ -580,7 +592,7 @@ def obtener_report(inicio: str, fin: str, freq:str, distr:int , columna: List[st
         elif len (params) == 3:
             mean = pareto.mean(params[0], loc=params[1],scale=params[2])
             var = pareto.var(params[0], loc=params[1],scale=params[2])
-            
+        
     elif distr == 15:
         subtipo = "linealmente decreciente"
         parametros = "Modelo de tipo: y_i = y_i-1 - b, y_0 = a donde a = params[0] = "+ str(params[0])+" y b = params[1] = "+ str(params[1])
@@ -599,20 +611,24 @@ def obtener_report(inicio: str, fin: str, freq:str, distr:int , columna: List[st
         mean = "Información no relevante"
         var = "Información no relevante"
 
+    if distr !=15 and distr!= 16 and distr!=17:
+        mean = float(mean)
+        var = float (var)
     tipos = "Modelo con una distribución " + subtipo
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
     explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
     explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
-    explicacion = explicacion + ". Distr: normal (1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta(11), chi cuadrado(12), t-student(13), pareto(14), linealmente decreciente(15), linealmente creciente(16) y random(17) --> " + str(distr)
+    explicacion = explicacion + ". Distr: normal(1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta(11), chi cuadrado(12), t-student(13), pareto(14), linealmente decreciente(15), linealmente creciente(16) y random(17) --> " + str(distr)
     explicacion = explicacion + ". Columna: nombre de la columna --> " + columna[0]
     for k in range (1, len (columna)):
         explicacion = explicacion+", " + columna [k]
     if len(params) > 0:
         explicacion = explicacion + ". Params: parámetros de la distribución --> "+str(params [0])
         for k in range (1, len (params)):
-            explicacion = explicacion+", " + str(params [k])
+            explicacion = explicacion+", " + str(params[k])
     return {"Tipo": tipos,"Parametros de la distribución": parametros, "Parámetros de la query" : explicacion, "Media" :mean, "Varianza" : var}
 
+# Creación de csv a partir de los datos de una distribución
 @app.get("/Datos/distribucion/fin")
 async def obtener_datos(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
 
@@ -629,6 +645,7 @@ async def obtener_datos(inicio: str, fin:str, freq:str, distr:int , columna: Lis
     
     return response
 
+# Gráfica de los datos siguiendo una distribución
 @app.get("/Plot/distribuciones/fin")
 async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     df = crear_df_fin_datos(inicio,fin,freq,columna,distr,params)
@@ -640,7 +657,7 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int , columna: L
 
     return StreamingResponse(buffer,media_type="image/png")
 
-
+# Report estadístico de los datos siguiendo cierta distribución
 @app.get("/Report/distribuciones/periodos")
 def obtener_report(inicio: str, periodos: int, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
     
@@ -853,7 +870,10 @@ def obtener_report(inicio: str, periodos: int, freq:str, distr:int , columna: Li
         parametros = "Modelo con una distribución con valores aleatorios entre params[0] = " + str(params[0]) +" y params[1] = " + str(params[1])
         mean = "Información no relevante"
         var = "Información no relevante"
-
+        
+    if distr !=15 and distr!= 16 and distr!=17:
+        mean = float(mean)
+        var = float (var)
     tipos = "Modelo con una distribución " + subtipo
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
     explicacion = explicacion +". Periodos: número de de periodos a generar --> "+ str(periodos)
@@ -868,7 +888,7 @@ def obtener_report(inicio: str, periodos: int, freq:str, distr:int , columna: Li
             explicacion = explicacion+", " + str(params [k])
     return {"Tipo": tipos,"Parametros de la distribución": parametros, "Parámetros de la query" : explicacion, "Media" :mean, "Varianza" : var}
 
-
+# Creación csv con los datos siguiendo una distribución
 @app.get("/Datos/distribucion/periodos")
 async def obtener_datos(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"),params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     
@@ -885,6 +905,7 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, distr:int,  columna
     
     return response
 
+# Gráfica con los datos siguiendo cierta distribución
 @app.get("/Plot/distribucion/periodos")
 async def obtener_grafica(inicio: str, periodos:int, freq:str, distr:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     df = crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params)
@@ -944,6 +965,7 @@ def crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tip
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
+# Report estadístico de datos periódicos según ciertas distribuciones
 @app.get("/Report/periodicos/fin")
 async def obtener_report(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
 
@@ -1161,7 +1183,11 @@ async def obtener_report(inicio: str, fin:str, freq:str, distr:int, p: int, tipo
         parametros = "Modelo con una distribución con valores aleatorios entre params[0] = " + str(params[0]) +" y params[1] = " + str(params[1])
         mean = "Información no relevante"
         var = "Información no relevante"
-
+        
+    if distr !=15 and distr!= 16 and distr!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos = "Modelo periodico siguiendo una distribución " + subtipo + " con " + periodicidad
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
     explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
@@ -1178,7 +1204,7 @@ async def obtener_report(inicio: str, fin:str, freq:str, distr:int, p: int, tipo
             explicacion = explicacion+", " + str(params[k])
     return {"Tipo": tipos,"Parametros de la distribución": parametros, "Parámetros de la query" : explicacion, "Media" :mean, "Varianza" : var}
 
-
+# Creación csv de datos periódicos según cierta distribución
 @app.get("/Datos/periodicos/fin")
 async def obtener_datos(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
 
@@ -1195,6 +1221,7 @@ async def obtener_datos(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:
     
     return response
 
+# Gráfica de datos periódicos según cierta distribución
 @app.get("/Plot/periodicos/fin")
 async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     df = crear_df_fin_periodicos(inicio,fin,freq,columna,distr,params, p,tipo)
@@ -1206,6 +1233,7 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int, p: int, tip
 
     return StreamingResponse(buffer,media_type="image/png")
 
+# Report estadístico de datos periódicos según ciertas distribuciones 
 @app.get("/Report/periodicos/periodos")
 async def obtener_report(inicio: str, periodos:int, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
 
@@ -1421,7 +1449,11 @@ async def obtener_report(inicio: str, periodos:int, freq:str, distr:int, p: int,
         parametros = "Modelo con una distribución con valores aleatorios entre params[0] = " + str(params[0]) +" y params[1] = " + str(params[1])
         mean = "Información no relevante"
         var = "Información no relevante"
-
+        
+    if distr !=15 and distr!= 16 and distr!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos = "Modelo periodico siguiendo una distribución " + subtipo + " con " + periodicidad
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
     explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
@@ -1438,6 +1470,7 @@ async def obtener_report(inicio: str, periodos:int, freq:str, distr:int, p: int,
             explicacion = explicacion+", " + str(params[k])
     return {"Tipo": tipos,"Parametros de la distribución": parametros, "Parámetros de la query" : explicacion, "Media" :mean, "Varianza" : var}
 
+# Creación de csv con datos periódicos según ciertas distribuciones
 @app.get("/Datos/periodicos/periodos")
 async def obtener_datos(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
 
@@ -1454,6 +1487,7 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, distr:int, p:int, t
     
     return response
  
+# Gráfica de datos periódicos según ciertas distribuciones 
 @app.get("/Plot/periodicos/periodos")
 async def obtener_grafica(inicio: str, periodos:int, freq:str, distr:int, p:int, tipo:int,  columna: List[str]= Query(...,description="Nombres de las columnas"),params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     df = crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tipo)
@@ -1466,7 +1500,6 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, distr:int, p:int,
     return StreamingResponse(buffer,media_type="image/png")
 
 # Modelos ARMA
-
 def modelo_AR(c,phi,num_datos,desv,a=[]):
     
     orden = len(phi)
@@ -1528,7 +1561,7 @@ def modelo_ARMA(c,phi,teta,num_datos,desv,a=[]):
                 
     return datos
     
-
+# Modelos estacionales
 def modelo_AR_estacional(c,phi,s,num_datos,desv,a=[]):
     
     if len(a)==0: 
@@ -1629,7 +1662,7 @@ def crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s=0,phi=[],teta=[
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
-
+# Report estadístico de modelo ARMA
 @app.get("/Report/ARMA/fin")
 async def obtener_report(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     
@@ -2413,7 +2446,15 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:in
         parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
+    
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
         
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+          
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego una segunda distribución "+ subtipo2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
     explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
@@ -2886,7 +2927,15 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dis
         parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
+    
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
         
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+           
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego una segunda distribución "+ subtipo2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
     explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
@@ -2939,7 +2988,6 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
 
 @app.get("/Report/drift/fin/dist-ARMA")
 async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
-    
     
     if dist1 == 1 :
         subtipo1 = "normal"
@@ -3150,7 +3198,10 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:in
         parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
         mean1 = "Información no relevante"
         var1 = "Información no relevante"
-        
+     
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var) 
         
     if phi == []:
         subtipo2 = "de medias móviles"
@@ -3444,6 +3495,10 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dis
         mean1 = "Información no relevante"
         var1 = "Información no relevante"
 
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+        
     if phi == []:
         subtipo2 = "de medias móviles"
         parametros2 = "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
@@ -3465,6 +3520,7 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dis
            parametros2 = parametros2  + " teta_"+ str(k)+" = " + str (teta[k])
     if s != 0:
         subtipo2 += " estacional con amplitud de la estación: " + str(s)
+        
     
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego un modelo "+ subtipo2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
@@ -3952,6 +4008,14 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:in
 
     tipos2 = "modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad
 
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+        
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego un "+ tipos2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
     explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
@@ -4433,6 +4497,14 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dis
 
     tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad
 
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+        
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " con una primera distribución " + subtipo1 + " y luego un "+ tipos2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
     explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
@@ -4693,7 +4765,11 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:in
         parametros1 = "Modelo con una distribución con valores aleatorios entre params1[0] = " + str(params1[0]) +" y params1 [1] =" + str(params1[1])
         mean1 = "Información no relevante"
         var1 = "Información no relevante" 
-        
+    
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+           
 
     if tipo2 == 1:
         subtipo2 = "lineal"
@@ -4979,7 +5055,10 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dis
         mean1 = "Información no relevante"
         var1 = "Información no relevante"
         
-        
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+          
     if tipo2 == 1:
         subtipo2 = "lineal"
         tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params2[0]) + ", b = " +str (params2[1]) +" y e0 es un random con valores entre [- " + str(coef_error)+ " , "+ str(coef_error) +" ]"
@@ -5143,7 +5222,6 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int ,c1:float 
     response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-ARMA-fin.csv"
     
     return response 
-
 
 @app.get("/Plot/drift/fin/ARMA-ARMA")
 async def obtener_gráfica(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
@@ -5496,6 +5574,10 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int ,c:float 
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
         
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var) 
+         
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un modelo " + subtipo1 + " y luego una distribucion "+ subtipo2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
     explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
@@ -5785,6 +5867,10 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int ,c:f
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
         
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+            
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un modelo " + subtipo1 + " y luego una distribucion "+ subtipo2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
     explicacion = explicacion +". Periodos: número de datos a generar --> "+ str(periodos)
@@ -6082,7 +6168,11 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, c:float,
         parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
-
+        
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un modelo " + subtipo1 + " y luego un "+ tipos2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
@@ -6383,6 +6473,10 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, c:f
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
 
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un modelo " + subtipo1 + " y luego un "+ tipos2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
@@ -7073,6 +7167,14 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
     
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+        
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
     tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad2
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un "+ tipos2
@@ -7130,6 +7232,7 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
 @app.get("/Report/drift/periodos/periodico-periodico")
 async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+    
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
     elif tipo1==2 :
@@ -7140,6 +7243,7 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
         parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
         mean1 = params1[0]
         var1 = params1[1] **2
+        
     elif dist1 ==2 :
         subtipo1 = "binomial"
         parametros1 = "Modelo con n = params1[0] y p = params1[1] donde n = número de pruebas y p = probabilidad de éxito. El valor de n es " + str(params1[0])+" y el valor de p es "+str(params1[1])+ ". Adicionalmente, se puede añadir un desplazamiento params1[2] : "
@@ -7150,6 +7254,7 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
         mean1, var1 = binom.stats(params1[0], params1[1], moments='mv')
         if len (params1) == 3 :
            mean1 += params1[2]
+           
     elif dist1== 3 :
         subtipo1 = "poisson"
         parametros1 = "Modelo con mu = params1[0] donde mu = parámetro de poisson . El valor de mu es " + str(params1[0])+". Adicionalmente, se puede añadir un desplazamiento params1[1] : "
@@ -7342,7 +7447,6 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
         mean1 = "Información no relevante"
         var1 = "Información no relevante"
 
-    
     if tipo2==1:
         periodicidad2 = "periodos de amplitud " + str(p2)
     elif tipo2==2 :
@@ -7557,6 +7661,14 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
     
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+        
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
     tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad2
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un "+ tipos2
@@ -7615,7 +7727,6 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
 @app.get("/Report/drift/fin/periodico-distr")
 async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
-
 
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
@@ -8038,6 +8149,14 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
     
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+        
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego una distribucion "+ subtipo2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
@@ -8522,6 +8641,14 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
     
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+        
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego una distribucion "+ subtipo2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
@@ -8814,7 +8941,11 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
            parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
     if s2 != 0:
         subtipo2 += " estacional con amplitud de la estación: " + str(s2)
-        
+    
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+            
     tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un modelo "+ subtipo2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
@@ -9110,7 +9241,11 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
            parametros2 = parametros2  + " teta2_"+ str(k)+" = " + str (teta2[k])
     if s2 != 0:
         subtipo2 += " estacional con amplitud de la estación: " + str(s2)
-        
+    
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+         
     tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un modelo "+ subtipo2
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
@@ -9406,6 +9541,10 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
         subtipo2 = "logaritmica" 
         tendencia = "La serie es de tipo y = a + b * log(t) + e0 donde a = " + str(params2[0]) + ", b = " + str(params2[1]) + " e0 es un random con valores entre [- " + str(coef_error)+ " , "+ str(coef_error) +" ]"
 
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un modelo de tendencia determinista con tendencia "+subtipo2 
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
@@ -9693,8 +9832,10 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
         subtipo2 = "logaritmica" 
         tendencia = "La serie es de tipo y = a + b * log(t) + e0 donde a = " + str(params2[0]) + ", b = " + str(params2[1]) + " e0 es un random con valores entre [- " + str(coef_error)+ " , "+ str(coef_error) +" ]"
 
-    
-       
+    if dist1 !=15 and dist1!= 16 and dist1!=17:
+        mean = float(mean)
+        var = float (var)
+
     tipos1 = "Modelo periodico siguiendo una distribución " + subtipo1 + " con " + periodicidad1
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " primero siguiendo un " + tipos1 + " y luego un modelo de tendencia determinista con tendencia "+subtipo2 
     explicacion = "Inicio: fecha de inicio --> " + str(inicio)
@@ -9864,7 +10005,6 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
     elif tipo1 == 4:
         subtipo1 = "logaritmica" 
         tendencia1 = "La serie es de tipo y = a + b * log(t) + e0 donde a = " + str(params1[0]) + ", b = " + str(params1[1]) + " e0 es un random con valores entre [- " + str(coef_error1)+ " , "+ str(coef_error1) +" ]"
-
 
     if tipo2 == 1:
         subtipo2 = "lineal"
@@ -10165,7 +10305,10 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
         parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
-        
+    
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var) 
     
     tipos1 = "modelo de tendencia determinista con tendencia " + subtipo1
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " siguiendo un primer " + tipos1 + " y luego una distribución "+ subtipo2
@@ -10448,6 +10591,10 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
     
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos1 = "modelo de tendencia determinista con tendencia " + subtipo1
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " siguiendo un primer " + tipos1 + " y luego una distribución "+ subtipo2
     explicacion = "Inicio: fecha de inicio " + str(inicio)
@@ -10949,7 +11096,10 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
         
-    
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
+        
     tipos1 = "modelo de tendencia determinista con tendencia " + subtipo1
     tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad2
     tipos = "Modelo que sufre drift en el dato " + str(num_drift) + " siguiendo un primer " + tipos1 + " y luego un "+ tipos2
@@ -11239,7 +11389,10 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
         parametros2 = "Modelo con una distribución con valores aleatorios entre params2[0] = " + str(params2[0]) +" y params2 [1] =" + str(params2[1])
         mean2 = "Información no relevante"
         var2 = "Información no relevante"
-        
+    
+    if dist2 !=15 and dist2!= 16 and dist2!=17:
+        mean = float(mean)
+        var = float (var)
     
     tipos1 = "modelo de tendencia determinista con tendencia " + subtipo1
     tipos2 = "Modelo periodico siguiendo una distribución " + subtipo2 + " con " + periodicidad2
@@ -11250,7 +11403,7 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
     explicacion = explicacion + ". Tipo1: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> tipo1: " + str(tipo1)
     explicacion = explicacion + ". coef_error1: coeficientes de errores de e la tendencia (e0) --> coef_error1: " + str(coef_error1)
     explicacion = explicacion + ". Dist2: normal(1), binomial(2), poisson(3), geométrica(4), hipergeométrica(5), constante(6), uniforme(7), lognormal(8), exponencial(9), gamma(10), beta(11), chi cuadrado(12), t-student(13), pareto(14), linealmente decreciente(15), linealmente creciente(16) y random(17) --> "+ str(dist2) 
-    explicacion += ". p2 : indica la amplitud del periodo (tipo=1) o la cantidad de periodos (tipo=2) --> " + str(p2) 
+    explicacion += ". p2: indica la amplitud del periodo (tipo=1) o la cantidad de periodos (tipo=2) --> " + str(p2) 
     explicacion += ". Tipo2 : por amplitud (1) / por cantidad (2) --> tipo1: "+ str(tipo2)
     explicacion += ". num_drift: dato en el que se produce el cambio de distribución --> " + str(num_drift)
     explicacion = explicacion + ". Columna: nombre de la columnas --> " + columna[0]
@@ -11299,9 +11452,8 @@ def objetivo_lineal(df_caract,a,b,columna):
     df = df_caract.copy()
     df[columna] = a + b * df_caract[df_caract.columns[0]]
     return df
-
  
-# Generación de nuevas variables a partir de las anterionres  
+# Creación de datos obtenidos a partir de una relación lineal de los datos previos.
 @app.post("/Variables/Lineal")
 async def obtener_datos(a : float, b: float, indice:str, columna:str, file: UploadFile = File(...)) :
     
@@ -11326,7 +11478,8 @@ async def obtener_datos(a : float, b: float, indice:str, columna:str, file: Uplo
     response = StreamingResponse(stream, media_type="text/csv")
     response.headers["Content-Disposition"] = "attachment; filename=objetivo-lineal.csv"
     return response 
-    
+ 
+# Gráfica de datos obtenidos a partir de una relación lineal.   
 @app.post("/Plot/Variables/Lineal")
 async def obtener_grafica(a : float, b: float, indice:str, columna:str, file: UploadFile = File(...)) :
 
@@ -11348,9 +11501,7 @@ async def obtener_grafica(a : float, b: float, indice:str, columna:str, file: Up
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
 # Crea una columna Target: y = sumatorio a[i] * x ^ i
-
 def objetivo_polinomico(df_caract,a, columna):
     df = df_caract.copy()
     df[columna] = np.zeros(df.shape[0])
@@ -11358,6 +11509,7 @@ def objetivo_polinomico(df_caract,a, columna):
         df[columna] = df[columna] + a[i]*df_caract[df_caract.columns[0]]**i
     return df
 
+# Creación de datos obtenidos a partir de una relación polinómica de los datos previos.
 @app.post("/Variables/Polinomico")
 async def obtener_datos (indice:str, columna:str, a: List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
     
@@ -11383,6 +11535,7 @@ async def obtener_datos (indice:str, columna:str, a: List[float]= Query(...,desc
     response.headers["Content-Disposition"] = "attachment; filename=objetivo-polinomico.csv"
     return response 
 
+# Gráfica de datos obtenidos a partir de una relación polinómica de los datos previos.
 @app.post("/Plot/Variables/Polinomico")
 async def obtener_grafica( indice:str, columna:str, a: List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -11404,12 +11557,12 @@ async def obtener_grafica( indice:str, columna:str, a: List[float]= Query(...,de
     return StreamingResponse(buffer,media_type="image/png")
 
 # Crea una columna Target: y = a * e ^ (b * x)
-
 def objetivo_exp(df_caract,a,b,columna):
     df = df_caract.copy()
     df[columna] = a * np.exp(b* df_caract[df_caract.columns[0]])
     return df
 
+# Creación de datos obtenidos a partir de una relación exponencial de los datos previos.
 @app.post("/Variables/Exponencial")
 async def obtener_datos( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
     
@@ -11435,6 +11588,7 @@ async def obtener_datos( a:float,b:float,indice:str, columna:str, file: UploadFi
     response.headers["Content-Disposition"] = "attachment; filename=objetivo-exponencial.csv"
     return response 
 
+# Gráfica de datos obtenidos a partir de una relación exponencial de los datos previos.
 @app.post("/Plot/Variables/Exponencial")
 async def obtener_grafica( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
 
@@ -11457,12 +11611,12 @@ async def obtener_grafica( a:float,b:float,indice:str, columna:str, file: Upload
     return StreamingResponse(buffer,media_type="image/png")
 
 # Crea una columna Target: y = a + b * log (x)
-
 def objetivo_log(df_caract,a,b,columna):
     df = df_caract.copy()
     df[columna] = a + b * np.log(df_caract[df_caract.columns[0]])
     return df
 
+# Creación de datos obtenidos a partir de una relación logarítmica de los datos previos.
 @app.post("/Variables/Logaritmica")
 async def obtener_datos( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
     
@@ -11488,6 +11642,7 @@ async def obtener_datos( a:float,b:float,indice:str, columna:str, file: UploadFi
     response.headers["Content-Disposition"] = "attachment; filename=objetivo-logaritmico.csv"
     return response 
 
+# Gráfica de datos obtenidos a partir de una relación logarítmica de los datos previos.
 @app.post("/Plot/Variables/Logaritmica")
 async def obtener_grafica( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -11508,7 +11663,6 @@ async def obtener_grafica( a:float,b:float,indice:str, columna:str, file: Upload
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
 # Crea una columna Target: y = a + sumatorio b[i] * x [i]
 def multivariante(df_caract,a,b,columna):
     df = df_caract.copy()
@@ -11517,6 +11671,7 @@ def multivariante(df_caract,a,b,columna):
         df[columna] = df[columna] + b[k] * df_caract[df.columns[k]]
     return df
 
+# Creación de datos obtenidos como combinación lineal de los otros
 @app.post("/Variables/Multivariante")
 async def obtener_datos(a:float, indice:str, columna:str, b :List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
     
@@ -11544,6 +11699,7 @@ async def obtener_datos(a:float, indice:str, columna:str, b :List[float]= Query(
     response.headers["Content-Disposition"] = "attachment; filename=objetivo-multivariante.csv"
     return response 
 
+# Gráfica de datos obtenidos como combinación lineal de los otros
 @app.post("/Plot/Variables/Multivariante")
 async def obtener_grafica(a:float, indice:str, columna:str, b :List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
 
@@ -11567,7 +11723,6 @@ async def obtener_grafica(a:float, indice:str, columna:str, b :List[float]= Quer
 
 
 # Crea una columna Target: y = a + sumatorio b[i][i] * x [i] + sumatorio b[j][k]x[j]x[k]
-
 def interaccion(df_caract,a,b,columna):
     df = df_caract.copy()
     df[columna] = a
@@ -11580,7 +11735,7 @@ def interaccion(df_caract,a,b,columna):
 class MatrixBody(BaseModel):
     matrix: List[List[float]]
     
-#Mirar matriz
+# Creación de datos obtenidos tras aplicar una matriz de correlación para obtener nuevos datos
 @app.post("/Variables/Interaccion")
 async def obtener_datos(a:float, indice:str, columna:str, b: str, file: UploadFile = File(...)) :
     
@@ -11611,6 +11766,7 @@ async def obtener_datos(a:float, indice:str, columna:str, b: str, file: UploadFi
     response.headers["Content-Disposition"] = "attachment; filename=objetivo-interaccion.csv"
     return response 
 
+# Gráfico de datos obtenidos tras aplicar una matriz de correlación para obtener nuevos datos
 @app.post("/Plot/Variables/Interaccion")
 async def obtener_grafica(a:float, indice:str, columna:str, b: str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -11638,12 +11794,12 @@ async def obtener_grafica(a:float, indice:str, columna:str, b: str, file: Upload
     return StreamingResponse(buffer,media_type="image/png")
 
 # Crea una columna Target: y = a / x ^ n
-
 def objetivo_prop_inversa(df_caract,a,n,columna):
     df = df_caract.copy()
     df[columna] = a / (df_caract[df_caract.columns[0]] ** n)
     return df
 
+# Creación de datos obtenidos tras aplicar la inversa a los datos previos
 @app.post("/Variables/Inversa")
 async def obtener_datos(a:float, n:int , indice:str, columna:str, file: UploadFile = File(...)) :
     
@@ -11669,6 +11825,7 @@ async def obtener_datos(a:float, n:int , indice:str, columna:str, file: UploadFi
     response.headers["Content-Disposition"] = "attachment; filename=objetivo-inversa.csv"
     return response 
 
+# Gráfica de datos obtenidos tras aplicar la inversa a los datos previos
 @app.post("/Plot/Variables/Inversa")
 async def obtener_grafica(a:float, n:int , indice:str, columna:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -11691,7 +11848,6 @@ async def obtener_grafica(a:float, n:int , indice:str, columna:str, file: Upload
 
 
 # Crea una columna Target: Si x < umbral, y = f(x). En otro caso, y = g(x)
-
 def objetivo_escalonada(df_caract,f,g,umbral,columna):
     df = df_caract.copy()
     df[columna] = np.zeros(df_caract.shape[0])
@@ -11727,6 +11883,7 @@ def logaritmo(x):
 def raiz(x):
     return math.sqrt(x+3) - 24
 
+# Funciones definidas 
 def elegir_funcion(funcion):
     
     if funcion=='Lineal':
@@ -11765,7 +11922,8 @@ def elegir_funcion(funcion):
         return math.expm1
     elif funcion == 'Ceil':
         return math.ceil
-    
+
+# Creación csv con datos obtenidos tras aplicar una función u otra según la variable sea mayor / menor que un umbral    
 @app.post("/Variables/Escalonada")
 async def obtener_datos(umbral:float, f: str,g:str , indice:str, columna:str, file: UploadFile = File(...)) :
     
@@ -11793,6 +11951,7 @@ async def obtener_datos(umbral:float, f: str,g:str , indice:str, columna:str, fi
     response.headers["Content-Disposition"] = "attachment; filename=objetivo-escalonada.csv"
     return response 
 
+# Gráfica de datos obtenidos tras aplicar una función u otra según la variable sea mayor / menor que un umbral 
 @app.post("/Plot/Variables/Escalonada")
 async def obtener_grafica(umbral:float, f: str,g:str , indice:str, columna:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -11815,10 +11974,7 @@ async def obtener_grafica(umbral:float, f: str,g:str , indice:str, columna:str, 
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
-
 # Crea una columna Target: Si x cumple condM --> y = fM(x1,...,xN)
-
 def objetivo_condicional(df_caract,columna,cond,func):
     df = df_caract.copy()
     df[columna] = np.zeros(df_caract.shape[0])
@@ -11870,6 +12026,7 @@ def menoresI(x,valor1,valor2):
 def verdad(x):
     return True
 
+# Condiciones predefinidas
 def elegir_condicion(cond):
     
     if cond[1:7]=='MenorI':
@@ -11884,7 +12041,6 @@ def elegir_condicion(cond):
         valor = cond[7:]
         num = float(valor)
         return partial(mayorI,valor=num,indice=indice)
-
     
     elif cond[1:9]=='MenoresI':
         valor1 = cond[0]
@@ -11892,6 +12048,7 @@ def elegir_condicion(cond):
         num1 = int(valor1)
         num2 = int(valor2)
         return partial(menoresI,valor1=num1,valor2=num2)
+    
     elif cond[1:9]=='MayoresI':
         valor1 = cond[0]
         valor2 = cond[9]
@@ -11905,12 +12062,14 @@ def elegir_condicion(cond):
         num1 = int(valor1)
         num2 = int(valor2)
         return partial(iguales,valor1=num1,valor2=num2)
+    
     elif cond[1:8]=='Menores':
         valor1 = cond[0]
         valor2 = cond[8]
         num1 = int(valor1)
         num2 = int(valor2)
         return partial(menores,valor1=num1,valor2=num2)
+    
     elif cond[1:8]=='Mayores':
         valor1 = cond[0]
         valor2 = cond[8]
@@ -11924,12 +12083,14 @@ def elegir_condicion(cond):
         valor = cond[6:]
         num = float(valor)
         return partial(igual,valor=num,indice=indice)
+    
     elif cond[1:6]=='Menor':
         ind = cond[0]
         indice = int(ind)
         valor = cond[6:]
         num = float(valor)
         return partial(menor,valor=num,indice=indice)
+    
     elif cond[1:6]=='Mayor':
         ind = cond[0]
         indice = int(ind)
@@ -12035,7 +12196,7 @@ def ceilM (x):
     result = linealM(x)
     return math.ceil(result)
 
-
+# Definición de funciones predefinidas que podemos usar
 def elegir_funcion_multi(funcion):
     
     if funcion=='Lineal':
@@ -12075,7 +12236,7 @@ def elegir_funcion_multi(funcion):
     elif funcion == 'Ceil':
         return ceilM     
 
-
+# Creación de datos obtenidos tras aplicar una función a una combinación lineal de las variables dependiendo de ciertas condiciones
 @app.post("/Variables/Condicional")
 async def obtener_datos( funciones: List[str],condiciones: List[str] , indice:str, columna:str, file: UploadFile = File(...)) :
     
@@ -12111,6 +12272,7 @@ async def obtener_datos( funciones: List[str],condiciones: List[str] , indice:st
     response.headers["Content-Disposition"] = "attachment; filename=objetivo-condicional.csv"
     return response 
 
+# Gráfica de datos obtenidos tras aplicar una función a una combinación lineal de las variables dependiendo de ciertas condiciones
 @app.post("/Plot/Variables/Condicional")
 async def obtener_grafica( funciones: List[str],condiciones: List[str] , indice:str, columna:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -12154,8 +12316,7 @@ def objetivo_funcional(df_caract,columna,f):
         df.loc[k,columna]=f(a)
     return df
 
-
-
+# Creación de datos obtenidos tras aplicar una función a una combinación lineal de las variables.
 @app.post("/Variables/Funcional")
 async def obtener_datos( funciones: str , indice:str, columna:str, file: UploadFile = File(...)) :
     
@@ -12182,6 +12343,7 @@ async def obtener_datos( funciones: str , indice:str, columna:str, file: UploadF
     response.headers["Content-Disposition"] = "attachment; filename=objetivo-funcional.csv"
     return response 
 
+# Gráfica de datos obtenidos tras aplicar una función a una combinación lineal de las variables.
 @app.post("/Plot/Variables/Funcional")
 async def obtener_grafica( funciones: str , indice:str, columna:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -12204,7 +12366,6 @@ async def obtener_grafica( funciones: str , indice:str, columna:str, file: Uploa
     return StreamingResponse(buffer,media_type="image/png")
 
 # Técnicas de aumentación de datos: 
-
 # Definimos nuevos datos indicando el número de datos a generar, la frequencia y el tipo de interpolación (lineal/cubico).
 def interpolacion_max(df,kind,num,freq):
     df=df.reset_index()
@@ -12274,7 +12435,7 @@ def interpolacion_spline(df,s):
         df[x]=spline_interpolation(df[x],s)
     return df
 
-# Interpolación
+# Gráfica con datos obtenidos a partir de una interpolación lineal/cúbica y tomando como final el minimo valor
 @app.post("/Aumentar/Interpolacion/Min")
 async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12300,6 +12461,7 @@ async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: Upload
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion-min.csv"
     return response 
 
+# Creación csv con datos obtenidos a partir de una interpolación lineal/cúbica y tomando como final el mínimo valor
 @app.post("/Plot/Aumentar/Interpolacion/Min")
 async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12323,7 +12485,7 @@ async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: Upload
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
+# Creación csv con datos obtenidos a partir de una interpolación lineal/cúbica y tomando como final el máximo valor
 @app.post("/Aumentar/Interpolacion/Max")
 async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12349,7 +12511,7 @@ async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: Upload
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion-max.csv"
     return response 
 
-
+# Gráfica con datos obtenidos a partir de una interpolación lineal/cúbica y tomando como final el máximo valor
 @app.post("/Plot/Aumentar/Interpolacion/Max")
 async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12372,6 +12534,7 @@ async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: Upload
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
+# Creación csv con datos obtenidos a partir de una interpolación a través del punto medio de los datos previos y posteriores
 @app.post("/Aumentar/Interpolacion/Medio")
 async def obtener_datos(freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12397,7 +12560,7 @@ async def obtener_datos(freq:str, indice:str, file: UploadFile = File(...)) :
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion-medio.csv"
     return response 
 
-
+# Gráfica de datos obtenidos con una interpolación a través del punto medio de los datos previos y posteriores
 @app.post("/Plot/Aumentar/Interpolacion/Medio")
 async def obtener_grafica(freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12420,7 +12583,7 @@ async def obtener_grafica(freq:str, indice:str, file: UploadFile = File(...)) :
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
+# Creación csv de datos obtenidos con la interpolación spline
 @app.post("/Aumentar/Interpolacion/Spline")
 async def obtener_datos(s:int, indice:str, file: UploadFile = File(...)) :
     
@@ -12446,6 +12609,7 @@ async def obtener_datos(s:int, indice:str, file: UploadFile = File(...)) :
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion-spline.csv"
     return response 
 
+# Gráfica con los datos obtenido de la interpolación spline 
 @app.post("/Plot/Aumentar/Interpolacion/Spline")
 async def obtener_grafica(s:int, indice:str, file: UploadFile = File(...)) :
     
@@ -12469,7 +12633,7 @@ async def obtener_grafica(s:int, indice:str, file: UploadFile = File(...)) :
     return StreamingResponse(buffer,media_type="image/png")
 
 # Random Sampling
-
+# Barajamos los datos de forma aleatoria 
 def sampling(df,size,freq):
     indice = series_periodos(df.index[0],size+df.shape[0],freq)
     for x in df.columns:
@@ -12482,7 +12646,7 @@ def sampling(df,size,freq):
             df_sampling= df_sampling.join(df_new, how="outer")
     return df_sampling
 
-
+# Creación csv con los datos obtenidos mediante sampling 
 @app.post("/Aumentar/Sampling")
 async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12508,7 +12672,7 @@ async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(.
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-sampling.csv"
     return response 
 
-
+# Gráfica con los datos obtenidos mediante sampling 
 @app.post("/Plot/Aumentar/Sampling")
 async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12533,9 +12697,7 @@ async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File
 
 
 # Técnicas estadísticas
-
 # Devuelve df con datos añadidos calculados a partir de una distribución normal con la media y desviación de los datos pasados 
-
 def normal(df,freq,size):
     indice=series_periodos(df.index[0],size+df.shape[0],freq)
     for x in df.columns:
@@ -12563,7 +12725,6 @@ def log_normal(df,freq,sigma,size):
     return df_lognormal
 
 # Calcula nuevos datos usando: media + z * desv donde la media y las desv son las de los datos pasados y z = raiz (-2 * log u1) cos(2 pi u2) tal que u1,u2 son dos randoms entre 0 e 1
-
 def box_muller_transform(mean, std_dev, size=100):
     u1, u2 = np.random.rand(size), np.random.rand(size)
     z1 = np.sqrt(-2 * np.log(u1)) * np.cos(2 * np.pi * u2)
@@ -12581,6 +12742,7 @@ def box_muller(df,freq,size):
             df_bm = df_bm.join(df_new, how="outer")
     return df_bm
 
+# Creación csv de datos obtenidos con una distribución normal con la media y desv típica de los datos
 @app.post("/Aumentar/Normal")
 async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12606,6 +12768,7 @@ async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(.
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-normal.csv"
     return response 
 
+# Gráfica de los datos obtenidos con una distribución normal con la media y desv típica de los datos
 @app.post("/Plot/Aumentar/Normal")
 async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12628,6 +12791,7 @@ async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
+# Creación csv de datos obtenidos con una distribución lognormal
 @app.post("/Aumentar/Lognormal")
 async def obtener_datos(sigma:float, size:int,freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12653,6 +12817,7 @@ async def obtener_datos(sigma:float, size:int,freq:str, indice:str, file: Upload
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-lognormal.csv"
     return response 
 
+# Gráfica de los datos obtenidos con una distribución lognormal
 @app.post("/Plot/Aumentar/Lognormal")
 async def obtener_grafica(sigma:float, size:int,freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12675,7 +12840,7 @@ async def obtener_grafica(sigma:float, size:int,freq:str, indice:str, file: Uplo
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
+# Creación csv de datos obtenidos con box muller
 @app.post("/Aumentar/Muller")
 async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12701,7 +12866,7 @@ async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(.
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-muller.csv"
     return response 
 
-
+# Gráfica de datos obtenidos con box muller
 @app.post("/Plot/Aumentar/Muller")
 async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12727,7 +12892,6 @@ async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File
 
 # Bootstrapping 
 # Obtenemos nuevos datos barajando los originales + introduciendo ruido
-
 def agregar_bootstrapping(df,freq):
     
     for x in df.columns:
@@ -12742,6 +12906,7 @@ def agregar_bootstrapping(df,freq):
             df_bootstrap= df_bootstrap.join(a, how="outer")
     return df_bootstrap
 
+# Creación csv barajando los originales + introduciendo ruido
 @app.post("/Aumentar/Bootstrap")
 async def obtener_datos(freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12767,6 +12932,7 @@ async def obtener_datos(freq:str, indice:str, file: UploadFile = File(...)) :
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-bootstrapping.csv"
     return response 
 
+# Gráfica barajando los originales + introduciendo ruido
 @app.post("/Plot/Aumentar/Bootstrap")
 async def obtener_grafica(freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12789,8 +12955,7 @@ async def obtener_grafica(freq:str, indice:str, file: UploadFile = File(...)) :
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-# Duplicar
-
+# Duplicar algunos datos y añadir ruido
 def duplicate_and_perturb(data, duplication_factor=0.3, perturbation_std=0.05):
     duplicated_data = []
     np.random.seed(8)
@@ -12801,7 +12966,6 @@ def duplicate_and_perturb(data, duplication_factor=0.3, perturbation_std=0.05):
     return np.array(duplicated_data)
 
 # Duplicamos algunos datos añadiendole cierto ruido.
-
 def duplicados(df,freq,duplication_factor=0.3,perturbation_std=0.05):
     
     for x in df.columns:
@@ -12816,6 +12980,7 @@ def duplicados(df,freq,duplication_factor=0.3,perturbation_std=0.05):
             
     return df_dd
 
+# Creación csv con algunos datos duplicados y con ruido
 @app.post("/Aumentar/Duplicado")
 async def obtener_datos(freq:str,duplication_factor:float, perturbation_std: float, indice:str, file: UploadFile = File(...)) :
     
@@ -12842,8 +13007,7 @@ async def obtener_datos(freq:str,duplication_factor:float, perturbation_std: flo
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-duplicado.csv"
     return response 
 
-
-
+# Gráfica con algunos datos duplicados y con ruido
 @app.post("/Plot/Aumentar/Duplicado")
 async def obtener_grafica(freq:str,duplication_factor:float, perturbation_std: float, indice:str, file: UploadFile = File(...)) :
     
@@ -12867,10 +13031,8 @@ async def obtener_grafica(freq:str,duplication_factor:float, perturbation_std: f
     return StreamingResponse(buffer,media_type="image/png")
 
 
-# Comb lineal
-
+# Combinación lineal
 # Calculamos nuevos datos como combinación lineal de los otros 
-
 def linear_combinations(data, n_combinations):
     combinations = []
     for _ in range(n_combinations):
@@ -12893,6 +13055,7 @@ def agregar_comb(df,freq,size):
             df_dl = df_dl.join(df_new, how="outer")
     return df_dl
 
+# Creación csv con datos obtenidos como combinación lineal de los previos
 @app.post("/Aumentar/Comb_lineal")
 async def obtener_datos(freq:str,size:int, indice:str, file: UploadFile = File(...)) :
     
@@ -12918,6 +13081,7 @@ async def obtener_datos(freq:str,size:int, indice:str, file: UploadFile = File(.
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-comb-lineal.csv"
     return response 
 
+# Gráfica con los datos obtenidos como combinación lineal de los datos previos
 @app.post("/Plot/Aumentar/Comb_lineal")
 async def obtener_grafica(freq:str,size:int, indice:str, file: UploadFile = File(...)) :
     
@@ -12944,7 +13108,6 @@ async def obtener_grafica(freq:str,size:int, indice:str, file: UploadFile = File
 # Técnicas que realizan modificaciones en los datos:
 
 # Traslacion
-
 # Desplazamiento espacial de la serie
 def traslacion(df,shift,freq):
     df_trasl =df.copy()
@@ -12960,6 +13123,7 @@ def traslacion(df,shift,freq):
             df_trasl = df_trasl.join(df_new, how="outer")
     return df_trasl
 
+# Creación csv con los datos trasladados
 @app.post("/Aumentar/Traslacion")
 async def obtener_datos(shift:float, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -12985,6 +13149,7 @@ async def obtener_datos(shift:float, freq:str, indice:str, file: UploadFile = Fi
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-traslacion.csv"
     return response 
 
+# Gráfica con los datos trasladados 
 @app.post("/Plot/Aumentar/Traslacion")
 async def obtener_grafica(shift:float, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -13008,9 +13173,7 @@ async def obtener_grafica(shift:float, freq:str, indice:str, file: UploadFile = 
     return StreamingResponse(buffer,media_type="image/png")
     
 # Agregación de ruido harmónico
-
 # Añadimos ruido harmonico a la muestra con cierta amplitud y frequencia
-
 def add_harmonic_noise(df,freq, amplitude=0.1, frequency=0.5):
     df_harm = df.copy()
     for x in df_harm.columns:
@@ -13028,7 +13191,7 @@ def add_harmonic_noise(df,freq, amplitude=0.1, frequency=0.5):
     
     return df_harm
 
-
+# Creación csv con datos con ruido harmónico
 @app.post("/Aumentar/Harmonico")
 async def obtener_datos(amplitude:float, frequency:float,freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -13054,6 +13217,7 @@ async def obtener_datos(amplitude:float, frequency:float,freq:str, indice:str, f
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-ruido-harmonico.csv"
     return response 
 
+# Gráfica obtenida tras aplicar ruido harmónico 
 @app.post("/Plot/Aumentar/Harmonico")
 async def obtener_grafica(amplitude:float, frequency:float,freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -13078,8 +13242,7 @@ async def obtener_grafica(amplitude:float, frequency:float,freq:str, indice:str,
 
 
 # Escalado
-
-# Desplazamiento espacial de la serie
+# Multiplicación por un factor de la serie
 def escalado(df,freq,factor):
     df_esc =df.copy()
     for x in df_esc.columns:
@@ -13094,6 +13257,7 @@ def escalado(df,freq,factor):
             df_esc= df_esc.join(df_new, how="outer")
     return df_esc
 
+# Creación csv con los datos obtenidos al escalar los datos
 @app.post("/Aumentar/Escalado")
 async def obtener_datos(factor:float, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -13119,6 +13283,7 @@ async def obtener_datos(factor:float, freq:str, indice:str, file: UploadFile = F
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-escalado.csv"
     return response 
 
+# Gráfica de los datos obtenidos tras realizar un escalado de los datos 
 @app.post("/Plot/Aumentar/Escalado")
 async def obtener_grafica(factor:float, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -13149,8 +13314,7 @@ def pulse_noise(data, num_pulses=5, amplitude=1):
         pulse_data.append(data[i]+ np.random.uniform(-amplitude, amplitude))
     return pulse_data
 
-# Calculamos nuevos datos como combinación lineal de los otros 
-
+# Calculamos nuevos datos splicando saltos en datos aleatorios
 def agregar_saltos(df,freq,num_saltos,amplitud):
     for x in df.columns:
         data = df[x]
@@ -13164,7 +13328,7 @@ def agregar_saltos(df,freq,num_saltos,amplitud):
             df_saltos = df_saltos.join(df_new, how="outer")
     return df_saltos
 
-
+# Creación csv con los datos obtenidos de realizar saltos en los datos 
 @app.post("/Aumentar/Saltos")
 async def obtener_datos(num_saltos:int, amplitud:float, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -13188,6 +13352,7 @@ async def obtener_datos(num_saltos:int, amplitud:float, freq:str, indice:str, fi
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-saltos.csv"
     return response 
 
+# Gráfica de los datos obtenidos de realizar saltos en los datos 
 @app.post("/Plot/Aumentar/Saltos")
 async def obtener_grafica(num_saltos:int, amplitud:float, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -13208,14 +13373,14 @@ async def obtener_grafica(num_saltos:int, amplitud:float, freq:str, indice:str, 
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-# Mixup
+# Mix up: creación de un nuevo dato a partir del data set previo y un dato al azar, usando una comb lineal obtenida con una distribución beta
 def mixup(data, alpha=0.2):
     lambda_ = np.random.beta(alpha, alpha)
     indices = np.random.permutation(len(data))
     data_mixup = lambda_ * data + (1 - lambda_) * data[indices]
     return data_mixup
 
-# Agregar combinación del data junto a otro dato aleatorio
+# Agregar combinación lineal del dato junto a otro dato aleatorio
 def agregar_mixup(df,freq,alpha=0.2):
     df_mix =df.copy()
     for x in df_mix.columns:
@@ -13230,6 +13395,7 @@ def agregar_mixup(df,freq,alpha=0.2):
             df_mix= df_mix.join(df_new, how="outer")
     return df_mix
 
+# Creación csv a partir de la técnica de mixup
 @app.post("/Aumentar/Mixup")
 async def obtener_datos(alpha:float, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -13255,6 +13421,7 @@ async def obtener_datos(alpha:float, freq:str, indice:str, file: UploadFile = Fi
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-mixup.csv"
     return response 
 
+# Gráfica de la técnica de mixup
 @app.post("/Plot/Aumentar/Mixup")
 async def obtener_grafica(alpha:float, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -13277,6 +13444,7 @@ async def obtener_grafica(alpha:float, freq:str, indice:str, file: UploadFile = 
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
+# Tomamos dos valores al azar y realizamos la media de los valores
 def random_mix(data, n_samples=100):
     mixed_data = []
     for _ in range(n_samples):
@@ -13285,7 +13453,6 @@ def random_mix(data, n_samples=100):
     return np.array(mixed_data)
 
 # Los valores se calculan tomando dos valores al azar y haciendo la media
-
 def agregar_random_mix(df,freq,n_samples):
     indice=series_periodos(df.index[0],n_samples+df.shape[0],freq)
     for x in df.columns:
@@ -13297,6 +13464,7 @@ def agregar_random_mix(df,freq,n_samples):
             df_sampling= df_sampling.join(df_new, how="outer")
     return df_sampling
 
+# Creación csv de la técnica de randon mix
 @app.post("/Aumentar/Random_mix")
 async def obtener_datos(n_samples:int, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -13322,6 +13490,7 @@ async def obtener_datos(n_samples:int, freq:str, indice:str, file: UploadFile = 
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-random-mix.csv"
     return response 
 
+# Gráfica de la técnica de randon mix
 @app.post("/Plot/Aumentar/Random_mix")
 async def obtener_grafica(n_samples:int, freq:str, indice:str, file: UploadFile = File(...)) :
     
@@ -13345,7 +13514,6 @@ async def obtener_grafica(n_samples:int, freq:str, indice:str, file: UploadFile 
     return StreamingResponse(buffer,media_type="image/png")
 
 # Transformaciones matemáticas
-
 # Aplicamos operaciones matemáticas
 def agregar_matematica(df,freq,funcion,factor=1):
     indice=series_periodos(df.index[0],2*df.shape[0],freq)
@@ -13373,7 +13541,7 @@ def agregar_matematica(df,freq,funcion,factor=1):
             df_transf= df_transf.join(df_new, how="outer")
     return df_transf
 
-
+# Creación csv con los datos obtenidos de aplicar la técnica de aumentación de datos 
 @app.post("/Aumentar/Matematica")
 async def obtener_datos(funcion:str, freq:str, indice:str,factor : Union[float,None] = 1, file: UploadFile = File(...)) :
 
@@ -13397,6 +13565,7 @@ async def obtener_datos(funcion:str, freq:str, indice:str,factor : Union[float,N
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-matematica.csv"
     return response 
 
+# Gráfica de la técnica de aumentación de datos mediante transformaciones matemáticas
 @app.post("/Plot/Aumentar/Matematica")
 async def obtener_grafica(funcion:str, freq:str, indice:str,factor : Union[float,None] = 1, file: UploadFile = File(...)) :
 
@@ -13421,9 +13590,7 @@ async def obtener_grafica(funcion:str, freq:str, indice:str,factor : Union[float
 # Técnicas de reducción 
 
 # Ventana deslizante
-
 # Calculo con ventanas deslizantes del tamaño pasado como parámetro
-
 def ventanas(df,ventana):
     df_o = df.copy()
     for x in df.columns:
@@ -13431,6 +13598,7 @@ def ventanas(df,ventana):
     df_o = df_o.dropna()
     return df_o
 
+# Creación csv con la técnica de ventana deslizante
 @app.post("/Aumentar/Ventana")
 async def obtener_datos(ventana:int, indice:str, file: UploadFile = File(...)) :
 
@@ -13455,6 +13623,7 @@ async def obtener_datos(ventana:int, indice:str, file: UploadFile = File(...)) :
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-ventana.csv"
     return response 
 
+# Gráfica con la técnica de ventana deslizante
 @app.post("/Plot/Aumentar/Ventana")
 async def obtener_grafica(ventana:int, indice:str, file: UploadFile = File(...)) :
 
@@ -13477,12 +13646,10 @@ async def obtener_grafica(ventana:int, indice:str, file: UploadFile = File(...))
     return StreamingResponse(buffer,media_type="image/png")
      
 # Recorte
-
 def crop(series, start, end):
     return series[start:end]
 
 # Recortamos la serie quedándonos solo con una parte desde la posición de inicio al fin
-
 def recorte(df_i,start,end):
     df_o = df_i.copy()
     for x in df_o.columns:
@@ -13490,6 +13657,7 @@ def recorte(df_i,start,end):
     df_o=df_o.dropna()
     return df_o
 
+# Creación csv con la técnica de recorte
 @app.post("/Aumentar/Recorte")
 async def obtener_datos(start:int,end:int, indice:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -13513,6 +13681,7 @@ async def obtener_datos(start:int,end:int, indice:str, file: UploadFile = File(.
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-recorte.csv"
     return response 
 
+# Gráfrica técnica de recorte
 @app.post("/Plot/Aumentar/Recorte")
 async def obtener_grafica(start:int,end:int, indice:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -13533,9 +13702,8 @@ async def obtener_grafica(start:int,end:int, indice:str, file: UploadFile = File
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
-# Definición de modelo autorregresivos con búsqueda de parámetros realizada por grid search
-def prediccion_autorregresivos(datos,datos_train,datos_test, columna):
+# Definición de modelo autorregresivos con búsqueda de parámetros realizada por grid search devolviendo el error cuadrático medio
+def prediccion_sarimax(datos,datos_train,datos_test, columna):
     
     # Grid search
     forecaster = ForecasterSarimax(
@@ -13546,7 +13714,7 @@ def prediccion_autorregresivos(datos,datos_train,datos_test, columna):
                 )
 
     param_grid = {
-        'order': [(0, 1, 0), (0, 1, 1), (1, 1, 0), (1, 1, 1), (2, 1, 1), (1 ,1 ,2), ( 2, 1, 2),(0, 0, 0), (0, 0, 1), (1, 0, 0), (1, 0, 1), (2, 0, 1), (1 ,0 ,2), ( 2, 0, 2) ],
+        'order': [(0, 1, 0), (0, 1, 1), (1, 1, 0), (1, 1, 1), (2, 1, 1), (1 ,1 ,2), ( 2, 1, 2),(0, 0, 0), (0, 0, 1), (1, 0, 0), (1, 0, 1), (2, 0, 1), (1 ,0 ,2), (2, 0, 2) ],
         'seasonal_order': [(0, 0, 0, 0), (0, 1, 0, 12), (1, 1, 1, 12)],
         'trend': [None]
     }
@@ -13590,8 +13758,8 @@ def prediccion_autorregresivos(datos,datos_train,datos_test, columna):
     
     return metrics.mean_squared_error(datos_test, predicciones_m1[:len(datos_test)])
     
-# Definición de modelo autorregresivos con búsqueda de parámetros realizada por grid search
-def plot_prediccion_autorregresivos(datos,datos_train,datos_test, columna):
+# Definición de modelo autorregresivos con búsqueda de parámetros realizada por grid search devolviendo la predicción
+def plot_prediccion_sarimax(datos,datos_train,datos_test, columna):
     
     # Grid search
     forecaster = ForecasterSarimax(
@@ -13646,6 +13814,7 @@ def plot_prediccion_autorregresivos(datos,datos_train,datos_test, columna):
     
     return predicciones_m1
 
+# Error cuadrático medio modelo Sarimax
 @app.post("/Modelo/Sarimax")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -13661,8 +13830,9 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
     train = int(df.shape[0]*0.8)
-    return {prediccion_autorregresivos(df,df[:train],df[train:], df.columns[0]) }
+    return {prediccion_sarimax(df,df[:train],df[train:], df.columns[0]) }
 
+# Gráfica modelo sarimax
 @app.post("/Plot/Modelo/Sarimax")
 async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -13680,7 +13850,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     
     train = int(df.shape[0]*0.8)
     df_test = df[train:]
-    predicciones_m1=plot_prediccion_autorregresivos(df,df[:train],df_test, df.columns[0])
+    predicciones_m1=plot_prediccion_sarimax(df,df[:train],df_test, df.columns[0])
     result = pd.merge(df_test, predicciones_m1, left_index=True, right_index=True)
     plt.figure()
     result.plot(title="Predicciones Sarimax",figsize=(13,5))
@@ -13691,7 +13861,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
+# Entrenamiento del modelo autoregresivo Random Forest devolviendo el error cuadrático medio / predicción
 def error_backtesting_forecasterAutoreg(datos_train,datos_test,lags,steps):
 
     forecaster = ForecasterAutoreg(
@@ -13771,7 +13941,8 @@ def plot_backtesting_forecasterAutoreg(datos_train,datos_test,lags,steps):
 
     return predicciones
 
-@app.post("/Modelo/ForasterRF")
+# Error cuadrático medio del modelo autorregresivo Random Forest
+@app.post("/Modelo/ForecasterRF")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -13788,8 +13959,8 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     train = int(df.shape[0]*0.8)
     return {error_backtesting_forecasterAutoreg(df[:train],df[train:],10,180) }
 
-
-@app.post("/Plot/Modelo/ForasterRF")
+# Gráfica del modelo autorregresivo Random Forest
+@app.post("/Plot/Modelo/ForecasterRF")
 async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -13816,7 +13987,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
+# Entrenamiento del modelo autoregresivo directo Ridge devolviendo el error cuadrático medio / gráfica
 def error_backtesting_forecasterAutoregDirect(datos_train,datos_test,steps,lags):
 
     forecaster = ForecasterAutoregDirect(
@@ -13898,6 +14069,7 @@ def predicciones_backtesting_forecasterAutoregDirect(datos_train,datos_test,step
     # ==============================================================================
     return predicciones
 
+# Error cuadrático del modelo autorregresivo Ridge
 @app.post("/Modelo/AutoregRidge")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -13915,6 +14087,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     train = int(df.shape[0]*0.8)
     return {error_backtesting_forecasterAutoregDirect(df[:train],df[train:], df[train:].shape[0],5) }
 
+# Gráfica del modelo autorregresivo Ridge
 @app.post("/Plot/Modelo/AutoregRidge")
 async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -13944,7 +14117,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     return StreamingResponse(buffer,media_type="image/png")
 
 
-# Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test
+# Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test y devolvemos el error cuadrçatocp ,edop- 
 def error_prophet_prediccion(data_train,data_test):
     
     data_train=data_train.reset_index()
@@ -13963,7 +14136,7 @@ def error_prophet_prediccion(data_train,data_test):
 
 
 
-# Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test
+# Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test y devolvemos las predicciones
 def pred_prophet_prediccion(data_train,data_test):
     
     data_train=data_train.reset_index()
@@ -13978,7 +14151,7 @@ def pred_prophet_prediccion(data_train,data_test):
     
     return y_pred
 
-
+# Error cuadrático medio del modelo Prophet
 @app.post("/Modelo/Prophet")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -13996,6 +14169,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     train = int(df.shape[0]*0.8)
     return {error_prophet_prediccion(df[:train],df[train:]) }
 
+# Gráfica del modelo de predicción Prophet
 @app.post("/Plot/Modelo/Prophet")
 async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -14028,7 +14202,70 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
+# Error cuadrático medio de todos los modelos de predicción 
+@app.post("/Modelos")
+async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    train = int(df.shape[0]*0.8)
+    e_prophet = error_prophet_prediccion(df[:train],df[train:])
+    e_autoregRidge = error_backtesting_forecasterAutoregDirect(df[:train],df[train:], df[train:].shape[0],5) 
+    e_regRF = error_backtesting_forecasterAutoreg(df[:train],df[train:],10,180)
+    e_autoreg=prediccion_sarimax(df,df[:train],df[train:], df.columns[0])
+    return {"Error predicción autorregresivo Sarimax": e_autoreg,
+            "Error predicción forecaster Random Forest": e_regRF,
+            "Error predicción forecaster Ridge": e_autoregRidge,
+            "Error predicción prophet": e_prophet}
+    
+# Gráfica de los valores reales vs los valores de predicción de todos los modelos
+@app.post("/Modelos/Plot")
+async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    train = int(df.shape[0]*0.8)  
+    y_pred4=pred_prophet_prediccion(df[:train],df[train:])
+    y_pred2=plot_backtesting_forecasterAutoreg(df[:train],df[train:],10,180)
+    y_pred1=plot_prediccion_sarimax(df,df[:train],df[train:], df.columns[0])
+    y_pred3=predicciones_backtesting_forecasterAutoregDirect(df[:train],df[train:], df[train:].shape[0],5)
+    plt.figure()
+    y_true=df[train:].values
+    result = pd.DataFrame({
+        'Valores Reales': y_true.reshape(-1),
+        'Predicciones autorregresivos Sarimax': y_pred1.values.reshape(-1),
+        'Predicciones forecaster Random Forest': y_pred2.values.reshape(-1),
+        'Predicciones forecaster Ridge': y_pred3.values.reshape(-1),
+        'Predicciones Prophet': y_pred4
+    })
+    result.index=df[train:].index
+    result.plot(title="Predicciones Modelos",figsize=(13,7))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+# Entrenamiento de modelo regresivo lineal devolviendo la predicción / error cuadrático medio.
 def error_entrenar_linearReg(df,columns_predict):
     modelo = LinearRegression()
     l = int(df.shape[0]*0.8)
@@ -14046,6 +14283,7 @@ def pred_entrenar_linearReg(df,columns_predict):
     df_pred['Predicciones'] = modelo.predict(df[l:].drop(columns=columns_predict))
     return df_pred
 
+# Error cuadrático medio de regresión lineal
 @app.post("/Modelo/RegLineal")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -14062,6 +14300,7 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
     df.index.freq=freq
     return {error_entrenar_linearReg(df,columna) }
 
+# Gráfica modelo de regresión lineal
 @app.post("/Plot/Modelo/RegLineal")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -14087,6 +14326,7 @@ async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = Fi
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
+# Entrenamiento de modelo regresivo basado en árbol de decisión devolviendo la predicción / error cuadrático medio.
 def error_entrenar_TreeReg(df,columns_predict):
     
     l = int(df.shape[0]*0.8)
@@ -14139,6 +14379,7 @@ def pred_entrenar_TreeReg(df,columns_predict):
     
     return df_pred
 
+# Error cuadrático medio modelo árbol de decisión
 @app.post("/Modelo/DecisionTree")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -14155,6 +14396,7 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
     df.index.freq=freq
     return {error_entrenar_TreeReg(df,columna) }
 
+# Gráfica modelo árbol de decisión
 @app.post("/Plot/Modelo/DecisionTree")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
@@ -14180,7 +14422,7 @@ async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = Fi
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
+# Entrenamiento de modelo regresivo basado en Random Forest devolviendo la predicción / error cuadrático medio.
 def error_entrenar_RandomForestReg(df,columns_predict):
     
     l = int(df.shape[0]*0.8)
@@ -14237,6 +14479,7 @@ def pred_entrenar_RandomForestReg(df,columns_predict):
     
     return df_pred
 
+# Error cuadrático medio modelo Random Forest
 @app.post("/Modelo/RandomForest")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     
@@ -14254,6 +14497,7 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
     df.index.freq=freq
     return {error_entrenar_RandomForestReg(df,columna) }
 
+# Gráfica modelo Random Forest
 @app.post("/Plot/Modelo/RandomForest")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     
@@ -14280,7 +14524,7 @@ async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = Fi
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
+# Entrenamiento de modelo regresivo basado en Gradient Boosting devolviendo la predicción / error cuadrático medio.
 def error_entrenar_GradientBoostReg(df,columns_predict):
     
     l = int(df.shape[0]*0.8)
@@ -14311,7 +14555,6 @@ def error_entrenar_GradientBoostReg(df,columns_predict):
     
     return mse
 
-
 def pred_entrenar_GradientBoostReg(df,columns_predict):
     
     l = int(df.shape[0]*0.8)
@@ -14320,12 +14563,12 @@ def pred_entrenar_GradientBoostReg(df,columns_predict):
     
     modelo = GradientBoostingRegressor(random_state=42)
     param_grid = {
-    'n_estimators': [100, 200, 300],
-    'learning_rate': [0.01, 0.1, 1.0],
-    'max_depth': [3, 5, 7],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4],
-    'max_features': [None, 'sqrt', 'log2']
+        'n_estimators': [100, 200, 300],
+        'learning_rate': [0.01, 0.1, 1.0],
+        'max_depth': [3, 5, 7],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4],
+        'max_features': [None, 'sqrt', 'log2']
     } 
     grid_search = GridSearchCV(estimator=modelo, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
     grid_search.fit(X_train, y_train)
@@ -14340,6 +14583,7 @@ def pred_entrenar_GradientBoostReg(df,columns_predict):
     
     return df_pred
 
+# Error modelo Gradient Boosting
 @app.post("/Modelo/GradientBoosting")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     
@@ -14357,6 +14601,7 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
     df.index.freq=freq
     return {error_entrenar_GradientBoostReg(df,columna) }
 
+# Gráfica modelo Gradient Boosting
 @app.post("/Plot/Modelo/GradientBoosting")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     
@@ -14383,6 +14628,7 @@ async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = Fi
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
+# Entrenamiento de modelo regresivo basado en Extra Tree devolviendo la predicción / error cuadrático medio.
 def error_entrenar_ExtraTreeReg(df,columns_predict):
     
     l = int(df.shape[0]*0.8)
@@ -14438,6 +14684,7 @@ def pred_entrenar_ExtraTreeReg(df,columns_predict):
     df_pred['Predicciones'] = optimized_model.predict(df[l:].drop(columns=columns_predict))
     return df_pred
 
+# Error cuadrático medio modelo Extra Tree
 @app.post("/Modelo/ExtraTree")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     
@@ -14455,6 +14702,7 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
     df.index.freq=freq
     return {error_entrenar_ExtraTreeReg(df,columna) }
 
+# Gráfica modelo Extra Tree
 @app.post("/Plot/Modelo/ExtraTree")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     
@@ -14470,7 +14718,6 @@ async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = Fi
     
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
-    
     result = pred_entrenar_ExtraTreeReg(df,columna)
     plt.figure()
     result[[columna,'Predicciones']].plot(title="Predicciones Modelo Regresivo ExtraTree",figsize=(13,7))
@@ -14481,6 +14728,7 @@ async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = Fi
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
+# Error cuadrático medio que comete cada modelo
 @app.post("/Modelos/Error")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     
@@ -14503,6 +14751,7 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
             "Error gradient boosting":error_entrenar_GradientBoostReg(df,columna),
             "Error extra tree":error_entrenar_ExtraTreeReg(df,columna)}
     
+# Gráfica con los valores reales vs los valores de predicción de cada modelo
 @app.post("/Plot/Modelos")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     
@@ -14523,13 +14772,10 @@ async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = Fi
     res1 = result1['Predicciones'].values.reshape(-1)
     result2 = pred_entrenar_TreeReg(df,columna)
     res2 = result2['Predicciones'].values.reshape(-1)
-
     result3 = pred_entrenar_RandomForestReg(df,columna)
     res3 = result3['Predicciones'].values.reshape(-1)
-
     result4 = pred_entrenar_GradientBoostReg(df,columna)
     res4 = result4['Predicciones'].values.reshape(-1)
-
     result5 = pred_entrenar_ExtraTreeReg(df,columna)
     res5 = result5['Predicciones'].values.reshape(-1)
 
