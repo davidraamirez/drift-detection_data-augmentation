@@ -285,7 +285,7 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, tipo:int , error:
 
 # Modelos con ciertas distribuciones:
 def crear_datos(distr,params,num_datos):
-    
+    np.random.seed(1)
     if distr == 1 :
         datos = np.random.normal(params[0],params[1],num_datos)
         
