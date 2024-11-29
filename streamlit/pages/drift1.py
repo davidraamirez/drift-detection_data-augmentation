@@ -1,3 +1,4 @@
+import json
 import streamlit as st
 import pandas as pd 
 import matplotlib.pyplot as plt
@@ -43,7 +44,7 @@ try:
         # Leer el contenido de la imagen
         image = Image.open(BytesIO(responsePlot.content))
         # Mostrar la imagen en la aplicación
-        st.image(image, caption="Imagen obtenida de la API") 
+        st.image(image, caption="Serie temporal") 
             
     else:
         st.error(f"Error al consultar la API: {responsePlot.text}")
@@ -73,6 +74,13 @@ try:
     responseCUSUM = requests.post(api_urlCUSUM,files=files)
     files = {'file': ('datos-distribucion-fin.csv', pd.io.common.BytesIO(data), 'text/csv')}
     responsePH = requests.post(api_urlPH,files=files)
+    
+    driftKS = json.loads(responseKS.text)
+    driftJS = json.loads(responseJS.text)
+    driftPSI = json.loads(responsePSI.text)
+    driftPSIQ = json.loads(responsePSIQ.text)
+    driftCUSUM = json.loads(responseCUSUM.text)
+    driftPH = json.loads(responsePH.text)
  
     # Mostrar datos si la respuesta es exitosa
     if responseKS.status_code == 200 and responseJS.status_code == 200 and responsePSI.status_code == 200 and responsePSIQ.status_code == 200 and responseCUSUM.status_code == 200 and responsePH.status_code == 200:
@@ -88,6 +96,24 @@ try:
         st.json(responseCUSUM.text)
         st.text("Page-Hinkley")
         st.json(responsePH.text)
+    
+        if driftKS["Drift"]  == "No detectado" and driftJS["Drift"]  == "No detectado":
+            st.write("No se han detectado cambios en la distribución entre la primera mitad de los datos y la segunda mitad de los datos, según las medidas de Kolmogorov-Smirnov y Jensen Shannon. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
+        else :
+            st.write("Se ha detectado un cambio en la distribución entre la primera mitad de los datos y la segunda mitad, gracias a las medidas de Kolmogorov-Smirnov y Jensen Shannon.")
+            
+        if driftPSI["Drift"]  == "No detectado" and driftPSIQ["Drift"]  == "No detectado":
+            st.write("No se han detectado cambios en la distribución entre los primeros datos (80%) y los últimos datos (20%), según el Population Stability Index. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
+        elif  driftPSI["Drift"]  == "Detectado":
+            st.write("Solo se ha detectado un cambio en la distribución entre los primeros datos (80%) y los últimos datos (20%) con el Population Stability Index sin cuantiles. En el caso del uso de cuantiles, no se ha detectado un cambio. Esto indica que el cambio ha sido muy leve, por lo que se mantiene el modelo de los datos.")
+        else :
+            st.write("Se ha detectado un cambio en la distribución entre los primeros datos (80%) y los últimos datos (20%), gracias al Population Stability Index.")
+        
+        if driftCUSUM["Drift"] == "No detectado" and driftPH["Drift"]=="No detectado":
+            st.write("No se han detectado grandes desviaciones de los datos respecto a la media a lo largo del tiempo, respecto a CUSUM y Page-Hinkley. Esto podría indicar una desviación del modelo o simplemente que el modelo sigue una distribución con cierta desviación respecto de la media.")
+        else:
+            st.write("Se han detectado desviaciones de los datos respecto a la media a lo largo del tiempo, gracias a CUSUM y Page-Hinkley. Esto podría indicar una desviación del modelo o simplemente que el modelo sigue una distribución con cierta desviación respecto de la media.")
+            
     else:
         st.error(f"Error al consultar la API KS: "+str(responseKS.status_code)+", "+ {responseKS.text}+ 
                  ". Error al consultar la API JS: "+str(responseJS.status_code)+", "+ {responseJS.text}+
@@ -97,3 +123,5 @@ try:
                  ". Error al consultar la API PH: "+str(responsePH.status_code)+", "+ {responsePH.text})
 except Exception as e:
     st.error(f"Error: {str(e)}")
+    
+    

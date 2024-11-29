@@ -43,6 +43,8 @@ from collections import defaultdict
 import inspect
 import re
 from abc import ABCMeta, abstractmethod
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
 
 __version__ = '0.5.3'
 
@@ -12800,11 +12802,11 @@ def normal(df,freq,size):
     return df_normal
 
 # Devuelve df con datos añadidos calculados a partir de una distribución lognormal cuya media es el logaritmo de la media de los datos pasados 
-def log_normal(df,freq,sigma,size):
+def log_normal(df,freq,size):
     indice=series_periodos(df.index[0],size+df.shape[0],freq)
     for x in df.columns:
         data = df[x].values
-        data_augmented = np.random.lognormal(mean=np.log(data.mean()),sigma=sigma,size=size)
+        data_augmented = np.random.lognormal(mean=np.log(data.mean()),sigma=np.log(np.std(data)),size=size)
         if x == df.columns[0]:
             df_lognormal=pd.DataFrame(data=np.concatenate((df[x].values,data_augmented)),index=indice,columns=[x])
         else:
@@ -12881,7 +12883,7 @@ async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File
 
 # Creación csv de datos obtenidos con una distribución lognormal
 @app.post("/Aumentar/Lognormal")
-async def obtener_datos(sigma:float, size:int,freq:str, indice:str, file: UploadFile = File(...)) :
+async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -12894,7 +12896,7 @@ async def obtener_datos(sigma:float, size:int,freq:str, indice:str, file: Upload
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
-    df1 = log_normal(df,freq,sigma,size)
+    df1 = log_normal(df,freq,size)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
     df1.to_csv(stream,index_label="Indice")
@@ -12907,7 +12909,7 @@ async def obtener_datos(sigma:float, size:int,freq:str, indice:str, file: Upload
 
 # Gráfica de los datos obtenidos con una distribución lognormal
 @app.post("/Plot/Aumentar/Lognormal")
-async def obtener_grafica(sigma:float, size:int,freq:str, indice:str, file: UploadFile = File(...)) :
+async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -12920,7 +12922,7 @@ async def obtener_grafica(sigma:float, size:int,freq:str, indice:str, file: Uplo
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
-    df1 = log_normal(df,freq,sigma,size)
+    df1 = log_normal(df,freq,size)
     plot_df(df1)
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
@@ -13192,7 +13194,6 @@ async def obtener_grafica(freq:str,size:int, indice:str, file: UploadFile = File
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
 # Técnicas que realizan modificaciones en los datos:
 
 # Traslacion
@@ -13416,51 +13417,6 @@ def agregar_saltos(df,freq,num_saltos,amplitud):
             df_saltos = df_saltos.join(df_new, how="outer")
     return df_saltos
 
-# Creación csv con los datos obtenidos de realizar saltos en los datos 
-@app.post("/Aumentar/Saltos")
-async def obtener_datos(num_saltos:int, amplitud:float, freq:str, indice:str, file: UploadFile = File(...)) :
-    
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    df1 = agregar_saltos(df,freq,num_saltos,amplitud)
-    # Convertir el DataFrame a un buffer de CSV
-    stream = io.StringIO()
-    df1.to_csv(stream,index_label="Indice")
-    stream.seek(0)
-
-    # Devolver el archivo CSV como respuesta
-    response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=aumentar-saltos.csv"
-    return response 
-
-# Gráfica de los datos obtenidos de realizar saltos en los datos 
-@app.post("/Plot/Aumentar/Saltos")
-async def obtener_grafica(num_saltos:int, amplitud:float, freq:str, indice:str, file: UploadFile = File(...)) :
-    
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    df1 = agregar_saltos(df,freq,num_saltos,amplitud)
-    plot_df(df1)
-    buffer = io.BytesIO()
-    plt.savefig(buffer,format="png")
-    buffer.seek(0)
-    plt.close()
-    return StreamingResponse(buffer,media_type="image/png")
-
 # Mix up: creación de un nuevo dato a partir del data set previo y un dato al azar, usando una comb lineal obtenida con una distribución beta
 def mixup(data, alpha=0.2):
     lambda_ = np.random.beta(alpha, alpha)
@@ -13674,6 +13630,71 @@ async def obtener_grafica(funcion:str, freq:str, indice:str,factor : Union[float
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
+def estadist(df,freq,num,tipo):
+    indice=series_periodos(df.index[0],num+df.shape[0],freq)
+    for x in df.columns:
+        data = df[x]
+        if tipo==1:
+            transformed_data = np.zeros(num)+ data.mean()
+        elif tipo==2:
+            transformed_data = np.zeros(num) + data.median()
+        elif tipo==3:
+            transformed_data = np.zeros(num) + data.mode().iloc[0]
+
+        if x == df.columns[0]:
+            df_transf=pd.DataFrame(data=np.concatenate((data,transformed_data)),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,transformed_data)),index=indice,columns=[x])
+            df_transf= df_transf.join(df_new, how="outer")
+            
+    return df_transf
+
+# Creación csv con los datos obtenidos de aplicar la técnica de aumentación de datos 
+@app.post("/Aumentar/Estadistica")
+async def obtener_datos(tipo:int, num:int,freq:str, indice:str, file: UploadFile = File(...)) :
+
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = estadist(df,freq,num,tipo)
+        
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-matematica.csv"
+    
+    return response 
+
+# Gráfica de la técnica de aumentación de datos mediante transformaciones matemáticas
+@app.post("/Plot/Aumentar/Estadistica")
+async def obtener_grafica(tipo:int,num:int, freq:str, indice:str, file: UploadFile = File(...)) :
+
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 = estadist(df,freq,num,tipo)
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Técnicas de reducción 
 
@@ -13847,7 +13868,7 @@ def prediccion_sarimax(datos,datos_train,datos_test, columna):
     return metrics.mean_squared_error(datos_test, predicciones_m1[:len(datos_test)])
     
 # Definición de modelo autorregresivos con búsqueda de parámetros realizada por grid search devolviendo la predicción
-def plot_prediccion_sarimax(datos,datos_train,datos_test, columna):
+def plot_prediccion_sarimax(datos,datos_train, columna):
     
     # Grid search
     forecaster = ForecasterSarimax(
@@ -13938,7 +13959,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     
     train = int(df.shape[0]*0.8)
     df_test = df[train:]
-    predicciones_m1=plot_prediccion_sarimax(df,df[:train],df_test, df.columns[0])
+    predicciones_m1=plot_prediccion_sarimax(df,df[:train], df.columns[0])
     result = pd.merge(df_test, predicciones_m1, left_index=True, right_index=True)
     plt.figure()
     result.plot(title="Predicciones Sarimax",figsize=(13,5))
@@ -14290,6 +14311,8 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
+
+
 # Error cuadrático medio de todos los modelos de predicción 
 @app.post("/Modelos")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
@@ -14371,6 +14394,8 @@ def pred_entrenar_linearReg(df,columns_predict):
     df_pred['Predicciones'] = modelo.predict(df[l:].drop(columns=columns_predict))
     return df_pred
 
+
+
 # Error cuadrático medio de regresión lineal
 @app.post("/Modelo/RegLineal")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
@@ -14413,6 +14438,7 @@ async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = Fi
     buffer.seek(0)
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
+
 
 # Entrenamiento de modelo regresivo basado en árbol de decisión devolviendo la predicción / error cuadrático medio.
 def error_entrenar_TreeReg(df,columns_predict):
@@ -14924,7 +14950,7 @@ async def detectar_drift(indice:str,threshold_ks: float = 0.05, inicio: int = 1,
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
-    sep = int(df.shape[0]*0.5)
+    sep = int((df.shape[0]-inicio)*0.5)
     status,report = detect_dataset_drift_ks(df[inicio:sep],df[sep:],threshold_ks)
     if status:
         drift = "No detectado"
@@ -15007,7 +15033,7 @@ async def detectar_drift(indice:str,threshold_js: float = 0.2,inicio:int=1, file
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
-    sep = int(df.shape[0]*0.5)
+    sep = int((df.shape[0]-inicio)*0.5)
     status,report = detect_dataset_drift_js(df[inicio:sep],df[sep:],threshold_js)
     if status:
         drift = "No detectado"
@@ -15082,7 +15108,7 @@ async def detectar_drift(indice:str,threshold_psi: float = 2,num_bins :int =10,i
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
-    sep = int(df.shape[0]*0.5)
+    sep = int((df.shape[0]-inicio)*0.8)
     status,report = detect_dataset_drift_psi(df[inicio:sep],df[sep:],threshold_psi,num_bins)
     if status:
         drift = "No detectado"
@@ -15174,7 +15200,7 @@ async def detectar_drift(indice:str,threshold_psi: float = 2,num_quantiles :int 
         df = pd.read_csv(csv_data,index_col=indice)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    sep = int(df.shape[0]*0.75)
+    sep = int((df.shape[0]-inicio)*0.8)
     status,report = detect_dataset_drift_psi_quantiles(df[inicio:sep],df[sep:],threshold_psi,num_quantiles)
     if status:
         drift = "No detectado"
