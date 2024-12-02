@@ -45,6 +45,7 @@ import re
 from abc import ABCMeta, abstractmethod
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 __version__ = '0.5.3'
 
@@ -12728,7 +12729,7 @@ def sampling(df,size,freq):
     indice = series_periodos(df.index[0],size+df.shape[0],freq)
     for x in df.columns:
         data = df[x]
-        sampled_data = np.random.choice(data, size=size, replace=True)
+        sampled_data = np.random.choice(data, size=size, replace=True) + np.random.normal(0, 0.5, size)
         if x == df.columns[0]:
             df_sampling=pd.DataFrame(data=np.concatenate((data,sampled_data)),index=indice,columns=[x])
         else:
@@ -13123,20 +13124,20 @@ async def obtener_grafica(freq:str,duplication_factor:float, perturbation_std: f
 
 # Combinación lineal
 # Calculamos nuevos datos como combinación lineal de los otros 
-def linear_combinations(data, n_combinations):
-    combinations = []
-    for _ in range(n_combinations):
-        weights = np.random.rand(data.shape[0])
+def linear_combinations(data,num_datos, n_combinations):
+    for _ in range(num_datos):
+        datos = data[-n_combinations:]
+        weights = np.random.rand(n_combinations)
         weights /= np.sum(weights)  # Normalizar pesos
-        combination = np.dot(weights, data)
-        combinations.append(combination)
-    return np.array(combinations)
+        combination = np.dot(weights, datos)
+        combination += np.random.normal(0,0.5)
+        data=np.append(data,combination)
+    return np.array(data)
 
-def agregar_comb(df,freq,size):
+def agregar_comb(df,freq,size,window_size):
     for x in df.columns:
         data = df[x]
-        data_augmented = linear_combinations(data,size)
-        datos=np.concatenate((data.values,data_augmented))
+        datos = linear_combinations(data.values,size,window_size)
         if x == df.columns[0]:
             indice = series_periodos(df.index[0],len(datos),freq)
             df_dl = pd.DataFrame(data=datos,index=indice,columns=[x])
@@ -13147,7 +13148,7 @@ def agregar_comb(df,freq,size):
 
 # Creación csv con datos obtenidos como combinación lineal de los previos
 @app.post("/Aumentar/Comb_lineal")
-async def obtener_datos(freq:str,size:int, indice:str, file: UploadFile = File(...)) :
+async def obtener_datos(freq:str,size:int, indice:str,window_size:int, file: UploadFile = File(...)) :
     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -13160,7 +13161,7 @@ async def obtener_datos(freq:str,size:int, indice:str, file: UploadFile = File(.
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
-    df1 = agregar_comb(df,freq,size)
+    df1 = agregar_comb(df,freq,size,window_size)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
     df1.to_csv(stream,index_label="Indice")
@@ -13173,7 +13174,7 @@ async def obtener_datos(freq:str,size:int, indice:str, file: UploadFile = File(.
 
 # Gráfica con los datos obtenidos como combinación lineal de los datos previos
 @app.post("/Plot/Aumentar/Comb_lineal")
-async def obtener_grafica(freq:str,size:int, indice:str, file: UploadFile = File(...)) :
+async def obtener_grafica(freq:str,size:int, indice:str,window_size:int, file: UploadFile = File(...)) :
     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -13186,7 +13187,7 @@ async def obtener_grafica(freq:str,size:int, indice:str, file: UploadFile = File
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
-    df1 = agregar_comb(df,freq,size)
+    df1 = agregar_comb(df,freq,size,window_size)
     plot_df(df1)
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
@@ -13263,13 +13264,20 @@ async def obtener_grafica(shift:float, freq:str, indice:str, file: UploadFile = 
     
 # Agregación de ruido harmónico
 # Añadimos ruido harmonico a la muestra con cierta amplitud y frequencia
-def add_harmonic_noise(df,freq, amplitude=0.1, frequency=0.5):
+def add_harmonic_noise(df,freq,size):
     df_harm = df.copy()
     for x in df_harm.columns:
         data = df[x]
-        time = np.arange(len(data))
+        time = np.arange(size)
+        # Aplicar FFT
+        fft_result = np.fft.fft(data)
+        frequencies = np.fft.fftfreq(len(data), d=(time[1] - time[0]))  # Frecuencias asociadas
+        amplitudes = np.abs(fft_result)  # Magnitudes (amplitud)
+        dominant_freq_idx = np.argmax(amplitudes)
+        frequency = frequencies[dominant_freq_idx]
+        amplitude = amplitudes[dominant_freq_idx]
         harmonic_noise = amplitude * np.sin(2 * np.pi * frequency * time)
-        data_augmented = data + harmonic_noise
+        data_augmented = np.random.choice(data, size=size, replace=True) + harmonic_noise
         datos = np.concatenate((data.values,data_augmented))
         if x == df.columns[0]:
             indice = series_periodos(df.index[0],len(datos),freq)
@@ -13282,7 +13290,7 @@ def add_harmonic_noise(df,freq, amplitude=0.1, frequency=0.5):
 
 # Creación csv con datos con ruido harmónico
 @app.post("/Aumentar/Harmonico")
-async def obtener_datos(amplitude:float, frequency:float,freq:str, indice:str, file: UploadFile = File(...)) :
+async def obtener_datos(freq:str, indice:str,size:int, file: UploadFile = File(...)) :
     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -13295,7 +13303,7 @@ async def obtener_datos(amplitude:float, frequency:float,freq:str, indice:str, f
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
-    df1 = add_harmonic_noise(df,freq, amplitude, frequency)
+    df1 = add_harmonic_noise(df,freq, size)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
     df1.to_csv(stream,index_label="Indice")
@@ -13308,7 +13316,7 @@ async def obtener_datos(amplitude:float, frequency:float,freq:str, indice:str, f
 
 # Gráfica obtenida tras aplicar ruido harmónico 
 @app.post("/Plot/Aumentar/Harmonico")
-async def obtener_grafica(amplitude:float, frequency:float,freq:str, indice:str, file: UploadFile = File(...)) :
+async def obtener_grafica(freq:str, indice:str,size:int, file: UploadFile = File(...)) :
     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -13321,7 +13329,7 @@ async def obtener_grafica(amplitude:float, frequency:float,freq:str, indice:str,
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
-    df1 = add_harmonic_noise(df,freq, amplitude, frequency)
+    df1 = add_harmonic_noise(df,freq,size)
     plot_df(df1)
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
@@ -13811,6 +13819,121 @@ async def obtener_grafica(start:int,end:int, indice:str, file: UploadFile = File
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
+
+# Creación csv con la técnica de recorte
+@app.post("/Aumentar/Descomponer")
+async def obtener_datos(indice:str,freq:str, size:int,tipo:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    indice=series_periodos(df.index[0],size+df.shape[0],freq)
+
+    for x in df.columns:
+        data = df[x]
+        # Descomposición de la serie
+        if tipo=="additive":
+            descomposicion = seasonal_decompose(data, model='additive', period=12)
+        elif tipo=="multiplicative":
+            descomposicion = seasonal_decompose(data, model='multiplicative', period=12)
+            
+        tendencia = descomposicion.trend
+        estacionalidad = descomposicion.seasonal
+        residuo = descomposicion.resid
+        # Calcular la tasa de cambio promedio de la tendencia
+        tendencia_valida = tendencia.dropna()
+        cambios = tendencia_valida.diff().dropna()
+        tasa_cambio_promedio = cambios.mean()
+
+        # Extrapolar los valores de la tendencia
+        n_pasos = size
+        ultima_tendencia = tendencia_valida.iloc[-1]
+        tendencia_futura = [ultima_tendencia + (i + 1) * tasa_cambio_promedio for i in range(n_pasos)]
+        
+        # Replicar los valores estacionales
+        longitud_estacionalidad = 12  # Basado en la periodicidad detectada
+        estacionalidad_extrapolada = np.tile(estacionalidad[-longitud_estacionalidad:], size%12+1)[:size]
+        if tipo=="additive":
+            prediccion = tendencia_futura + estacionalidad_extrapolada
+        elif tipo=="multiplicative":
+            prediccion = tendencia_futura * estacionalidad_extrapolada
+        if x == df.columns[0]:
+            df_desc=pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
+            df_desc= df_desc.join(df_new, how="outer")
+            
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df_desc.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=descomposicion.csv"
+    return response 
+
+# Gráfrica técnica de recorte
+@app.post("/Plot/Aumentar/Descomponer")
+async def obtener_grafica( indice:str,freq:str,size:int,tipo:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    indice=series_periodos(df.index[0],size+df.shape[0],freq)
+    for x in df.columns:
+        data = df[x]
+        # Descomposición de la serie
+        if tipo=="additive":
+            descomposicion = seasonal_decompose(data, model='additive', period=12)
+        elif tipo=="multiplicative":
+            descomposicion = seasonal_decompose(data, model='multiplicative', period=12)
+        tendencia = descomposicion.trend
+        estacionalidad = descomposicion.seasonal
+        residuo = descomposicion.resid
+        # Calcular la tasa de cambio promedio de la tendencia
+        tendencia_valida = tendencia.dropna()
+        cambios = tendencia_valida.diff().dropna()
+        tasa_cambio_promedio = cambios.mean()
+
+        # Extrapolar los valores de la tendencia
+        n_pasos = size
+        ultima_tendencia = tendencia_valida.iloc[-1]
+        tendencia_futura = [ultima_tendencia + (i + 1) * tasa_cambio_promedio for i in range(n_pasos)]
+        
+        # Replicar los valores estacionales
+        longitud_estacionalidad = 12  # Basado en la periodicidad detectada
+        estacionalidad_extrapolada = np.tile(estacionalidad[-longitud_estacionalidad:], 2)[:size]
+        if tipo=="additive":
+            prediccion = tendencia_futura + estacionalidad_extrapolada
+        elif tipo=="multiplicative":
+            prediccion = tendencia_futura * estacionalidad_extrapolada 
+             
+        if x == df.columns[0]:
+            df_desc=pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
+            df_desc= df_desc.join(df_new, how="outer")
+            
+    plot_df(df_desc)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 # Definición de modelo autorregresivos con búsqueda de parámetros realizada por grid search devolviendo el error cuadrático medio
 def prediccion_sarimax(datos,datos_train,datos_test, columna):
     
@@ -13891,7 +14014,7 @@ def plot_prediccion_sarimax(datos,datos_train, columna):
                             steps                 = 12,
                             refit                 = True,
                             metric                = 'mean_absolute_error',
-                            initial_train_size    = len(datos_train),
+                            initial_train_size    =int(len(datos_train)*0.8),
                             fixed_train_size      = False,
                             return_best           = False,
                             n_jobs                = 'auto',
@@ -13910,7 +14033,7 @@ def plot_prediccion_sarimax(datos,datos_train, columna):
     metrica_m1, predicciones_m1 = backtesting_sarimax(
                                             forecaster            = forecaster_1,
                                             y                     = datos[columna],
-                                            initial_train_size    = len(datos_train),
+                                            initial_train_size    = int(len(datos_train)*0.8),
                                             steps                 = 72,
                                             metric                = 'mean_absolute_error',
                                             refit                 = True,
@@ -13922,6 +14045,60 @@ def plot_prediccion_sarimax(datos,datos_train, columna):
 
     
     return predicciones_m1
+
+@app.post("/Datos/Sarimax")
+async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    df1 = plot_prediccion_sarimax(df,df, df.columns[0])[:size]
+    df2 = pd.DataFrame(data=np.concatenate((df.values,df1.values)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df2.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=prediccion-sarimax.csv"
+    return response 
+
+
+@app.post("/Plot/Datos/Sarimax")
+async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    train = int(df.shape[0]*0.8)
+    df1 = plot_prediccion_sarimax(df,df, df.columns[0])[:size]
+    result = pd.DataFrame(data=np.concatenate((df.values,df1.values)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+
+    plt.figure()
+    result.plot(title="Predicciones Sarimax",figsize=(13,5))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Error cuadrático medio modelo Sarimax
 @app.post("/Modelo/Sarimax")
@@ -13943,7 +14120,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
 
 # Gráfica modelo sarimax
 @app.post("/Plot/Modelo/Sarimax")
-async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+async def obtener_grafica(indice:str,freq:str,size:int=0, file: UploadFile = File(...)) :
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14014,7 +14191,7 @@ def error_backtesting_forecasterAutoreg(datos_train,datos_test,lags,steps):
 
     return error_mse
 
-def plot_backtesting_forecasterAutoreg(datos_train,datos_test,lags,steps):
+def plot_backtesting_forecasterAutoreg(datos_train,size,lags,steps):
 
     forecaster = ForecasterAutoreg(
                     regressor = RandomForestRegressor(random_state=123),
@@ -14046,9 +14223,61 @@ def plot_backtesting_forecasterAutoreg(datos_train,datos_test,lags,steps):
 
     # Predicciones
     # ==============================================================================
-    predicciones = forecaster.predict(steps=len(datos_test))
+    predicciones = forecaster.predict(steps=size)
 
     return predicciones
+
+@app.post("/Datos/ForecasterAutoreg")
+async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    df1 = plot_backtesting_forecasterAutoreg(df,size,10,180)
+    df2 = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df2.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=prediccion-ForecasterRF.csv"
+    return response 
+
+@app.post("/Plot/Datos/ForecasterAutoreg")
+async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    df1 = plot_backtesting_forecasterAutoreg(df,size,10,180)
+    result = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+
+    plt.figure()
+    result.plot(title="Predicciones Modelo Autorregresivo Random Forest",figsize=(13,5))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Error cuadrático medio del modelo autorregresivo Random Forest
 @app.post("/Modelo/ForecasterRF")
@@ -14085,10 +14314,10 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index.freq=freq
     train = int(df.shape[0]*0.8)
     df_test = df[train:]
-    predicciones_m1=plot_backtesting_forecasterAutoreg(df[:train],df[train:],10,180)
+    predicciones_m1=plot_backtesting_forecasterAutoreg(df[:train],df[train:].shape[0],10,180)
     result = pd.merge(df_test, predicciones_m1, left_index=True, right_index=True)
     plt.figure()
-    result.plot(title="Predicciones Modelo Autoregresivo Random Forest",figsize=(13,7))
+    result.plot(title="Predicciones Modelo Autorregresivo Random Forest",figsize=(13,7))
     plt.xlabel("Tiempo")  
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
@@ -14140,7 +14369,7 @@ def error_backtesting_forecasterAutoregDirect(datos_train,datos_test,steps,lags)
 
     return error_mse
 
-def predicciones_backtesting_forecasterAutoregDirect(datos_train,datos_test,steps,lags):
+def predicciones_backtesting_forecasterAutoregDirect(datos_train,steps,lags):
 
     forecaster = ForecasterAutoregDirect(
                 regressor     = Ridge(random_state=123),
@@ -14178,6 +14407,58 @@ def predicciones_backtesting_forecasterAutoregDirect(datos_train,datos_test,step
     # ==============================================================================
     return predicciones
 
+@app.post("/Datos/AutoregRidge")
+async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    df1 = predicciones_backtesting_forecasterAutoregDirect(df,size,5)
+    df2 = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df2.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=prediccion-ForecasterRidge.csv"
+    return response 
+
+@app.post("/Plot/Datos/AutoregRidge")
+async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    df1 = predicciones_backtesting_forecasterAutoregDirect(df,size,5)
+    result = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+
+    plt.figure()
+    result.plot(title="Predicciones Modelo Autorregresivo Ridge",figsize=(13,5))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 # Error cuadrático del modelo autorregresivo Ridge
 @app.post("/Modelo/AutoregRidge")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
@@ -14194,7 +14475,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
     train = int(df.shape[0]*0.8)
-    return {error_backtesting_forecasterAutoregDirect(df[:train],df[train:], df[train:].shape[0],5) }
+    return {error_backtesting_forecasterAutoregDirect(df[:train], df[train:].shape[0],5) }
 
 # Gráfica del modelo autorregresivo Ridge
 @app.post("/Plot/Modelo/AutoregRidge")
@@ -14214,7 +14495,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     
     train = int(df.shape[0]*0.8)
     df_test = df[train:]
-    predicciones_m1=predicciones_backtesting_forecasterAutoregDirect(df[:train],df[train:], df[train:].shape[0],5)
+    predicciones_m1=predicciones_backtesting_forecasterAutoregDirect(df[:train], df[train:].shape[0],5)
     result = pd.merge(df_test, predicciones_m1, left_index=True, right_index=True)
     plt.figure()
     result.plot(title="Predicciones Modelo Autoregresivo Directo Ridge",figsize=(13,7))
@@ -14243,22 +14524,72 @@ def error_prophet_prediccion(data_train,data_test):
     mae = mean_squared_error(y_true,y_pred)
     return mae
 
-
-
 # Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test y devolvemos las predicciones
-def pred_prophet_prediccion(data_train,data_test):
+def pred_prophet_prediccion(data_train,size):
     
     data_train=data_train.reset_index()
     data_train.rename(columns={data_train.columns[0] : 'ds', data_train.columns[1]: 'y'}, inplace=True)
     model = Prophet()
     model.fit(data_train)
     
-    future = model.make_future_dataframe(periods=len(data_test),freq='M')
+    future = model.make_future_dataframe(periods=size,freq='M')
     forecast=model.predict(future)
     
     y_pred=forecast['yhat'][len(data_train):].values
     
     return y_pred
+
+@app.post("/Datos/Prophet")
+async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    df1 = pred_prophet_prediccion(df,size)
+    df2 = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df2.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=prediccion-pophet.csv"
+    return response 
+
+@app.post("/Plot/Datos/Prophet")
+async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    df1 = pred_prophet_prediccion(df,size)
+    result = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+
+    plt.figure()
+    result.plot(title="Predicciones Modelo Autorregresivo Prophet",figsize=(13,5))
+    plt.xlabel("Tiempo")  
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
 
 # Error cuadrático medio del modelo Prophet
 @app.post("/Modelo/Prophet")
@@ -14295,7 +14626,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index.freq=freq
     
     train = int(df.shape[0]*0.8)
-    y_pred=pred_prophet_prediccion(df[:train],df[train:])
+    y_pred=pred_prophet_prediccion(df[:train],df[train:].shape[0])
     plt.figure()
     y_true=df[train:].values
     result = pd.DataFrame({
@@ -14329,10 +14660,10 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
     train = int(df.shape[0]*0.8)
-    e_prophet = error_prophet_prediccion(df[:train],df[train:])
-    e_autoregRidge = error_backtesting_forecasterAutoregDirect(df[:train],df[train:], df[train:].shape[0],5) 
-    e_regRF = error_backtesting_forecasterAutoreg(df[:train],df[train:],10,180)
-    e_autoreg=prediccion_sarimax(df,df[:train],df[train:], df.columns[0])
+    e_prophet = error_prophet_prediccion(df[:train],df[train:].shape[0])
+    e_autoregRidge = error_backtesting_forecasterAutoregDirect(df[:train], df[train:].shape[0],5) 
+    e_regRF = error_backtesting_forecasterAutoreg(df[:train],df[train:].shape[0],10,180)
+    e_autoreg=prediccion_sarimax(df,df[:train], df.columns[0])
     return {"Error predicción autorregresivo Sarimax": e_autoreg,
             "Error predicción forecaster Random Forest": e_regRF,
             "Error predicción forecaster Ridge": e_autoregRidge,
@@ -14354,10 +14685,10 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
     train = int(df.shape[0]*0.8)  
-    y_pred4=pred_prophet_prediccion(df[:train],df[train:])
+    y_pred4=pred_prophet_prediccion(df[:train],df[train:].shape[0])
     y_pred2=plot_backtesting_forecasterAutoreg(df[:train],df[train:],10,180)
     y_pred1=plot_prediccion_sarimax(df,df[:train],df[train:], df.columns[0])
-    y_pred3=predicciones_backtesting_forecasterAutoregDirect(df[:train],df[train:], df[train:].shape[0],5)
+    y_pred3=predicciones_backtesting_forecasterAutoregDirect(df[:train], df[train:].shape[0],5)
     plt.figure()
     y_true=df[train:].values
     result = pd.DataFrame({

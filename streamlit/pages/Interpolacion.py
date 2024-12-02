@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import requests
 from PIL import Image
 from io import BytesIO
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 st.title("Petición Datos")
 
@@ -163,7 +164,7 @@ try:
         image = Image.open(BytesIO(responseLognormal2.content))
         # Mostrar la imagen en la aplicación
         st.image(image, caption="Serie temporal aumentada con lognormal") 
-        datos_lognormal = responseNormal.content
+        datos_lognormal = responseLognormal.content
         df = pd.read_csv(pd.io.common.BytesIO(datos_lognormal))
         st.dataframe(df)
     else:
@@ -195,3 +196,223 @@ try:
 except Exception as e:
     st.error(f"Error: {str(e)}")
     
+st.header("Modelos predictivos")
+st.subheader("Sarimax")
+api_urlSarimax= "http://127.0.0.1:8000/Datos/Sarimax?indice=Indice&freq=M&size="+str(num)
+api_urlSarimax2 = "http://127.0.0.1:8000/Plot/Datos/Sarimax?indice=Indice&freq=M&size="+str(num)
+try:
+    files = {'file': ('Sarimax.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseSarimax= requests.post(api_urlSarimax,files=files)
+    files = {'file': ('Sarimax.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseSarimax2 = requests.post(api_urlSarimax2,files=files)
+    # Mostrar datos si la respuesta es exitosa
+    if responseSarimax2.status_code == 200 and responseSarimax.status_code ==200:
+        # Leer el contenido de la imagen
+        image = Image.open(BytesIO(responseSarimax2.content))
+        # Mostrar la imagen en la aplicación
+        st.image(image, caption="Serie temporal aumentada con modelo Sarimax") 
+        datos_sarimax = responseSarimax.content
+        df = pd.read_csv(pd.io.common.BytesIO(datos_sarimax))
+        st.dataframe(df)
+    else:
+        st.error(f"Error al consultar la API: {responseSarimax.text}")
+        
+except Exception as e:
+    st.error(f"Error: {str(e)}")
+    
+st.subheader("Forecaster Autoregresivos Random Forest")
+api_urlAutoreg= "http://127.0.0.1:8000/Datos/ForecasterAutoreg?indice=Indice&freq=M&size="+str(num)
+api_urlAutoreg2 = "http://127.0.0.1:8000/Plot/Datos/ForecasterAutoreg?indice=Indice&freq=M&size="+str(num)
+try:
+    files = {'file': ('AutoregRf.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseAutoreg= requests.post(api_urlAutoreg,files=files)
+    files = {'file': ('AutoregRF.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseAutoreg2 = requests.post(api_urlAutoreg2,files=files)
+    # Mostrar datos si la respuesta es exitosa
+    if responseAutoreg2.status_code == 200 and responseAutoreg.status_code ==200:
+        # Leer el contenido de la imagen
+        image = Image.open(BytesIO(responseAutoreg2.content))
+        # Mostrar la imagen en la aplicación
+        st.image(image, caption="Serie temporal aumentada con Modelo Autorregresivo Random Forest") 
+        datos_autoreg = responseAutoreg.content
+        df = pd.read_csv(pd.io.common.BytesIO(datos_autoreg))
+        st.dataframe(df)
+    else:
+        st.error(f"Error al consultar la API: {responseAutoreg.text}")
+        
+except Exception as e:
+    st.error(f"Error: {str(e)}")
+    
+st.subheader("Forecaster Autoregresivos Ridge")
+api_urlRidge= "http://127.0.0.1:8000/Datos/AutoregRidge?indice=Indice&freq=M&size="+str(num)
+api_urlRidge2 = "http://127.0.0.1:8000/Plot/Datos/AutoregRidge?indice=Indice&freq=M&size="+str(num)
+try:
+    files = {'file': ('AutoregRidge.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseRidge= requests.post(api_urlRidge,files=files)
+    files = {'file': ('AutoregRidge.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseRidge2 = requests.post(api_urlRidge2,files=files)
+    # Mostrar datos si la respuesta es exitosa
+    if responseRidge2.status_code == 200 and responseRidge.status_code ==200:
+        # Leer el contenido de la imagen
+        image = Image.open(BytesIO(responseRidge2.content))
+        # Mostrar la imagen en la aplicación
+        st.image(image, caption="Serie temporal aumentada con Modelo Autorregresivo Ridge") 
+        datos_ridge = responseRidge.content
+        df = pd.read_csv(pd.io.common.BytesIO(datos_ridge))
+        st.dataframe(df)
+    else:
+        st.error(f"Error al consultar la API: {responseRidge.text}")
+        
+except Exception as e:
+    st.error(f"Error: {str(e)}")
+    
+st.subheader("Prophet")
+api_urlProphet= "http://127.0.0.1:8000/Datos/Prophet?indice=Indice&freq=M&size="+str(num)
+api_urlProphet2 = "http://127.0.0.1:8000/Plot/Datos/Prophet?indice=Indice&freq=M&size="+str(num)
+try:
+    files = {'file': ('Prophet.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseProphet= requests.post(api_urlProphet,files=files)
+    files = {'file': ('Prophet.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseProphet2 = requests.post(api_urlProphet2,files=files)
+    # Mostrar datos si la respuesta es exitosa
+    if responseProphet2.status_code == 200 and responseProphet.status_code ==200:
+        # Leer el contenido de la imagen
+        image = Image.open(BytesIO(responseProphet2.content))
+        # Mostrar la imagen en la aplicación
+        st.image(image, caption="Serie temporal aumentada con Modelo Prophet") 
+        datos_prophet = responseProphet.content
+        df = pd.read_csv(pd.io.common.BytesIO(datos_prophet))
+        st.dataframe(df)
+    else:
+        st.error(f"Error al consultar la API: {responseProphet.text}")
+        
+except Exception as e:
+    st.error(f"Error: {str(e)}")
+    
+st.header("Técnicas que introducen ruido")
+st.subheader("Bootstraping")
+api_urlBootstrap = "http://127.0.0.1:8000/Aumentar/Sampling?size="+str(num)+"&freq=M&indice=Indice"
+api_urlBootstrap2 = "http://127.0.0.1:8000/Plot/Aumentar/Sampling?size="+str(num)+"&freq=M&indice=Indice"
+try:
+    files = {'file': ('Bootstrap.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseBootstrap= requests.post(api_urlBootstrap,files=files)
+    files = {'file': ('Bootstrap.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseBootstrap2 = requests.post(api_urlBootstrap2,files=files)
+    # Mostrar datos si la respuesta es exitosa
+    if responseBootstrap2.status_code == 200 and responseBootstrap.status_code ==200:
+        # Leer el contenido de la imagen
+        image = Image.open(BytesIO(responseBootstrap2.content))
+        # Mostrar la imagen en la aplicación
+        st.image(image, caption="Serie temporal aumentada mediante barajo y añadir ruido") 
+        datos_bootstrap = responseBootstrap.content
+        df = pd.read_csv(pd.io.common.BytesIO(datos_bootstrap))
+        st.dataframe(df)
+    else:
+        st.error(f"Error al consultar la API: {responseBootstrap.text}")
+        
+except Exception as e:
+    st.error(f"Error: {str(e)}")
+    
+st.subheader("Ruido Harmónico")
+api_urlHarmonico = "http://127.0.0.1:8000/Aumentar/Harmonico?freq=M&indice=Indice&size="+str(num)
+api_urlHarmonico2 = "http://127.0.0.1:8000/Plot/Aumentar/Harmonico?freq=M&indice=Indice&size="+str(num)
+try:
+    files = {'file': ('Harmonico.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseHarmonico= requests.post(api_urlHarmonico,files=files)
+    files = {'file': ('Harmonico.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseHarmonico2 = requests.post(api_urlHarmonico2,files=files)
+    # Mostrar datos si la respuesta es exitosa
+    if responseHarmonico2.status_code == 200 and responseHarmonico.status_code ==200:
+        # Leer el contenido de la imagen
+        image = Image.open(BytesIO(responseHarmonico2.content))
+        # Mostrar la imagen en la aplicación
+        st.image(image, caption="Serie temporal aumentada obtenido al añadir ruido harmónico") 
+        datos_harm = responseHarmonico.content
+        df = pd.read_csv(pd.io.common.BytesIO(datos_harm))
+        st.dataframe(df)
+    else:
+        st.error(f"Error al consultar la API: {responseHarmonico.text}")
+        
+except Exception as e:
+    st.error(f"Error: {str(e)}")
+
+
+    
+st.subheader("Combinación Lineal")
+api_urlCl = "http://127.0.0.1:8000/Aumentar/Comb_lineal?freq=M&size="+str(num)+"&indice=Indice&window_size=5"
+api_urlCl2 = "http://127.0.0.1:8000/Plot/Aumentar/Comb_lineal?freq=M&size="+str(num)+"&indice=Indice&window_size=5"
+try:
+    files = {'file': ('Comb_lineal.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseCl= requests.post(api_urlCl,files=files)
+    files = {'file': ('Comb_lineal.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseCl2 = requests.post(api_urlCl2,files=files)
+    # Mostrar datos si la respuesta es exitosa
+    if responseCl2.status_code == 200 and responseCl.status_code ==200:
+        # Leer el contenido de la imagen
+        image = Image.open(BytesIO(responseCl2.content))
+        # Mostrar la imagen en la aplicación
+        st.image(image, caption="Serie temporal aumentada mediante combinación lineal de los últimos 5 valores") 
+        datos_cl = responseCl.content
+        df = pd.read_csv(pd.io.common.BytesIO(datos_cl))
+        st.dataframe(df)
+    else:
+        st.error(f"Error al consultar la API: {responseCl.text}")
+        
+except Exception as e:
+    st.error(f"Error: {str(e)}")
+    
+st.header("Técnicas que se basan en descomponer la serie")
+st.subheader("Descomposición aditiva en tendencia y estacionalidad")
+api_urlDescomp = "http://127.0.0.1:8000/Aumentar/Descomponer?indice=Indice&freq=M&size="+str(num)+"&tipo=additive"
+api_urlDescomp2 = "http://127.0.0.1:8000/Plot/Aumentar/Descomponer?indice=Indice&freq=M&size="+str(num)+"&tipo=additive"
+try:
+    files = {'file': ('Descomposicion.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseDesc= requests.post(api_urlDescomp,files=files)
+    files = {'file': ('Descomposicion.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseDesc2 = requests.post(api_urlDescomp2,files=files)
+    # Mostrar datos si la respuesta es exitosa
+    if responseDesc.status_code == 200 and responseDesc2.status_code ==200:
+        datos_desc = responseDesc.content
+        df1 =  pd.read_csv(pd.io.common.BytesIO(data))
+        descomposicion = seasonal_decompose(df1[df1.columns[1]], model='additive', period=12)
+        st.pyplot(descomposicion.plot())
+        # Leer el contenido de la imagen
+        image = Image.open(BytesIO(responseDesc2.content))
+        # Mostrar la imagen en la aplicación
+        st.image(image, caption="Serie temporal aumentada mediante descomposición aditiva en tendencia y estacionalidad") 
+
+        df = pd.read_csv(pd.io.common.BytesIO(datos_desc))
+        st.dataframe(df)
+    else:
+        st.error(f"Error al consultar la API: {responseDesc2.text}")
+        
+except Exception as e:
+    st.error(f"Error: {str(e)}")
+
+    
+st.subheader("Descomposición multiplicativa en tendencia y estacionalidad")
+api_urlDescompM = "http://127.0.0.1:8000/Aumentar/Descomponer?indice=Indice&freq=M&size="+str(num)+"&tipo=multiplicative"
+api_urlDescompM2 = "http://127.0.0.1:8000/Plot/Aumentar/Descomponer?indice=Indice&freq=M&size="+str(num)+"&tipo=multiplicative"
+try:
+    files = {'file': ('Descomposicion.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseDescM= requests.post(api_urlDescompM,files=files)
+    files = {'file': ('Descomposicion.csv', pd.io.common.BytesIO(data), 'text/csv')}
+    responseDescM2 = requests.post(api_urlDescompM2,files=files)
+    # Mostrar datos si la respuesta es exitosa
+    if responseDescM.status_code == 200 and responseDescM2.status_code ==200:
+        datos_descM = responseDescM.content
+        df1 =  pd.read_csv(pd.io.common.BytesIO(data))
+        descomposicionM = seasonal_decompose(df1[df1.columns[1]], model='multiplicative', period=12)
+        st.pyplot(descomposicionM.plot())
+        # Leer el contenido de la imagen
+        image = Image.open(BytesIO(responseDescM2.content))
+        # Mostrar la imagen en la aplicación
+        st.image(image, caption="Serie temporal aumentada mediante descomposición multiplicativa en tendencia y estacionalidad") 
+
+        df = pd.read_csv(pd.io.common.BytesIO(datos_descM))
+        st.dataframe(df)
+    else:
+        st.error(f"Error al consultar la API: {responseDescM2.text}")
+        
+except Exception as e:
+    st.error(f"Error: {str(e)}")
