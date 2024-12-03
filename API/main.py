@@ -46,6 +46,7 @@ from abc import ABCMeta, abstractmethod
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 from statsmodels.tsa.seasonal import seasonal_decompose
+from scipy.interpolate import CubicSpline
 
 __version__ = '0.5.3'
 
@@ -12456,40 +12457,42 @@ async def obtener_grafica( funciones: str , indice:str, columna:str, file: Uploa
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-# Técnicas de aumentación de datos: 
 # Definimos nuevos datos indicando el número de datos a generar, la frequencia y el tipo de interpolación (lineal/cubico).
-def interpolacion_max(df,kind,num,freq):
+def interpolacion_min_max(df,kind,num,freq):
     df=df.reset_index()
     indices=df.index.values
-    indice=series_periodos(df[df.columns[0]][0],num,freq)
-    x =indices 
+    indice=series_periodos(df[df.columns[0]][0],num+df.shape[0],freq)
+    x = indices 
     for i in range(1,len(df.columns)):
         y = df[df.columns[i]]
-        f = interp1d(x, y, kind=kind) # kind ='linear' / 'cubic'
-        x_new = np.linspace(0,df[df.columns[i]].argmax(), num=num)  # New x values
+        inicio = min(df[df.columns[i]].argmin(),df[df.columns[i]].argmax())
+        fin = max(df[df.columns[i]].argmin(),df[df.columns[i]].argmax())
+        f = interp1d(x, y, kind=kind) # kind ='linear' / 'cubic' / 'quadratic'
+        x_new = np.linspace(inicio,fin, num=num)  # New x values
         y_new = f(x_new)  # Interpolated y values
         if i==1:
-            df_int = pd.DataFrame(data=y_new,index=indice,columns=[df.columns[i]])
+            df_int = pd.DataFrame(data=np.concatenate((y.values.reshape(-1),y_new)),index=indice,columns=[df.columns[i]])
         else :     
-            df_n = pd.DataFrame(data=y_new,index=indice,columns=[df.columns[i]])
+            df_n = pd.DataFrame(data=np.concatenate((y.values.reshape(-1),y_new)),index=indice,columns=[df.columns[i]])
             df_int= df_int.join(df_n, how="outer")
+            
     return df_int
 
 # Definimos nuevos datos indicando el número de datos a generar, la frequencia y el tipo de interpolación (lineal/cubico).
-def interpolacion_min(df,kind,num,freq):
+def interpolacion_normal(df,kind,num,freq):
     df=df.reset_index()
     indices=df.index.values
-    indice=series_periodos(df[df.columns[0]][0],num,freq)
-    x =indices 
+    indice=series_periodos(df[df.columns[0]][0],num+df.shape[0],freq)
+    x = indices 
     for i in range(1,len(df.columns)):
         y = df[df.columns[i]]
-        f = interp1d(x, y, kind=kind) # kind ='linear' / 'cubic'
-        x_new = np.linspace(0,df[df.columns[i]].argmin(), num=num)  # New x values
+        f = interp1d(x, y, kind=kind) # kind = 'linear' / 'cubic' / 'quadratic'
+        x_new = np.linspace(0,df.shape[0]-1, num=num)  # New x values
         y_new = f(x_new)  # Interpolated y values
         if i==1:
-            df_int = pd.DataFrame(data=y_new,index=indice,columns=[df.columns[i]])
+            df_int = pd.DataFrame(data=np.concatenate((y.values.reshape(-1),y_new)),index=indice,columns=[df.columns[i]])
         else :     
-            df_n = pd.DataFrame(data=y_new,index=indice,columns=[df.columns[i]])
+            df_n = pd.DataFrame(data=np.concatenate((y.values.reshape(-1),y_new)),index=indice,columns=[df.columns[i]])
             df_int= df_int.join(df_n, how="outer")
             
     return df_int
@@ -12515,20 +12518,38 @@ def punto_medio(df,freq):
             df_pm = df_pm.join(df_new, how="outer")
     return df_pm
 
-def spline_interpolation(data, s=1):
+def spline_interpolation_linear(data, num,s=1):
     x = np.arange(len(data))
     spline = UnivariateSpline(x, data, s=s)
-    return spline(x)
+    x_new = np.linspace(0,len(data)-1, num=num)
+    return spline(x_new)
+
+def spline_interpolation_cubic(data, num):
+    x = np.arange(len(data))
+    spline = CubicSpline(x,data)
+    x_new = np.linspace(0,len(data)-1, num=num)
+    return spline(x_new)
 
 # Realizamos la interpolación spline 
-def interpolacion_spline(df,s):
+def interpolacion_spline(df,tipo,num,freq,s):
+    print(df.head())
+    indice=series_periodos(df.index[0],num+df.shape[0],freq)
     for x in df.columns:
-        df[x]=spline_interpolation(df[x],s)
-    return df
+        y=df[x]
+        if tipo=='linear': 
+            y_new = spline_interpolation_linear(df[x],num,s)
+        elif tipo=='cubic':
+            y_new = spline_interpolation_cubic(df[x],num)
+        if x==df.columns[0]:
+            df_int = pd.DataFrame(data=np.concatenate((y.values.reshape(-1),y_new)),index=indice,columns=[x])
+        else :     
+            df_n = pd.DataFrame(data=np.concatenate((y.values.reshape(-1),y_new)),index=indice,columns=[x])
+            df_int= df_int.join(df_n, how="outer")       
+    return df_int
 
 # Gráfica con datos obtenidos a partir de una interpolación lineal/cúbica y tomando como final el minimo valor
-@app.post("/Aumentar/Interpolacion/Min")
-async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
+@app.post("/Aumentar/Interpolacion")
+async def obtener_datos(tipo_interpolacion : str, tipo_array:str,num: int,  freq:str, indice:str, s:int=1,file: UploadFile = File(...)) :
     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -12540,8 +12561,12 @@ async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: Upload
         df = pd.read_csv(csv_data,index_col=indice)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = interpolacion_min(df,tipo,num,freq)
+    if tipo_array=="min-max":
+        df1 = interpolacion_min_max(df,tipo_interpolacion,num,freq)
+    elif tipo_array == "normal":
+        df1 = interpolacion_normal(df,tipo_interpolacion,num,freq)
+    elif tipo_array == "spline":
+        df1 = interpolacion_spline(df,tipo_interpolacion,num,freq,s)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
     df1.to_csv(stream,index_label="Indice")
@@ -12549,12 +12574,12 @@ async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: Upload
 
     # Devolver el archivo CSV como respuesta
     response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion-min.csv"
+    response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion.csv"
     return response 
 
 # Creación csv con datos obtenidos a partir de una interpolación lineal/cúbica y tomando como final el mínimo valor
-@app.post("/Plot/Aumentar/Interpolacion/Min")
-async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
+@app.post("/Plot/Aumentar/Interpolacion")
+async def obtener_datos(tipo_interpolacion : str, tipo_array:str, num: int, freq:str, indice:str,s:int=0, file: UploadFile = File(...)) :
     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -12567,57 +12592,12 @@ async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: Upload
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
-    
-    df1 = interpolacion_min(df,tipo,num,freq)
-    plot_df(df1)
-    buffer = io.BytesIO()
-    plt.savefig(buffer,format="png")
-    buffer.seek(0)
-    plt.close()
-    return StreamingResponse(buffer,media_type="image/png")
-
-# Creación csv con datos obtenidos a partir de una interpolación lineal/cúbica y tomando como final el máximo valor
-@app.post("/Aumentar/Interpolacion/Max")
-async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
-    
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = interpolacion_max(df,tipo,num,freq)
-    # Convertir el DataFrame a un buffer de CSV
-    stream = io.StringIO()
-    df1.to_csv(stream,index_label="Indice")
-    stream.seek(0)
-
-    # Devolver el archivo CSV como respuesta
-    response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion-max.csv"
-    return response 
-
-# Gráfica con datos obtenidos a partir de una interpolación lineal/cúbica y tomando como final el máximo valor
-@app.post("/Plot/Aumentar/Interpolacion/Max")
-async def obtener_datos(tipo : str, num: int, freq:str, indice:str, file: UploadFile = File(...)) :
-    
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = interpolacion_max(df,tipo,num,freq)
+    if tipo_array=="min-max":
+        df1 = interpolacion_min_max(df,tipo_interpolacion,num,freq)
+    elif tipo_array == "normal":
+        df1 = interpolacion_normal(df,tipo_interpolacion,num,freq)
+    elif tipo_array == "spline":
+        df1 = interpolacion_spline(df,tipo_interpolacion,num,freq,s)
     plot_df(df1)
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
@@ -12674,58 +12654,11 @@ async def obtener_grafica(freq:str, indice:str, file: UploadFile = File(...)) :
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-# Creación csv de datos obtenidos con la interpolación spline
-@app.post("/Aumentar/Interpolacion/Spline")
-async def obtener_datos(s:int, indice:str, file: UploadFile = File(...)) :
-    
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = interpolacion_spline(df,s)
-    # Convertir el DataFrame a un buffer de CSV
-    stream = io.StringIO()
-    df1.to_csv(stream,index_label="Indice")
-    stream.seek(0)
-
-    # Devolver el archivo CSV como respuesta
-    response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=aumentar-interpolacion-spline.csv"
-    return response 
-
-# Gráfica con los datos obtenido de la interpolación spline 
-@app.post("/Plot/Aumentar/Interpolacion/Spline")
-async def obtener_grafica(s:int, indice:str, file: UploadFile = File(...)) :
-    
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = interpolacion_spline(df,s)
-    plot_df(df1)
-    buffer = io.BytesIO()
-    plt.savefig(buffer,format="png")
-    buffer.seek(0)
-    plt.close()
-    return StreamingResponse(buffer,media_type="image/png")
 
 # Random Sampling
 # Barajamos los datos de forma aleatoria 
 def sampling(df,size,freq):
+    np.random.seed(1)
     indice = series_periodos(df.index[0],size+df.shape[0],freq)
     for x in df.columns:
         data = df[x]
@@ -12790,6 +12723,7 @@ async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File
 # Técnicas estadísticas
 # Devuelve df con datos añadidos calculados a partir de una distribución normal con la media y desviación de los datos pasados 
 def normal(df,freq,size):
+    np.random.seed(1)
     indice=series_periodos(df.index[0],size+df.shape[0],freq)
     for x in df.columns:
         data = df[x]
@@ -12804,6 +12738,7 @@ def normal(df,freq,size):
 
 # Devuelve df con datos añadidos calculados a partir de una distribución lognormal cuya media es el logaritmo de la media de los datos pasados 
 def log_normal(df,freq,size):
+    np.random.seed(1)
     indice=series_periodos(df.index[0],size+df.shape[0],freq)
     for x in df.columns:
         data = df[x].values
@@ -12822,6 +12757,7 @@ def box_muller_transform(mean, std_dev, size=100):
     return mean + z1 * std_dev
 
 def box_muller(df,freq,size):
+    np.random.seed(1)
     indice=series_periodos(df.index[0],size+df.shape[0],freq)
     for x in df.columns:
         data = df[x].values
@@ -12984,7 +12920,7 @@ async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File
 # Bootstrapping 
 # Obtenemos nuevos datos barajando los originales + introduciendo ruido
 def agregar_bootstrapping(df,freq):
-    
+    np.random.seed(1)
     for x in df.columns:
         synthetic_data = df.sample(frac=1, replace=True).reset_index(drop=True)
         synthetic_data[x] += np.random.normal(0, 0.1, len(synthetic_data))  # Añadir ruido
@@ -13058,7 +12994,7 @@ def duplicate_and_perturb(data, duplication_factor=0.3, perturbation_std=0.05):
 
 # Duplicamos algunos datos añadiendole cierto ruido.
 def duplicados(df,freq,duplication_factor=0.3,perturbation_std=0.05):
-    
+    np.random.seed(1)
     for x in df.columns:
         data = df[x]
         data_dd=duplicate_and_perturb(data,duplication_factor,perturbation_std)
@@ -13135,6 +13071,7 @@ def linear_combinations(data,num_datos, n_combinations):
     return np.array(data)
 
 def agregar_comb(df,freq,size,window_size):
+    np.random.seed(1)
     for x in df.columns:
         data = df[x]
         datos = linear_combinations(data.values,size,window_size)
@@ -13265,6 +13202,7 @@ async def obtener_grafica(shift:float, freq:str, indice:str, file: UploadFile = 
 # Agregación de ruido harmónico
 # Añadimos ruido harmonico a la muestra con cierta amplitud y frequencia
 def add_harmonic_noise(df,freq,size):
+    np.random.seed(1)
     df_harm = df.copy()
     for x in df_harm.columns:
         data = df[x]
@@ -13413,6 +13351,7 @@ def pulse_noise(data, num_pulses=5, amplitude=1):
 
 # Calculamos nuevos datos splicando saltos en datos aleatorios
 def agregar_saltos(df,freq,num_saltos,amplitud):
+    np.random.seed(1)
     for x in df.columns:
         data = df[x]
         data_augmented = pulse_noise(data,num_saltos,amplitud)
@@ -13434,6 +13373,7 @@ def mixup(data, alpha=0.2):
 
 # Agregar combinación lineal del dato junto a otro dato aleatorio
 def agregar_mixup(df,freq,alpha=0.2):
+    np.random.seed(1)
     df_mix =df.copy()
     for x in df_mix.columns:
         data = df[x]
@@ -13506,6 +13446,7 @@ def random_mix(data, n_samples=100):
 
 # Los valores se calculan tomando dos valores al azar y haciendo la media
 def agregar_random_mix(df,freq,n_samples):
+    np.random.seed(1)
     indice=series_periodos(df.index[0],n_samples+df.shape[0],freq)
     for x in df.columns:
         sampled_data = random_mix(df[x],n_samples)
