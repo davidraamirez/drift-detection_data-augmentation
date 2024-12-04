@@ -31,7 +31,6 @@ if uploaded_file is not None:
     # Mostrar el gráfico en Streamlit
     st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico
         
-        
     st.title("Técnicas de Interpolación")
     num_float = st.number_input(label="Número de datos a interpolar",value=5)
     num = int(num_float)
@@ -509,11 +508,69 @@ if uploaded_file is not None:
             'Modelo': ['Media', 'Moda', 'Mediana', 'Normal','Lognormal','Muller','Sarimax','Random Forest','Ridge','Prophet','Bootstrap','Harmonico','Combinación Lineal','Descomposición aditiva','Descomposición multiplicativa','Interpolación', 'Interpolación min-max','Interpolación Spline'],
             'Error cuadrático medio': [error_media, error_moda, error_mediana, error_normal,error_lognormal,error_muller,error_sarimax,error_RF,error_ridge,error_prophet,error_bootstrap,error_harm,error_cl,error_desc,error_descM,error_interpol, error_interpolM,error_interpolS],
         }
+        result = pd.DataFrame({
+            'Valores Reales': df_test.values.reshape(-1),
+            'Moda':df_moda[df.shape[0]-num:].values.reshape(-1),
+            'Media':df_media[df.shape[0]-num:].values.reshape(-1),
+            'Mediana': df_mediana[df.shape[0]-num:].values.reshape(-1),
+            'Normal':df_normal[df.shape[0]-num:].values.reshape(-1),
+            #'Lognormal':df_lognormal[df.shape[0]-num:].values.reshape(-1),
+            'Box Muller':df_muller[df.shape[0]-num:].values.reshape(-1),
+            'Autorregresivos Sarimax': df_sarimax[df.shape[0]-num:].values.reshape(-1),
+            'Forecaster Random Forest': df_RF[df.shape[0]-num:].values.reshape(-1),
+            'Forecaster Ridge': df_ridge[df.shape[0]-num:].values.reshape(-1),
+            'Prophet': df_prophet[df.shape[0]-num:].values.reshape(-1),
+            'Bootstrap': df_bootstrap[df.shape[0]-num:].values.reshape(-1),
+            'Harmonica':df_harm[df.shape[0]-num:].values.reshape(-1),
+            'Combinación lineal':df_cl[df.shape[0]-num:].values.reshape(-1),
+            'Descomposición aditivia':df_desc[df.shape[0]-num:].values.reshape(-1),
+            'Descomposición multiplicativa':df_descM[df.shape[0]-num:].values.reshape(-1),
+            'Interpolación':df_interpol[df.shape[0]-num:].values.reshape(-1),
+            'Interpolación entre máximo y mínimo':df_interpolM[df.shape[0]-num:].values.reshape(-1),
+            'Interpolación spline' : df_interpolS[df.shape[0]-num:].values.reshape(-1)
+
+        })
     else:
         datos_error = {
             'Modelo': ['Media', 'Moda', 'Mediana', 'Normal','Lognormal','Muller','Sarimax','Random Forest','Ridge','Prophet','Bootstrap','Harmonico','Combinación Lineal','Descomposición aditiva','Descomposición multiplicativa','Interpolación', 'Interpolación min-max'],
             'Error cuadrático medio': [error_media, error_moda, error_mediana, error_normal,error_lognormal,error_muller,error_sarimax,error_RF,error_ridge,error_prophet,error_bootstrap,error_harm,error_cl,error_desc,error_descM,error_interpol, error_interpolM],
         }
+        result = pd.DataFrame({
+            'Valores Reales': df_test.values.reshape(-1),
+            'Moda':df_moda[df.shape[0]-num:].values.reshape(-1),
+            'Media':df_media[df.shape[0]-num:].values.reshape(-1),
+            'Mediana': df_mediana[df.shape[0]-num:].values.reshape(-1),
+            'Normal':df_normal[df.shape[0]-num:].values.reshape(-1),
+            'Lognormal':df_lognormal[df.shape[0]-num:].values.reshape(-1),
+            'Box Muller':df_muller[df.shape[0]-num:].values.reshape(-1),
+            'Autorregresivos Sarimax': df_sarimax[df.shape[0]-num:].values.reshape(-1),
+            'Forecaster Random Forest': df_RF[df.shape[0]-num:].values.reshape(-1),
+            'Forecaster Ridge': df_ridge[df.shape[0]-num:].values.reshape(-1),
+            'Prophet': df_prophet[df.shape[0]-num:].values.reshape(-1),
+            'Bootstrap': df_bootstrap[df.shape[0]-num:].values.reshape(-1),
+            'Harmonica':df_harm[df.shape[0]-num:].values.reshape(-1),
+            'Combinación lineal':df_cl[df.shape[0]-num:].values.reshape(-1),
+            'Descomposición aditivia':df_desc[df.shape[0]-num:].values.reshape(-1),
+            'Descomposición multiplicativa':df_descM[df.shape[0]-num:].values.reshape(-1),
+            'Interpolación':df_interpol[df.shape[0]-num:].values.reshape(-1),
+            'Interpolación entre máximo y mínimo':df_interpolM[df.shape[0]-num:].values.reshape(-1),
+        })
     
     df_error = pd.DataFrame(datos_error)
     st.dataframe(df_error)
+   
+    bottom_3 = df_error.nlargest(3, 'Error cuadrático medio')
+    top_3 = df_error.nsmallest(3,'Error cuadrático medio')
+    
+    st.write("Las tres peores técnicas para la interpolación son: ")
+    st.write(bottom_3['Modelo'].values)
+    
+    st.write("Las tres mejores técnicas para la interpolación son: ")
+    st.write(top_3['Modelo'].values)
+    
+    result.index=df_test.index
+    fig, ax = plt.subplots()  # Crear un objeto figure y un eje
+    result.plot(ax=ax,title="Serie temporal",figsize=(25,10))  # Graficar en el eje creado
+
+    # Mostrar el gráfico en Streamlit
+    st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico

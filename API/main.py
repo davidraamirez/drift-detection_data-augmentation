@@ -43,8 +43,6 @@ from collections import defaultdict
 import inspect
 import re
 from abc import ABCMeta, abstractmethod
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score
 from statsmodels.tsa.seasonal import seasonal_decompose
 from scipy.interpolate import CubicSpline
 
@@ -12532,7 +12530,6 @@ def spline_interpolation_cubic(data, num):
 
 # Realizamos la interpolación spline 
 def interpolacion_spline(df,tipo,num,freq,s):
-    print(df.head())
     indice=series_periodos(df.index[0],num+df.shape[0],freq)
     for x in df.columns:
         y=df[x]
@@ -14666,6 +14663,39 @@ def pred_entrenar_linearReg(df,columns_predict):
     df_pred['Predicciones'] = modelo.predict(df[l:].drop(columns=columns_predict))
     return df_pred
 
+def datos_pred_entrenar_linearReg(df,columns_predict,size):
+    modelo = LinearRegression()
+    l = df.shape[0] -size
+    modelo.fit(X=df[:l])
+    df_pred = df[l:].copy()
+    df_pred['Predicciones'] = modelo.predict(df[l:])
+    return df_pred
+
+# Error cuadrático medio de regresión lineal
+@app.post("/Datos/RegLineal")
+async def obtener_datos(indice:str,freq:str,columna:str,size:int, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df.index = pd.to_datetime(df.index)
+    df.index.freq=freq
+    df2 = datos_pred_entrenar_linearReg(df,columna,size)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df2.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=prediccion-LinearReg.csv"
+    return response 
 
 
 # Error cuadrático medio de regresión lineal
