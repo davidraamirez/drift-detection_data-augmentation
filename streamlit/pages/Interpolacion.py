@@ -514,7 +514,7 @@ if uploaded_file is not None:
             'Media':df_media[df.shape[0]-num:].values.reshape(-1),
             'Mediana': df_mediana[df.shape[0]-num:].values.reshape(-1),
             'Normal':df_normal[df.shape[0]-num:].values.reshape(-1),
-            #'Lognormal':df_lognormal[df.shape[0]-num:].values.reshape(-1),
+            #Lognormal':df_lognormal[df.shape[0]-num:].values.reshape(-1),
             'Box Muller':df_muller[df.shape[0]-num:].values.reshape(-1),
             'Autorregresivos Sarimax': df_sarimax[df.shape[0]-num:].values.reshape(-1),
             'Forecaster Random Forest': df_RF[df.shape[0]-num:].values.reshape(-1),

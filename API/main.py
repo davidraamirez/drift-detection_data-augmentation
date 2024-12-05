@@ -45,7 +45,8 @@ import re
 from abc import ABCMeta, abstractmethod
 from statsmodels.tsa.seasonal import seasonal_decompose
 from scipy.interpolate import CubicSpline
-
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 __version__ = '0.5.3'
 
 _DEFAULT_TAGS = {
@@ -12395,7 +12396,6 @@ async def obtener_grafica( funciones: List[str],condiciones: List[str] , indice:
     return StreamingResponse(buffer,media_type="image/png")
 
 # Crea una columna Target: y = f(x1,...,xN)
-
 def objetivo_funcional(df_caract,columna,f):
     df = df_caract.copy()       
     df[columna] = np.zeros(df_caract.shape[0])
@@ -12454,6 +12454,162 @@ async def obtener_grafica( funciones: str , indice:str, columna:str, file: Uploa
     buffer.seek(0)
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
+
+# Creación de datos obtenidos tras aplicar Principal Component Analysis sobre las variables
+@app.post("/Variables/PCA")
+async def obtener_datos( indice:str, columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    # Estandarización
+    scaler = StandardScaler()
+    df_scaled = scaler.fit_transform(df)
+    # Paso 2: Aplicar PCA
+    pca = PCA(n_components=1)  # Queremos sólo el primer componente principal
+    df[columna] = pca.fit_transform(df_scaled)
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-PCA.csv"
+    return response 
+
+# Gráfica de datos obtenidos tras aplicar Principal Component Analysis sobre las variables
+@app.post("/Plot/Variables/PCA")
+async def obtener_grafica( indice:str, columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    # Estandarización
+    scaler = StandardScaler()
+    df_scaled = scaler.fit_transform(df) 
+    # Paso 2: Aplicar PCA
+    pca = PCA(n_components=1)  # Queremos sólo el primer componente principal
+    df[columna] = pca.fit_transform(df_scaled) 
+      
+    plot_df(df)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+# Creación de datos obtenidos tras aplicar la matriz de correlación para generar una nueva variable.
+@app.post("/Variables/Correlacion")
+async def obtener_datos( indice:str, columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    df1 =interaccion(df,0,df.corr().values,columna)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-corr.csv"
+    return response 
+
+# Gráfica de datos obtenidos tras aplicar la matriz de correlación para generar una nueva variable
+@app.post("/Plot/Variables/Correlacion")
+async def obtener_grafica( indice:str, columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 =interaccion(df,0,df.corr().values,columna)
+      
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
+
+# Creación de datos obtenidos tras aplicar la matriz de correlación para generar una nueva variable.
+@app.post("/Variables/Covarianza")
+async def obtener_datos( indice:str, columna:str, file: UploadFile = File(...)) :
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    # Leer el archivo CSV en un DataFrame de pandas
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    df1 =interaccion(df,0,df.cov().values,columna)
+    
+    # Convertir el DataFrame a un buffer de CSV
+    stream = io.StringIO()
+    df1.to_csv(stream,index_label="Indice")
+    stream.seek(0)
+
+    # Devolver el archivo CSV como respuesta
+    response = StreamingResponse(stream, media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=objetivo-cov.csv"
+    return response 
+
+# Gráfica de datos obtenidos tras aplicar la matriz de correlación para generar una nueva variable
+@app.post("/Plot/Variables/Covarianza")
+async def obtener_grafica( indice:str, columna:str, file: UploadFile = File(...)) :
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+    
+    df1 =interaccion(df,0,df.cov().values,columna)
+      
+    plot_df(df1)
+    buffer = io.BytesIO()
+    plt.savefig(buffer,format="png")
+    buffer.seek(0)
+    plt.close()
+    return StreamingResponse(buffer,media_type="image/png")
+
 
 # Definimos nuevos datos indicando el número de datos a generar, la frequencia y el tipo de interpolación (lineal/cubico).
 def interpolacion_min_max(df,kind,num,freq):
@@ -13796,7 +13952,7 @@ async def obtener_datos(indice:str,freq:str, size:int,tipo:str, file: UploadFile
         
         # Replicar los valores estacionales
         longitud_estacionalidad = 12  # Basado en la periodicidad detectada
-        estacionalidad_extrapolada = np.tile(estacionalidad[-longitud_estacionalidad:], size%12+1)[:size]
+        estacionalidad_extrapolada = np.tile(estacionalidad[-longitud_estacionalidad:], int(size/12)+1)[:size]
         if tipo=="additive":
             prediccion = tendencia_futura + estacionalidad_extrapolada
         elif tipo=="multiplicative":
@@ -13853,7 +14009,7 @@ async def obtener_grafica( indice:str,freq:str,size:int,tipo:str, file: UploadFi
         
         # Replicar los valores estacionales
         longitud_estacionalidad = 12  # Basado en la periodicidad detectada
-        estacionalidad_extrapolada = np.tile(estacionalidad[-longitud_estacionalidad:], 2)[:size]
+        estacionalidad_extrapolada = np.tile(estacionalidad[-longitud_estacionalidad:], int(size/12) +1)[:size]
         if tipo=="additive":
             prediccion = tendencia_futura + estacionalidad_extrapolada
         elif tipo=="multiplicative":

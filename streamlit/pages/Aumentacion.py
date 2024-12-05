@@ -1,3 +1,7 @@
+import io
+from PIL import Image
+from io import BytesIO
+import requests
 import streamlit as st
 import pandas as pd 
 import matplotlib.pyplot as plt
@@ -27,28 +31,106 @@ if uploaded_file is not None:
     # 3. Convertir el DataFrame a CSV para enviar en el POST
     csv_data = df.to_csv(index=df.index.name)
     
-    st.header("Modelos de regresión:")
-
-    st.subheader("Media")
-    api_urlMedia = "http://127.0.0.1:8000/Aumentar/Estadistica?tipo=1&num="+str(num)+"&freq=M&indice="+df.index.name
-    api_urlMedia2 = "http://127.0.0.1:8000/Plot/Aumentar/Estadistica?tipo=1&num="+str(num)+"&freq=M&indice="+df.index.name
+    st.header("Principal Component Analysis")
+    api_urlPCA = "http://127.0.0.1:8000/Variables/PCA?indice="+df.index.name+"&columna=PCA"
+    api_urlPCA2 = "http://127.0.0.1:8000/Plot/Variables/PCA?indice="+df.index.name+"&columna=PCA"
 
     try:
-        files = {'file': ('Media.csv', io.StringIO(csv_data), 'text/csv')}
-        responseMedia= requests.post(api_urlMedia,files=files)
-        files = {'file': ('Media.csv', io.StringIO(csv_data), 'text/csv')}
-        responseMedia2 = requests.post(api_urlMedia2,files=files)
+        files = {'file': ('PCA.csv', io.StringIO(csv_data), 'text/csv')}
+        responsePCA= requests.post(api_urlPCA,files=files)
+        files = {'file': ('PCA.csv', io.StringIO(csv_data), 'text/csv')}
+        responsePCA2 = requests.post(api_urlPCA2,files=files)
         # Mostrar datos si la respuesta es exitosa
-        if responseMedia2.status_code == 200 and responseMedia.status_code ==200:
+        if responsePCA2.status_code == 200 and responsePCA.status_code ==200:
             # Leer el contenido de la imagen
-            image = Image.open(BytesIO(responseMedia2.content))
+            image = Image.open(BytesIO(responsePCA2.content))
             # Mostrar la imagen en la aplicación
-            st.image(image, caption="Serie temporal aumentada con media") 
-            datos_media = responseMedia.content
-            df_media = pd.read_csv(pd.io.common.BytesIO(datos_media),index_col="Indice")
-            st.dataframe(df_media)
+            st.image(image, caption="Serie temporal con aumento de variable a través de PCA") 
+            datos_PCA = responsePCA.content
+            df_PCA = pd.read_csv(pd.io.common.BytesIO(datos_PCA),index_col="Indice")
+            st.dataframe(df_PCA)
         else:
-            st.error(f"Error al consultar la API: {responseMedia.text}")
+            st.error(f"Error al consultar la API: {responsePCA.text}")
             
     except Exception as e:
         st.error(f"Error: {str(e)}")
+        
+    st.header("Correlacion")
+    api_urlCorr = "http://127.0.0.1:8000/Variables/Correlacion?indice="+df.index.name+"&columna=Corr"
+    api_urlCorr2 = "http://127.0.0.1:8000/Plot/Variables/Correlacion?indice="+df.index.name+"&columna=Corr"
+
+    try:
+        files = {'file': ('Corr.csv', io.StringIO(csv_data), 'text/csv')}
+        responseCorr= requests.post(api_urlCorr,files=files)
+        files = {'file': ('Corr.csv', io.StringIO(csv_data), 'text/csv')}
+        responseCorr2 = requests.post(api_urlCorr2,files=files)
+        # Mostrar datos si la respuesta es exitosa
+        if responseCorr2.status_code == 200 and responseCorr.status_code ==200:
+            # Leer el contenido de la imagen
+            image = Image.open(BytesIO(responseCorr2.content))
+            # Mostrar la imagen en la aplicación
+            st.image(image, caption="Serie temporal con aumento de variable a través de la matriz de correlación.") 
+            datos_Corr = responseCorr.content
+            df_Corr = pd.read_csv(pd.io.common.BytesIO(datos_Corr),index_col="Indice")
+            st.dataframe(df_Corr)
+        else:
+            st.error(f"Error al consultar la API: {responseCorr.text}")
+            
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
+        
+    st.header("Covarianza")
+    api_urlCov = "http://127.0.0.1:8000/Variables/Covarianza?indice="+df.index.name+"&columna=Cov"
+    api_urlCov2 = "http://127.0.0.1:8000/Plot/Variables/Covarianza?indice="+df.index.name+"&columna=Cov"
+
+    try:
+        files = {'file': ('Cov.csv', io.StringIO(csv_data), 'text/csv')}
+        responseCov= requests.post(api_urlCov,files=files)
+        files = {'file': ('Cov.csv', io.StringIO(csv_data), 'text/csv')}
+        responseCov2 = requests.post(api_urlCov2,files=files)
+        # Mostrar datos si la respuesta es exitosa
+        if responseCov2.status_code == 200 and responseCov.status_code ==200:
+            # Leer el contenido de la imagen
+            image = Image.open(BytesIO(responseCov2.content))
+            # Mostrar la imagen en la aplicación
+            st.image(image, caption="Serie temporal con aumento de variable a través de la matriz de covarianza.") 
+            datos_Cov = responseCov.content
+            df_Cov = pd.read_csv(pd.io.common.BytesIO(datos_Cov),index_col="Indice")
+            st.dataframe(df_Cov)
+        else:
+            st.error(f"Error al consultar la API: {responseCov.text}")
+            
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
+    
+
+    # Crear una lista de opciones
+    options = ['Lineal','Polinomica2','Polinomica3', 'Polinomica4','Exponencial','Exponencial2','Log','Raiz', 'Seno','Coseno','Tangente','Absoluto','Truncar','Log10','Log1p','Log2','Exp1','Ceil']     
+
+    # Crear el selectbox
+    selected_option = st.selectbox('Seleccione un tipo de interpolacion:', options,index=0)
+    
+    st.header("Funcional")
+    api_urlFunc = "http://127.0.0.1:8000/Variables/Funcional?funciones="+selected_option+"&indice="+df.index.name+"&columna=Func"
+    api_urlFunc2 = "http://127.0.0.1:8000/Plot/Variables/Funcional?funciones="+selected_option+"&indice="+df.index.name+"&columna=Func"
+
+    try:
+        files = {'file': ('Func.csv', io.StringIO(csv_data), 'text/csv')}
+        responseFunc= requests.post(api_urlFunc,files=files)
+        files = {'file': ('Func.csv', io.StringIO(csv_data), 'text/csv')}
+        responseFunc2 = requests.post(api_urlFunc2,files=files)
+        # Mostrar datos si la respuesta es exitosa
+        if responseFunc2.status_code == 200 and responseFunc.status_code ==200:
+            # Leer el contenido de la imagen
+            image = Image.open(BytesIO(responseFunc2.content))
+            # Mostrar la imagen en la aplicación
+            st.image(image, caption="Serie temporal con aumento de variable a través de una función.") 
+            datos_Func = responseFunc.content
+            df_Func = pd.read_csv(pd.io.common.BytesIO(datos_Func),index_col="Indice")
+            st.dataframe(df_Func)
+        else:
+            st.error(f"Error al consultar la API: {responseFunc.text}")
+            
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
+    
