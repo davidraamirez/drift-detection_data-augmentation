@@ -103,16 +103,15 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"Error: {str(e)}")
     
-
     # Crear una lista de opciones
     options = ['Lineal','Polinomica2','Polinomica3', 'Polinomica4','Exponencial','Exponencial2','Log','Raiz', 'Seno','Coseno','Tangente','Absoluto','Truncar','Log10','Log1p','Log2','Exp1','Ceil']     
 
     # Crear el selectbox
-    selected_option = st.selectbox('Seleccione un tipo de interpolacion:', options,index=0)
+    selected_option = st.selectbox('Seleccione un tipo de función:', options,index=0)
     
     st.header("Funcional")
-    api_urlFunc = "http://127.0.0.1:8000/Variables/Funcional?funciones="+selected_option+"&indice="+df.index.name+"&columna=Func"
-    api_urlFunc2 = "http://127.0.0.1:8000/Plot/Variables/Funcional?funciones="+selected_option+"&indice="+df.index.name+"&columna=Func"
+    api_urlFunc = "http://127.0.0.1:8000/Variables/Funcional?funciones="+selected_option+"&indice="+df.index.name+"&columna="+selected_option
+    api_urlFunc2 = "http://127.0.0.1:8000/Plot/Variables/Funcional?funciones="+selected_option+"&indice="+df.index.name+"&columna="+selected_option
 
     try:
         files = {'file': ('Func.csv', io.StringIO(csv_data), 'text/csv')}
@@ -133,4 +132,91 @@ if uploaded_file is not None:
             
     except Exception as e:
         st.error(f"Error: {str(e)}")
+        
+    st.header("Condicional")
+    
+
+    
+    comparacion = [None,'Entre dos columnas','Entre una columna y un valor']
+    sel_comp = st.selectbox('Seleccione un tipo de comparación:',comparacion)
+    
+    # Crear una lista de opciones
+    modos = ['Menor=','Mayor=','Menor', 'Mayor','Igual']
+        
+    # Crear el selectbox
+    selected_modos = st.selectbox('Seleccione el modo de comparación:', modos)
+    
+     # Crear una lista de opciones
+    funciones = ['Lineal','Polinomica2','Polinomica3', 'Polinomica4','Exponencial','Exponencial2','Log','Raiz', 'Seno','Coseno','Tangente','Absoluto','Truncar','Log10','Log1p','Log2','Exp1','Ceil']     
+
+    # Crear el selectbox
+    selected_funcion = st.multiselect('Seleccione dos tipos de función:',funciones,max_selections=2)
+    
+    if sel_comp == 'Entre dos columnas':
+        columnas = st.multiselect('Seleccione las columnas',df.columns,max_selections=2)
+        if len(columnas)==2 and len(selected_funcion)==2:
+            c = str(df.columns.get_loc(columnas[0]))+selected_modos[0:5]+'es'+selected_modos[5:]+str(df.columns.get_loc(columnas[1]))
+            cond = [c,'default']
+            api_urlCond = "http://127.0.0.1:8000/Variables/Condicional?indice="+df.index.name+"&columna=condicional"
+            api_urlCond2 = "http://127.0.0.1:8000/Plot/Variables/Condicional?indice="+df.index.name+"&columna=condicional"
+
+            try:
+                files = {'funciones': (None,",".join(selected_funcion)),
+                        'condiciones':(None,",".join(cond)),
+                        'file': ('Cond.csv', io.StringIO(csv_data), 'text/csv')}
+                responseCond= requests.post(api_urlCond,files=files)
+                files = {'funciones': (None,",".join(selected_funcion)),
+                        'condiciones':(None,",".join(cond)),
+                        'file': ('Cond.csv', io.StringIO(csv_data), 'text/csv')}
+                responseCond2 = requests.post(api_urlCond2,files=files)
+                # Mostrar datos si la respuesta es exitosa
+                if responseCond2.status_code == 200 and responseCond.status_code ==200:
+                    # Leer el contenido de la imagen
+                    image = Image.open(BytesIO(responseCond2.content))
+                    # Mostrar la imagen en la aplicación
+                    st.image(image, caption="Serie temporal con aumento de variable a través de una comparativa entre los valores de dos columnas distintas.") 
+                    datos_Cond = responseCond.content
+                    df_Cond = pd.read_csv(pd.io.common.BytesIO(datos_Cond),index_col="Indice")
+                    st.dataframe(df_Cond)
+                else:
+                    st.error(f"Error al consultar la API: {responseCond.text}")
+                    
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
+                
+    elif sel_comp == 'Entre una columna y un valor':
+        columna = st.selectbox('Seleccione la columna:',df.columns,index=0)
+        num = st.number_input(label="Valor con el que se compara",value=0)
+        c = str(df.columns.get_loc(columna))+selected_modos[0:5]+str(num)
+        cond = [c,'default']
+        
+        api_urlCond = "http://127.0.0.1:8000/Variables/Condicional?indice="+df.index.name+"&columna=condicional"
+        api_urlCond2 = "http://127.0.0.1:8000/Plot/Variables/Condicional?indice="+df.index.name+"&columna=condicional"
+
+        try:
+            files = {'funciones': (None,",".join(selected_funcion)),
+                     'condiciones':(None,",".join(cond)),
+                     'file': ('Cond.csv', io.StringIO(csv_data), 'text/csv')}
+            responseCond= requests.post(api_urlCond,files=files)
+            files = {'funciones': (None,",".join(selected_funcion)),
+                     'condiciones':(None,",".join(cond)),
+                     'file': ('Cond.csv', io.StringIO(csv_data), 'text/csv')}
+            responseCond2 = requests.post(api_urlCond2,files=files)
+            # Mostrar datos si la respuesta es exitosa
+            if responseCond2.status_code == 200 and responseCond.status_code ==200:
+                # Leer el contenido de la imagen
+                image = Image.open(BytesIO(responseCond2.content))
+                # Mostrar la imagen en la aplicación
+                st.image(image, caption="Serie temporal con aumento de variable a través de una comparativa entre los valores de una columna y un valor.") 
+                datos_Cond = responseCond.content
+                df_Cond = pd.read_csv(pd.io.common.BytesIO(datos_Cond),index_col="Indice")
+                st.dataframe(df_Cond)
+            else:
+                st.error(f"Error al consultar la API: {responseCond.text}")
+                
+        except Exception as e:
+            st.error(f"Error: {str(e)}")
+        
+
+    
     
