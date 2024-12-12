@@ -15,7 +15,7 @@ st.set_page_config(
 #st.image("https://via.placeholder.com/1200x300.png?text=Drift+Detection+App", use_column_width=True)
 
 # Título principal
-st.title("Aplicación de comprobación de drift, interpolación de datos y creación de una variable exógena")
+st.title("Aplicación de comprobación de drift, interpolación de datos y creación de variables exógenas")
 
 # Descripción breve de la aplicación
 st.markdown(

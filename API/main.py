@@ -3067,7 +3067,7 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, dist1:int
 @app.get("/Plot/drift/fin/dist-dist")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve una imagen con los datos graficados a partir de un drift cambiando de una fistribución a otra:
+    Devuelve una imagen con los datos graficados a partir de un drift cambiando de una distribución a otra:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -8010,7 +8010,7 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, c:float
 @app.get("/Report/drift/periodos/ARMA-periodico")
 async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, c:float, desv:float, tipo2:int, dist2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico:
+    Devuelve un report estadístico de los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -8319,7 +8319,7 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, c:f
 @app.get("/Datos/drift/periodos/ARMA-periodico")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico:
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -15333,7 +15333,7 @@ def interaccion(df_caract,a,b,columna):
     for k in range(0,b.shape[0]):
         df[columna] = df[columna] + b[k][k] * df_caract[df.columns[k]]
         for i in range(k+1,b.shape[1]):
-            df[columna] = df[columna] + b[k][i] * df_caract[df.columns[k]] * df_caract[df.columns[i]]
+            df[columna] = df[columna] + b[k][i] * np.sqrt(df_caract[df.columns[k]] * df_caract[df.columns[i]])
     return df
 
     
@@ -17945,11 +17945,17 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
     
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
-    df1 = plot_prediccion_sarimax(df,df, df.columns[0])[:size]
-    df2 = pd.DataFrame(data=np.concatenate((df.values,df1.values)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
-    # Convertir el DataFrame a un buffer de CSV
+    indice = series_periodos(df.index[0],df.shape[0]+size,freq)
+    for x in df.columns:
+        data = df[x]
+        prediccion = plot_prediccion_sarimax(df,df,x)[:size]
+        if x == df.columns[0]:
+            df_sarimax=pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+            df_sarimax= df_sarimax.join(df_new, how="outer")
     stream = io.StringIO()
-    df2.to_csv(stream,index_label="Indice")
+    df_sarimax.to_csv(stream,index_label="Indice")
     stream.seek(0)
 
     # Devolver el archivo CSV como respuesta
@@ -17979,12 +17985,18 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
     
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
-    train = int(df.shape[0]*0.8)
-    df1 = plot_prediccion_sarimax(df,df, df.columns[0])[:size]
-    result = pd.DataFrame(data=np.concatenate((df.values,df1.values)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+    indice = series_periodos(df.index[0],df.shape[0]+size,freq)
+    for x in df.columns:
+        data = df[x]
+        prediccion = plot_prediccion_sarimax(df,df,x)[:size]
+        if x == df.columns[0]:
+            df_sarimax=pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+            df_sarimax= df_sarimax.join(df_new, how="outer")
 
     plt.figure()
-    result.plot(title="Predicciones Sarimax",figsize=(13,5))
+    df_sarimax.plot(title="Predicciones Sarimax",figsize=(13,5))
     plt.xlabel("Tiempo")  
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
@@ -18095,7 +18107,7 @@ def error_backtesting_forecasterAutoreg(datos_train,datos_test,lags,steps):
 
     return error_mse
 
-def plot_backtesting_forecasterAutoreg(datos_train,size,lags,steps):
+def plot_backtesting_forecasterAutoreg(datos_train,column,size,lags,steps):
 
     forecaster = ForecasterAutoreg(
                     regressor = RandomForestRegressor(random_state=123),
@@ -18112,7 +18124,7 @@ def plot_backtesting_forecasterAutoreg(datos_train,size,lags,steps):
 
     resultados_grid = grid_search_forecaster(
                         forecaster         = forecaster,
-                        y                  = datos_train[datos_train.columns[0]],
+                        y                  = datos_train[column],
                         param_grid         = param_grid,
                         lags_grid          = lags_grid,
                         steps              = steps,
@@ -18152,11 +18164,20 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
     
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
-    df1 = plot_backtesting_forecasterAutoreg(df,size,10,180)
-    df2 = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+    
+    indice = series_periodos(df.index[0],df.shape[0]+size,freq)
+    for x in df.columns:
+        data = df[x]
+        prediccion = plot_backtesting_forecasterAutoreg(df,x,size,10,180)
+        if x == df.columns[0]:
+            df_rf=pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+            df_rf= df_rf.join(df_new, how="outer")
+            
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
-    df2.to_csv(stream,index_label="Indice")
+    df_rf.to_csv(stream,index_label="Indice")
     stream.seek(0)
 
     # Devolver el archivo CSV como respuesta
@@ -18185,11 +18206,18 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
     
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
-    df1 = plot_backtesting_forecasterAutoreg(df,size,10,180)
-    result = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
-
+    indice = series_periodos(df.index[0],df.shape[0]+size,freq)
+    for x in df.columns:
+        data = df[x]
+        prediccion = plot_backtesting_forecasterAutoreg(df,x,size,10,180)
+        if x == df.columns[0]:
+            df_rf=pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+            df_rf= df_rf.join(df_new, how="outer")
+            
     plt.figure()
-    result.plot(title="Predicciones Modelo Autorregresivo Random Forest",figsize=(13,5))
+    df_rf.plot(title="Predicciones Modelo Autorregresivo Random Forest",figsize=(13,5))
     plt.xlabel("Tiempo")  
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
@@ -18299,7 +18327,7 @@ def error_backtesting_forecasterAutoregDirect(datos_train,datos_test,steps,lags)
 
     return error_mse
 
-def predicciones_backtesting_forecasterAutoregDirect(datos_train,steps,lags):
+def predicciones_backtesting_forecasterAutoregDirect(datos_train,column,steps,lags):
 
     forecaster = ForecasterAutoregDirect(
                 regressor     = Ridge(random_state=123),
@@ -18316,7 +18344,7 @@ def predicciones_backtesting_forecasterAutoregDirect(datos_train,steps,lags):
 
     resultados_grid = grid_search_forecaster(
                         forecaster         = forecaster,
-                        y                  = datos_train[datos_train.columns[0]],
+                        y                  = datos_train[column],
                         param_grid         = param_grid,
                         lags_grid          = lags_grid,
                         steps              = steps,
@@ -18358,11 +18386,19 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
     
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
-    df1 = predicciones_backtesting_forecasterAutoregDirect(df,size,5)
-    df2 = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+
+    indice = series_periodos(df.index[0],df.shape[0]+size,freq)
+    for x in df.columns:
+        data = df[x]
+        prediccion = predicciones_backtesting_forecasterAutoregDirect(df,x,size,5)
+        if x == df.columns[0]:
+            df_ridge=pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+            df_ridge= df_ridge.join(df_new, how="outer")
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
-    df2.to_csv(stream,index_label="Indice")
+    df_ridge.to_csv(stream,index_label="Indice")
     stream.seek(0)
 
     # Devolver el archivo CSV como respuesta
@@ -18391,11 +18427,17 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
     
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
-    df1 = predicciones_backtesting_forecasterAutoregDirect(df,size,5)
-    result = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
-
+    indice = series_periodos(df.index[0],df.shape[0]+size,freq)
+    for x in df.columns:
+        data = df[x]
+        prediccion = predicciones_backtesting_forecasterAutoregDirect(df,x,size,5)
+        if x == df.columns[0]:
+            df_ridge=pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
+            df_ridge= df_ridge.join(df_new, how="outer")
     plt.figure()
-    result.plot(title="Predicciones Modelo Autorregresivo Ridge",figsize=(13,5))
+    df_ridge.plot(title="Predicciones Modelo Autorregresivo Ridge",figsize=(13,5))
     plt.xlabel("Tiempo")  
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
@@ -18483,10 +18525,10 @@ def error_prophet_prediccion(data_train,data_test):
     return mae
 
 # Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test y devolvemos las predicciones
-def pred_prophet_prediccion(data_train,size):
+def pred_prophet_prediccion(data_train,column,size):
     
     data_train=data_train.reset_index()
-    data_train.rename(columns={data_train.columns[0] : 'ds', data_train.columns[1]: 'y'}, inplace=True)
+    data_train.rename(columns={data_train.columns[0] : 'ds', column: 'y'}, inplace=True)
     model = Prophet()
     model.fit(data_train)
     
@@ -18518,11 +18560,18 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
     
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
-    df1 = pred_prophet_prediccion(df,size)
-    df2 = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
+    indice = series_periodos(df.index[0],df.shape[0]+size,freq)
+    for x in df.columns:
+        data = df[x]
+        prediccion = pred_prophet_prediccion(df,x,size)
+        if x == df.columns[0]:
+            df_prophet=pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
+            df_prophet= df_prophet.join(df_new, how="outer")
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
-    df2.to_csv(stream,index_label="Indice")
+    df_prophet.to_csv(stream,index_label="Indice")
     stream.seek(0)
 
     # Devolver el archivo CSV como respuesta
@@ -18551,11 +18600,17 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
     
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
-    df1 = pred_prophet_prediccion(df,size)
-    result = pd.DataFrame(data=np.concatenate((df.values.reshape(-1),df1)),index=series_periodos(df.index[0],df.shape[0]+size,freq),columns=df.columns)
-
+    indice = series_periodos(df.index[0],df.shape[0]+size,freq)
+    for x in df.columns:
+        data = df[x]
+        prediccion = pred_prophet_prediccion(df,x,size)
+        if x == df.columns[0]:
+            df_prophet=pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
+        else:
+            df_new = pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
+            df_prophet= df_prophet.join(df_new, how="outer")
     plt.figure()
-    result.plot(title="Predicciones Modelo Autorregresivo Prophet",figsize=(13,5))
+    df_prophet.plot(title="Predicciones Modelo Autorregresivo Prophet",figsize=(13,5))
     plt.xlabel("Tiempo")  
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
