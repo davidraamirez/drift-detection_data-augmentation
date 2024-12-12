@@ -5,7 +5,13 @@ import matplotlib.pyplot as plt
 import requests
 from PIL import Image
 from io import BytesIO
-
+# Configurar la página
+st.set_page_config(
+    page_title="Drift No Detectado",
+    page_icon="📊",
+    layout="centered",
+    initial_sidebar_state="expanded",
+)
 # Título de la aplicación
 st.title("Petición Datos")
 
@@ -32,7 +38,7 @@ except Exception as e:
 st.title("Graficar Datos")
 
 # Entrada del usuario
-api_urlPlot = "http://127.0.0.1:8000/Plot/distribuciones/fin?inicio=1%2F1%2F2000&fin=1%2F1%2F2020&freq=M&distr=2&columna=valor&params=55&params=0.2"
+api_urlPlot = "http://127.0.0.1:8000/Plot/distribucion/fin?inicio=1%2F1%2F2000&fin=1%2F1%2F2020&freq=M&distr=2&columna=valor&params=55&params=0.2"
 
 try:
     # Hacer la llamada a la API

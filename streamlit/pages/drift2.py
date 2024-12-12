@@ -6,6 +6,14 @@ import requests
 from PIL import Image
 from io import BytesIO
 
+# Configurar la página
+st.set_page_config(
+    page_title="Drift Detectado",
+    page_icon="📊",
+    layout="centered",
+    initial_sidebar_state="expanded",
+)
+
 # Título de la aplicación
 st.title("Petición Datos")
 

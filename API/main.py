@@ -783,7 +783,7 @@ async def obtener_datos(inicio: str, fin:str, freq:str, distr:int , columna: Lis
     return response
 
 # Gráfica de los datos siguiendo una distribución
-@app.get("/Plot/distribuciones/fin")
+@app.get("/Plot/distribucion/fin")
 async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     """
     Devuelve una imagen con los datos graficados que siguen cierta distribución:
@@ -821,7 +821,7 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int , columna: L
     return StreamingResponse(buffer,media_type="image/png")
 
 # Report estadístico de los datos siguiendo cierta distribución
-@app.get("/Report/distribuciones/periodos")
+@app.get("/Report/distribucion/periodos")
 def obtener_report(inicio: str, periodos: int, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
     """
     Devuelve un report estadístico sobre cierta distribución:
@@ -7601,7 +7601,7 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:
     return StreamingResponse(buffer,media_type="image/png")
 
 # Report estadístico de drift de un modelo ARMA por uno periódico
-@app.get("/Report/drift/fin/ARMA-periodicos")
+@app.get("/Report/drift/fin/ARMA-periodico")
 async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, dist2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
     Devuelve un report estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico:
@@ -7910,7 +7910,7 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, c:float,
     return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
 
 # Creación csv de drift de un modelo ARMA por uno periódico
-@app.get("/Datos/drift/fin/ARMA-periodicos")
+@app.get("/Datos/drift/fin/ARMA-periodico")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
     Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico:
@@ -7955,12 +7955,12 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, c:float, 
 
     # Devolver el archivo CSV como respuesta
     response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-periodicos-fin.csv"
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-periodico-fin.csv"
     
     return response 
 
 # Gráfico de drift de un modelo ARMA por uno periódico
-@app.get("/Plot/drift/fin/ARMA-periodicos")
+@app.get("/Plot/drift/fin/ARMA-periodico")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
     Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico:
@@ -8007,7 +8007,7 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, c:float
     return StreamingResponse(buffer,media_type="image/png")
 
 # Report estadístico de drift de un modelo ARMA por uno periódico
-@app.get("/Report/drift/periodos/ARMA-periodicos")
+@app.get("/Report/drift/periodos/ARMA-periodico")
 async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, c:float, desv:float, tipo2:int, dist2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
     Devuelve un report estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico:
@@ -8316,7 +8316,7 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, c:f
     return {"Tipo": tipos, "Parámetro del modelo 1" : parametros1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
 
 # Creación csv de drift de un modelo ARMA por uno periódico
-@app.get("/Datos/drift/periodos/ARMA-periodicos")
+@app.get("/Datos/drift/periodos/ARMA-periodico")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
     Devuelve un report estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico:
@@ -8361,12 +8361,12 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int ,c:fl
 
     # Devolver el archivo CSV como respuesta
     response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-periodicos-periodos.csv"
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-ARMA-periodico-periodos.csv"
     
     return response 
 
 # Gráfico de drift de un modelo ARMA por uno periódico
-@app.get("/Plot/drift/periodos/ARMA-periodicos")
+@app.get("/Plot/drift/periodos/ARMA-periodico")
 async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
     Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico:
@@ -11306,7 +11306,7 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
         2. p1 = número de periodos
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 1
+    - **desv2**: desviación típica del ruido blanco del modelo 2
     - **columna**: nombre de la columna con los datos generados.
     """
     if tipo1==1:
@@ -11618,7 +11618,7 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
         2. p1 = número de periodos
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 1
+    - **desv2**: desviación típica del ruido blanco del modelo 2
     - **columna**: nombre de la columna con los datos generados.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
@@ -11667,7 +11667,7 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
         2. p1 = número de periodos
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 1
+    - **desv2**: desviación típica del ruido blanco del modelo 2
     - **columna**: nombre de la columna con los datos generados.
     """
     
@@ -11714,7 +11714,7 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
         2. p1 = número de periodos
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 1
+    - **desv2**: desviación típica del ruido blanco del modelo 2
     - **columna**: nombre de la columna con los datos generados.
     """
     if tipo1==1:
@@ -11993,7 +11993,7 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
 @app.get("/Datos/drift/periodos/periodico-ARMA")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     """
-    Devuelve un csv con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles:
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -12023,7 +12023,7 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
         2. p1 = número de periodos
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 1
+    - **desv2**: desviación típica del ruido blanco del modelo 2
     - **columna**: nombre de la columna con los datos generados.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
@@ -12073,7 +12073,7 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
         2. p1 = número de periodos
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 1
+    - **desv2**: desviación típica del ruido blanco del modelo 2
     - **columna**: nombre de la columna con los datos generados.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
@@ -12088,7 +12088,40 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 # Report estadístico de drift de un modelo periódico por una tendencia
 @app.get("/Report/drift/fin/periodico-tendencia")
 async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
+    - **tipo1**: valores posibles
+        1. p1 = amplitud de periodo
+        2. p1 = número de periodos
+    - **params2**: parámetros de la tendencia.
+    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
     elif tipo1==2 :
@@ -12353,7 +12386,40 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
 # Creación csv de drift de un modelo periódico por una tendencia
 @app.get("/Datos/drift/fin/periodico-tendencia")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
+    - **tipo1**: valores posibles
+        1. p1 = amplitud de periodo
+        2. p1 = número de periodos
+    - **params2**: parámetros de la tendencia.
+    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
@@ -12369,6 +12435,40 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
 # Gráfico de drift de un modelo periódico por una tendencia
 @app.get("/Plot/drift/fin/periodico-tendencia")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista:
+
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
+    - **tipo1**: valores posibles
+        1. p1 = amplitud de periodo
+        2. p1 = número de periodos
+    - **params2**: parámetros de la tendencia.
+    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -12381,7 +12481,40 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 # Report estadístico de drift de un modelo periódico por una tendencia
 @app.get("/Report/drift/periodos/periodico-tendencia")
 async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
+    - **tipo1**: valores posibles
+        1. p1 = amplitud de periodo
+        2. p1 = número de periodos
+    - **params2**: parámetros de la tendencia.
+    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
     elif tipo1==2 :
@@ -12648,7 +12781,40 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
 # Creación csv de drift de un modelo periódico por una tendencia
 @app.get("/Datos/drift/periodos/periodico-tendencia")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
+    - **tipo1**: valores posibles
+        1. p1 = amplitud de periodo
+        2. p1 = número de periodos
+    - **params2**: parámetros de la tendencia.
+    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
@@ -12664,7 +12830,40 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
 # Gráfico de drift de un modelo periódico por una tendencia
 @app.get("/Plot/drift/periodos/periodico-tendencia")
 async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve una gráfica con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
+    - **tipo1**: valores posibles
+        1. p1 = amplitud de periodo
+        2. p1 = número de periodos
+    - **params2**: parámetros de la tendencia.
+    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -12677,7 +12876,21 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 # Report estadístico de drift de un modelo de tendencia determinista por otro
 @app.get("/Report/drift/fin/tendencia-tendencia")
 async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a otro:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **params2**: parámetros de la tendencia 2.
+    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     if tipo1 == 1:
         subtipo1 = "lineal"
         tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + ", b = " +str (params1[1]) +" y e0 es un random con valores entre [- " + str(coef_error1)+ " , "+ str(coef_error1) +" ]"
@@ -12742,7 +12955,21 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
 # Creación csv de drift de un modelo de tendencia determinista por otro
 @app.get("/Datos/drift/fin/tendencia-tendencia")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a otro:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **params2**: parámetros de la tendencia 2.
+    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
@@ -12758,7 +12985,21 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
 # Gráfico de drift de un modelo de tendencia determinista por otro
 @app.get("/Plot/drift/fin/tendencia-tendencia")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a otro:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **params2**: parámetros de la tendencia 2.
+    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -12771,7 +13012,21 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 # Report estadístico de drift de un modelo de tendencia determinista por otro
 @app.get("/Report/drift/periodos/tendencia-tendencia")
 async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a otro:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **params2**: parámetros de la tendencia 2.
+    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     if tipo1 == 1:
         subtipo1 = "lineal"
         tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + ", b = " +str (params1[1]) +" y e0 es un random con valores entre [- " + str(coef_error1)+ " , "+ str(coef_error1) +" ]"
@@ -12836,7 +13091,21 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
 # Creación csv de drift de un modelo de tendencia determinista por otro
 @app.get("/Datos/drift/periodos/tendencia-tendencia")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a otro:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **params2**: parámetros de la tendencia 2.
+    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     
     # Convertir el DataFrame a un buffer de CSV
@@ -12853,6 +13122,21 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
 # Gráfico de drift de un modelo de tendencia determinista por otro
 @app.get("/Plot/drift/periodos/tendencia-tendencia")
 async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, coef_error1: Union[float, None] = 0, coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+    """
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a otro:
+
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **params2**: parámetros de la tendencia 2.
+    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -12865,7 +13149,36 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 # Report estadístico de drift de un modelo de tendencia determinista por una distribución
 @app.get("/Report/drift/fin/tendencia-distr")
 async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,dist2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+    """
+    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a una distribución:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **columna**: nombre de la columna con los datos generados.
+    """
     if tipo1 == 1:
         subtipo1 = "lineal"
         tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + ", b = " +str (params1[1]) +" y e0 es un random con valores entre [- " + str(coef_error1)+ " , "+ str(coef_error1) +" ]"
@@ -13124,7 +13437,36 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
 # Creación csv de drift de un modelo de tendencia determinista por una distribución
 @app.get("/Datos/drift/fin/tendencia-distr")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    """
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a una distribución:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
@@ -13140,7 +13482,36 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
 # Gráfico de drift de un modelo de tendencia determinista por una distribución
 @app.get("/Plot/drift/fin/tendencia-distr")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    """
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a una distribución:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -13153,7 +13524,36 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 # Report estadístico de drift de un modelo de tendencia determinista por una distribución
 @app.get("/Report/drift/periodos/tendencia-distr")
 async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,dist2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+    """
+    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a una distribución:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **columna**: nombre de la columna con los datos generados.
+    """
     if tipo1 == 1:
         subtipo1 = "lineal"
         tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + ", b = " +str (params1[1]) +" y e0 es un random con valores entre [- " + str(coef_error1)+ " , "+ str(coef_error1) +" ]"
@@ -13412,7 +13812,36 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
 # Creación csv de drift de un modelo de tendencia determinista por una distribución
 @app.get("/Datos/drift/periodos/tendencia-distr")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    """
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a una distribución:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
@@ -13427,7 +13856,36 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
 # Gráfico de drift de un modelo de tendencia determinista por una distribución
 @app.get("/Plot/drift/periodos/tendencia-distr")
 async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    """
+    Devuelve una imagen con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a una distribución:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[distr2,params2], 14, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -13440,7 +13898,21 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 # Report estadístico de drift de un modelo de tendencia determinista por uno ARMA
 @app.get("/Report/drift/fin/tendencia-ARMA")
 async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    """
+    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
+    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
+    - **desv2**: desviación típica del ruido blanco del modelo 2
+    - **columna**: nombre de la columna con los datos generados.
+    """
     if tipo1 == 1:
         subtipo1 = "lineal"
         tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + ", b = " +str (params1[1]) +" y e0 es un random con valores entre [- " + str(coef_error1)+ " , "+ str(coef_error1) +" ]"
@@ -13518,7 +13990,21 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
 # Creación csv de drift de un modelo de tendencia determinista por uno ARMA 
 @app.get("/Datos/drift/fin/tendencia-ARMA")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    """
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
+    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
+    - **desv2**: desviación típica del ruido blanco del modelo 2
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
     
     # Convertir el DataFrame a un buffer de CSV
@@ -13534,7 +14020,21 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
 # Gráfico de drift de un modelo de tendencia determinista por uno ARMA
 @app.get("/Plot/drift/fin/tendencia-ARMA")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    """
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
+    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
+    - **desv2**: desviación típica del ruido blanco del modelo 2
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -13547,7 +14047,21 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 # Report estadístico de drift de un modelo de tendencia determinista por uno ARMA
 @app.get("/Report/drift/periodos/tendencia-ARMA")
 async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    """
+    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
+    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
+    - **desv2**: desviación típica del ruido blanco del modelo 2
+    - **columna**: nombre de la columna con los datos generados.
+    """
     if tipo1 == 1:
         subtipo1 = "lineal"
         tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + ", b = " +str (params1[1]) +" y e0 es un random con valores entre [- " + str(coef_error1)+ " , "+ str(coef_error1) +" ]"
@@ -13625,7 +14139,21 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
 # Creación csv de drift de un modelo de tendencia determinista por uno ARMA
 @app.get("/Datos/drift/periodos/tendencia-ARMA")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    """
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
+    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
+    - **desv2**: desviación típica del ruido blanco del modelo 2
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df =crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
@@ -13640,7 +14168,21 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
 # Gráfico de drift de un modelo de tendencia determinista por uno ARMA
 @app.get("/Plot/drift/periodos/tendencia-ARMA")
 async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"),phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+    """
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
+    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
+    - **desv2**: desviación típica del ruido blanco del modelo 2
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[c2,desv2,s2,phi2,teta2,[]], 15, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -13651,9 +14193,42 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
     return StreamingResponse(buffer,media_type="image/png")
 
 # Report estadístico de drift de un modelo de tendencia determinista por uno periódico
-@app.get("/Report/periodos/fin/tendencia-periodicos")
+@app.get("/Report/periodos/fin/tendencia-periodico")
 async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, dist2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
-    
+    """
+    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo periódico:
+
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
+    - **tipo2**: valores posibles
+        1. p2 = amplitud de periodo
+        2. p2 = número de periodos
+    - **columna**: nombre de la columna con los datos generados.
+    """
     if tipo1 == 1:
         subtipo1 = "lineal"
         tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + ", b = " +str (params1[1]) +" y e0 es un random con valores entre [- " + str(coef_error1)+ " , "+ str(coef_error1) +" ]"
@@ -13921,9 +14496,42 @@ async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:in
     return {"Tipo": tipos, "Parámetro del modelo 1" : tendencia1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
 
 # Creación csv de drift de un modelo de tendencia determinista por uno periódico
-@app.get("/Datos/drift/fin/tendencia-periodicos")
+@app.get("/Datos/drift/fin/tendencia-periodico")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    """
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo periódico:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
+    - **tipo2**: valores posibles
+        1. p2 = amplitud de periodo
+        2. p2 = número de periodos
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
@@ -13932,13 +14540,46 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
 
     # Devolver el archivo CSV como respuesta
     response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-periodicos-fin.csv"
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-periodico-fin.csv"
     return response 
 
 # Gráfico de drift de un modelo de tendencia determinista por uno periódico
-@app.get("/Plot/drift/fin/tendencia-periodicos")
+@app.get("/Plot/drift/fin/tendencia-periodico")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, distr2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    """
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo periódico:
 
+    - **inicio**: fecha de inicio.
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
+    - **tipo2**: valores posibles
+        1. p2 = amplitud de periodo
+        2. p2 = número de periodos
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -13949,9 +14590,42 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     return StreamingResponse(buffer,media_type="image/png")
 
 # Report estadístico de drift de un modelo de tendencia determinista por uno periódico
-@app.get("/Report/drift/periodos/tendencia-periodicos")
+@app.get("/Report/drift/periodos/tendencia-periodico")
 async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, dist2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    """
+    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
+    - **tipo2**: valores posibles
+        1. p2 = amplitud de periodo
+        2. p2 = número de periodos
+    - **columna**: nombre de la columna con los datos generados.
+    """
     if tipo1 == 1:
         subtipo1 = "lineal"
         tendencia1= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params1[0]) + ", b = " +str (params1[1]) +" y e0 es un random con valores entre [- " + str(coef_error1)+ " , "+ str(coef_error1) +" ]"
@@ -14219,9 +14893,42 @@ async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tip
     return {"Tipo": tipos, "Parámetro del modelo 1" : tendencia1,"Parámetros de la segunda distribución: " : parametros2, "Parámetros de la query" : explicacion, "Media segunda distribución" :mean2, "Varianza de la segunda distribución" : var2}
 
 # Creación csv de drift de un modelo de tendencia determinista por uno periódico
-@app.get("/Datos/drift/periodos/tendencia-periodicos")
+@app.get("/Datos/drift/periodos/tendencia-periodico")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    """
+    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
+    - **tipo2**: valores posibles
+        1. p2 = amplitud de periodo
+        2. p2 = número de periodos
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
     
     # Convertir el DataFrame a un buffer de CSV
@@ -14231,13 +14938,46 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
 
     # Devolver el archivo CSV como respuesta
     response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-periodicos-periodos.csv"
+    response.headers["Content-Disposition"] = "attachment; filename=datos-drift-tendencia-periodico-periodos.csv"
     return response 
 
 # Gráfico de drift de un modelo de tendencia determinista por uno periódico
-@app.get("/Plot/drift/periodos/tendencia-periodicos")
+@app.get("/Plot/drift/periodos/tendencia-periodico")
 async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, distr2:int,p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float]= Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+    """
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles:
 
+    - **inicio**: fecha de inicio.
+    - **periodos**: número de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num_drift**: dato en el que se produce el drift.
+    - **params1**: parámetros de la tendencia 1.
+    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
+    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
+        1. Normal: Los parámetros son la media y la desv_típica de los datos.
+        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
+        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
+        6. Constante: El parámetro es el valor constante que toma los datos.
+        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
+        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
+        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
+        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
+        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
+    - **tipo2**: valores posibles
+        1. p2 = amplitud de periodo
+        2. p2 = número de periodos
+    - **columna**: nombre de la columna con los datos generados.
+    """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[tipo2,distr2,params2,p2], 16, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -14256,6 +14996,13 @@ def objetivo_lineal(df_caract,a,b,columna):
 # Creación de datos obtenidos a partir de una relación lineal de los datos previos.
 @app.post("/Variables/Lineal")
 async def obtener_datos(a : float, b: float, indice:str, columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve un csv con los datos añadiendole una columna a partir de una relación lineal respecto a la columna ya existente:
+    - **a**, **b** : coeficientes de la relación lineal (a + b*x*)
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariables
+    """
     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -14282,7 +15029,13 @@ async def obtener_datos(a : float, b: float, indice:str, columna:str, file: Uplo
 # Gráfica de datos obtenidos a partir de una relación lineal.   
 @app.post("/Plot/Variables/Lineal")
 async def obtener_grafica(a : float, b: float, indice:str, columna:str, file: UploadFile = File(...)) :
-
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de una relación lineal respecto a la columna ya existente:
+    - **a**, **b** : coeficientes de la relación lineal (a + b*x*)
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariables
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14312,7 +15065,13 @@ def objetivo_polinomico(df_caract,a, columna):
 # Creación de datos obtenidos a partir de una relación polinómica de los datos previos.
 @app.post("/Variables/Polinomico")
 async def obtener_datos (indice:str, columna:str, a: List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos añadiendole una columna a partir de una relación polinómica respecto a la columna ya existente:
+    - **a** : coeficiente de la relación polinómica (a[0] + a[1]*x* + a[2]*x*<sup>2</sup> + a[3]*x*<sup>3</sup> ...)
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariables
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14338,6 +15097,13 @@ async def obtener_datos (indice:str, columna:str, a: List[float]= Query(...,desc
 # Gráfica de datos obtenidos a partir de una relación polinómica de los datos previos.
 @app.post("/Plot/Variables/Polinomico")
 async def obtener_grafica( indice:str, columna:str, a: List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de una relación polinómica respecto a la columna ya existente:
+    - **a** : coeficiente de la relación polinómica (a[0] + a[1]*x* + a[2]*x*<sup>2</sup> + a[3]*x*<sup>3</sup> ...)
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariables
+    """   
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14365,7 +15131,13 @@ def objetivo_exp(df_caract,a,b,columna):
 # Creación de datos obtenidos a partir de una relación exponencial de los datos previos.
 @app.post("/Variables/Exponencial")
 async def obtener_datos( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos añadiendole una columna a partir de una relación exponencial respecto a la columna ya existente:
+    - **a**, **b** : coeficientes de la relación exponencial (a*e*<sup>bx</sup>)
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariables
+    """       
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14391,7 +15163,13 @@ async def obtener_datos( a:float,b:float,indice:str, columna:str, file: UploadFi
 # Gráfica de datos obtenidos a partir de una relación exponencial de los datos previos.
 @app.post("/Plot/Variables/Exponencial")
 async def obtener_grafica( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
-
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de una relación exponencial respecto a la columna ya existente:
+    - **a**, **b** : coeficientes de la relación exponencial (a*e*<sup>bx</sup>)
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariables
+    """  
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14419,7 +15197,13 @@ def objetivo_log(df_caract,a,b,columna):
 # Creación de datos obtenidos a partir de una relación logarítmica de los datos previos.
 @app.post("/Variables/Logaritmica")
 async def obtener_datos( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos añadiendole una columna a partir de una relación logarítmica respecto a la columna ya existente:
+    - **a**, **b** : coeficientes de la relación logarítmica (a+ b log(x))
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariables
+    """     
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14445,6 +15229,14 @@ async def obtener_datos( a:float,b:float,indice:str, columna:str, file: UploadFi
 # Gráfica de datos obtenidos a partir de una relación logarítmica de los datos previos.
 @app.post("/Plot/Variables/Logaritmica")
 async def obtener_grafica( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de una relación logarítmica respecto a la columna ya existente:
+    - **a**, **b** : coeficientes de la relación logarítmica (a+ b log(x))
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariables
+    """  
+    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14474,7 +15266,13 @@ def multivariante(df_caract,a,b,columna):
 # Creación de datos obtenidos como combinación lineal de los otros
 @app.post("/Variables/Multivariante")
 async def obtener_datos(a:float, indice:str, columna:str, b :List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos añadiendole una columna a partir de una relación lineal multivariable respecto a las columnas ya existentes:
+    - **a** , **b** : coeficientes de la relación lineal multivariable (a+ ∑<sub>i=1</sub> b[i]x[i])
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariables
+    """      
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14502,7 +15300,13 @@ async def obtener_datos(a:float, indice:str, columna:str, b :List[float]= Query(
 # Gráfica de datos obtenidos como combinación lineal de los otros
 @app.post("/Plot/Variables/Multivariante")
 async def obtener_grafica(a:float, indice:str, columna:str, b :List[float]= Query(...,description="Coeficientes"), file: UploadFile = File(...)) :
-
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de una relación lineal multivariable respecto a las columnas ya existentes:
+    - **a** , **b** : coeficientes de la relación lineal multivariable (a+ ∑<sub>i=1</sub> b[i]x[i])
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariables
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14532,13 +15336,17 @@ def interaccion(df_caract,a,b,columna):
             df[columna] = df[columna] + b[k][i] * df_caract[df.columns[k]] * df_caract[df.columns[i]]
     return df
 
-class MatrixBody(BaseModel):
-    matrix: List[List[float]]
     
-# Creación de datos obtenidos tras aplicar una matriz de correlación para obtener nuevos datos
+# Creación de datos obtenidos tras aplicar una matriz de interacción para obtener nuevos datos
 @app.post("/Variables/Interaccion")
 async def obtener_datos(a:float, indice:str, columna:str, b: str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos añadiendole una columna a partir de una relación basada en la matriz respecto a las columnas ya existentes:
+    - **a** , **b** : coeficientes de la relación (a+ ∑<sub>i=1</sub> b[i][i]x[i] + ∑<sub>j=1,k=1</sub> b[j][k]x[j]x[k] )
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariables
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14569,6 +15377,13 @@ async def obtener_datos(a:float, indice:str, columna:str, b: str, file: UploadFi
 # Gráfico de datos obtenidos tras aplicar una matriz de correlación para obtener nuevos datos
 @app.post("/Plot/Variables/Interaccion")
 async def obtener_grafica(a:float, indice:str, columna:str, b: str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de una relación basada en la matriz respecto a las columnas ya existentes:
+    - **a** , **b** : coeficientes de la relación (a+ ∑<sub>i=1</sub> b[i][i]x[i] + ∑<sub>j=1,k=1</sub> b[j][k]x[j]x[k] )
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariables
+    """   
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14602,7 +15417,13 @@ def objetivo_prop_inversa(df_caract,a,n,columna):
 # Creación de datos obtenidos tras aplicar la inversa a los datos previos
 @app.post("/Variables/Inversa")
 async def obtener_datos(a:float, n:int , indice:str, columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos añadiendole una columna a partir de una relación inversa respecto a la columna ya existente:
+    - **a** , **n** : coeficiente de la relación y grado (a / x<sup>n</sup>)
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariable
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14628,6 +15449,13 @@ async def obtener_datos(a:float, n:int , indice:str, columna:str, file: UploadFi
 # Gráfica de datos obtenidos tras aplicar la inversa a los datos previos
 @app.post("/Plot/Variables/Inversa")
 async def obtener_grafica(a:float, n:int , indice:str, columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de una relación inversa respecto a la columna ya existente:
+    - **a** , **n** : coeficiente de la relación y grado (a / x<sup>n</sup>)
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariable
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14725,8 +15553,15 @@ def elegir_funcion(funcion):
 
 # Creación csv con datos obtenidos tras aplicar una función u otra según la variable sea mayor / menor que un umbral    
 @app.post("/Variables/Escalonada")
-async def obtener_datos(umbral:float, f: str,g:str , indice:str, columna:str, file: UploadFile = File(...)) :
-    
+async def obtener_datos(umbral:float, f: str, g:str , indice:str, columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve un csv con los datos añadiendole una columna a partir de una relación escalonada respecto a la columna ya existente:
+    - **umbral** : valor umbral (si x < umbral --> f(x), si x>= umbral --> g(x))
+    - **f** , **g** : funciones que se usan para obtener el valor de la nueva columna 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariable
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -14754,6 +15589,14 @@ async def obtener_datos(umbral:float, f: str,g:str , indice:str, columna:str, fi
 # Gráfica de datos obtenidos tras aplicar una función u otra según la variable sea mayor / menor que un umbral 
 @app.post("/Plot/Variables/Escalonada")
 async def obtener_grafica(umbral:float, f: str,g:str , indice:str, columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados a partir de una relación escalonada respecto a la columna ya existente:
+    - **umbral** : valor umbral (si x < umbral --> f(x), si x>= umbral --> g(x))
+    - **f** , **g** : funciones que se usan para obtener el valor de la nueva columna 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos univariable
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15041,7 +15884,35 @@ def elegir_funcion_multi(funcion):
 # Creación de datos obtenidos tras aplicar una función a una combinación lineal de las variables dependiendo de ciertas condiciones
 @app.post("/Variables/Condicional")
 async def obtener_datos( funciones: List[str],condiciones: List[str] , indice:str, columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos añadiendole una columna a partir de una relación condicional respecto a las columnas ya existentes:
+    - **funciones** : array con las funciones aplicadas en caso de que se cumpla la condición correspondiente. Valores posibles de cada función:
+        1. *Lineal*: relación lineal respecto al resto de las variables
+        2. *Polinomica2*: relación polinómica de grado 2 respecto al resto de las variables
+        3. *Polinomica3*: relación polinómica de grado 3 respecto al resto de las variables
+        4. *Polinomica4*: relación polinómica de grado 4 respecto al resto de las variables
+        5. *Exponencial*: relación exponencial respecto a una relación lineal del resto de variables 
+        6. *Exponencial2*: relación exponencial de base 2 respecto a una relación lineal del resto de variables 
+        7. *Log*: relación logarítmica respecto a una relación lineal del resto de variables 
+        8. *Raiz*: relación radical respecto a una relación lineal del resto de variables 
+        9. *Seno*: relación senoidal respecto a una relación lineal del resto de variables 
+        10. *Coseno*: relación cosenoidal respecto a una relación lineal del resto de variables 
+        11. *Tangente*: relación tangencial respecto a una relación lineal del resto de variables 
+        12. *Absoluto*: valor absoluto respecto a una relación lineal del resto de variables 
+        13. *Truncar*: truncar respecto a una relación lineal del resto de variables 
+        14. *Log10*: logarítmo en base 10 de una relación lineal del resto de variables 
+        15. *Log1p*: logaritmo de una relación lineal del resto de variables 
+        16. *Log2*: logaritmo en base 2 de una relación lineal del resto de variables 
+        17. *Ceil*: parte entera de una relación lineal del resto de variables 
+    - **condiciones** : array con las condiciones. Valores posibles:
+        1. indice + Menor/Mayor/Igual/Menor=/Mayor= + valor: comprueba que el valor de la columna correspondiente al indice sea menor/mayor/igual/menor o igual/mayor o igual que el valor
+        2. indice1 + Menores/Mayores/Iguales/Menores=/Mayores= + indice2: comprueba que el valor de la columna correspondiente al indice1 sea menor/mayor/igual/menor o igual/mayor o igual que el valor de la columna correspondiente al indice2
+        3. default: siempre se cumple
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariable
+    Nota: Debe haber tantas funciones como condiciones. Si se cumple la n-ésima condición, entonces el valor de la nueva columba se obtiene de aplicar la n-ésima función
+    """  
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15077,6 +15948,35 @@ async def obtener_datos( funciones: List[str],condiciones: List[str] , indice:st
 # Gráfica de datos obtenidos tras aplicar una función a una combinación lineal de las variables dependiendo de ciertas condiciones
 @app.post("/Plot/Variables/Condicional")
 async def obtener_grafica( funciones: List[str],condiciones: List[str] , indice:str, columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de una relación condicional respecto a las columnas ya existentes:
+    - **funciones** : array con las funciones aplicadas en caso de que se cumpla la condición correspondiente. Valores posibles de cada función:
+        1. *Lineal*: relación lineal respecto al resto de las variables
+        2. *Polinomica2*: relación polinómica de grado 2 respecto al resto de las variables
+        3. *Polinomica3*: relación polinómica de grado 3 respecto al resto de las variables
+        4. *Polinomica4*: relación polinómica de grado 4 respecto al resto de las variables
+        5. *Exponencial*: relación exponencial respecto a una relación lineal del resto de variables 
+        6. *Exponencial2*: relación exponencial de base 2 respecto a una relación lineal del resto de variables 
+        7. *Log*: relación logarítmica respecto a una relación lineal del resto de variables 
+        8. *Raiz*: relación radical respecto a una relación lineal del resto de variables 
+        9. *Seno*: relación senoidal respecto a una relación lineal del resto de variables 
+        10. *Coseno*: relación cosenoidal respecto a una relación lineal del resto de variables 
+        11. *Tangente*: relación tangencial respecto a una relación lineal del resto de variables 
+        12. *Absoluto*: valor absoluto respecto a una relación lineal del resto de variables 
+        13. *Truncar*: truncar respecto a una relación lineal del resto de variables 
+        14. *Log10*: logarítmo en base 10 de una relación lineal del resto de variables 
+        15. *Log1p*: logaritmo de una relación lineal del resto de variables 
+        16. *Log2*: logaritmo en base 2 de una relación lineal del resto de variables 
+        17. *Ceil*: parte entera de una relación lineal del resto de variables 
+    - **condiciones** : array con las condiciones. Valores posibles:
+        1. indice + Menor/Mayor/Igual/Menor=/Mayor= + valor: comprueba que el valor de la columna correspondiente al indice sea menor/mayor/igual/menor o igual/mayor o igual que el valor
+        2. indice1 + Menores/Mayores/Iguales/Menores=/Mayores= + indice2: comprueba que el valor de la columna correspondiente al indice1 sea menor/mayor/igual/menor o igual/mayor o igual que el valor de la columna correspondiente al indice2
+        3. default: siempre se cumple
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariable
+    Nota: Debe haber tantas funciones como condiciones. Si se cumple la n-ésima condición, entonces el valor de la nueva columba se obtiene de aplicar la n-ésima función
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15120,7 +16020,30 @@ def objetivo_funcional(df_caract,columna,f):
 # Creación de datos obtenidos tras aplicar una función a una combinación lineal de las variables.
 @app.post("/Variables/Funcional")
 async def obtener_datos( funciones: str , indice:str, columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos generados añadiendole una columna a partir de una relación funcional respecto a las columnas ya existentes:
+    - **funciones** : valores posibles:
+        1. *Lineal*: relación lineal respecto al resto de las variables
+        2. *Polinomica2*: relación polinómica de grado 2 respecto al resto de las variables
+        3. *Polinomica3*: relación polinómica de grado 3 respecto al resto de las variables
+        4. *Polinomica4*: relación polinómica de grado 4 respecto al resto de las variables
+        5. *Exponencial*: relación exponencial respecto a una relación lineal del resto de variables 
+        6. *Exponencial2*: relación exponencial de base 2 respecto a una relación lineal del resto de variables 
+        7. *Log*: relación logarítmica respecto a una relación lineal del resto de variables 
+        8. *Raiz*: relación radical respecto a una relación lineal del resto de variables 
+        9. *Seno*: relación senoidal respecto a una relación lineal del resto de variables 
+        10. *Coseno*: relación cosenoidal respecto a una relación lineal del resto de variables 
+        11. *Tangente*: relación tangencial respecto a una relación lineal del resto de variables 
+        12. *Absoluto*: valor absoluto respecto a una relación lineal del resto de variables 
+        13. *Truncar*: truncar respecto a una relación lineal del resto de variables 
+        14. *Log10*: logarítmo en base 10 de una relación lineal del resto de variables 
+        15. *Log1p*: logaritmo de una relación lineal del resto de variables 
+        16. *Log2*: logaritmo en base 2 de una relación lineal del resto de variables 
+        17. *Ceil*: parte entera de una relación lineal del resto de variables 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariable
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15147,6 +16070,30 @@ async def obtener_datos( funciones: str , indice:str, columna:str, file: UploadF
 # Gráfica de datos obtenidos tras aplicar una función a una combinación lineal de las variables.
 @app.post("/Plot/Variables/Funcional")
 async def obtener_grafica( funciones: str , indice:str, columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de una relación funcional respecto a las columnas ya existentes:
+    - **funciones** : valores posibles:
+        1. *Lineal*: relación lineal respecto al resto de las variables
+        2. *Polinomica2*: relación polinómica de grado 2 respecto al resto de las variables
+        3. *Polinomica3*: relación polinómica de grado 3 respecto al resto de las variables
+        4. *Polinomica4*: relación polinómica de grado 4 respecto al resto de las variables
+        5. *Exponencial*: relación exponencial respecto a una relación lineal del resto de variables 
+        6. *Exponencial2*: relación exponencial de base 2 respecto a una relación lineal del resto de variables 
+        7. *Log*: relación logarítmica respecto a una relación lineal del resto de variables 
+        8. *Raiz*: relación radical respecto a una relación lineal del resto de variables 
+        9. *Seno*: relación senoidal respecto a una relación lineal del resto de variables 
+        10. *Coseno*: relación cosenoidal respecto a una relación lineal del resto de variables 
+        11. *Tangente*: relación tangencial respecto a una relación lineal del resto de variables 
+        12. *Absoluto*: valor absoluto respecto a una relación lineal del resto de variables 
+        13. *Truncar*: truncar respecto a una relación lineal del resto de variables 
+        14. *Log10*: logarítmo en base 10 de una relación lineal del resto de variables 
+        15. *Log1p*: logaritmo de una relación lineal del resto de variables 
+        16. *Log2*: logaritmo en base 2 de una relación lineal del resto de variables 
+        17. *Ceil*: parte entera de una relación lineal del resto de variables 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariable
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15169,7 +16116,12 @@ async def obtener_grafica( funciones: str , indice:str, columna:str, file: Uploa
 # Creación de datos obtenidos tras aplicar Principal Component Analysis sobre las variables
 @app.post("/Variables/PCA")
 async def obtener_datos( indice:str, columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos generados añadiendole una columna a partir de aplicar estadarización y Principal Component Analysis sobre las variables: 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariable
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15200,6 +16152,12 @@ async def obtener_datos( indice:str, columna:str, file: UploadFile = File(...)) 
 # Gráfica de datos obtenidos tras aplicar Principal Component Analysis sobre las variables
 @app.post("/Plot/Variables/PCA")
 async def obtener_grafica( indice:str, columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de aplicar estadarización y Principal Component Analysis sobre las variables: 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariable
+    """ 
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15227,7 +16185,12 @@ async def obtener_grafica( indice:str, columna:str, file: UploadFile = File(...)
 # Creación de datos obtenidos tras aplicar la matriz de correlación para generar una nueva variable.
 @app.post("/Variables/Correlacion")
 async def obtener_datos( indice:str, columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos generados añadiendole una columna a partir de aplicar la matriz de correlación sobre las variables: 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariable
+    """ 
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15253,6 +16216,13 @@ async def obtener_datos( indice:str, columna:str, file: UploadFile = File(...)) 
 # Gráfica de datos obtenidos tras aplicar la matriz de correlación para generar una nueva variable
 @app.post("/Plot/Variables/Correlacion")
 async def obtener_grafica( indice:str, columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de aplicar la matriz de correlación sobre las variables: 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariable
+    """ 
+    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15276,7 +16246,12 @@ async def obtener_grafica( indice:str, columna:str, file: UploadFile = File(...)
 # Creación de datos obtenidos tras aplicar la matriz de correlación para generar una nueva variable.
 @app.post("/Variables/Covarianza")
 async def obtener_datos( indice:str, columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos generados añadiendole una columna a partir de aplicar la matriz de covarianza sobre las variables: 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariable
+    """ 
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15302,6 +16277,12 @@ async def obtener_datos( indice:str, columna:str, file: UploadFile = File(...)) 
 # Gráfica de datos obtenidos tras aplicar la matriz de correlación para generar una nueva variable
 @app.post("/Plot/Variables/Covarianza")
 async def obtener_grafica( indice:str, columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados añadiendole una columna a partir de aplicar la matriz de covarianza sobre las variables: 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **columna** : nombre de la nueva columna generada 
+    - **file** : csv con los datos multivariable
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15414,7 +16395,16 @@ def interpolacion_spline(df,tipo,num,freq,s):
 # Gráfica con datos obtenidos a partir de una interpolación lineal/cúbica y tomando como final el minimo valor
 @app.post("/Aumentar/Interpolacion")
 async def obtener_datos(tipo_interpolacion : str, tipo_array:str,num: int,  freq:str, indice:str, s:int=1,file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados aplicando interpolación matemática: 
+    - **tipo_interpolacion**: tipo de interpolación a aplicar --> linear, cubic, quadratic
+    - **tipo_array**: inicio y fin del array tomado para interpolar --> min-max (desde el valor mínimo al máximo o viceversa), normal (desde el primero al último). Otro valor posible es spline --> interpolación tipo spline.
+    - **num**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **s** : parámetro interpolación spline
+    - **file** : csv con los datos 
+    """   
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15443,8 +16433,17 @@ async def obtener_datos(tipo_interpolacion : str, tipo_array:str,num: int,  freq
 
 # Creación csv con datos obtenidos a partir de una interpolación lineal/cúbica y tomando como final el mínimo valor
 @app.post("/Plot/Aumentar/Interpolacion")
-async def obtener_datos(tipo_interpolacion : str, tipo_array:str, num: int, freq:str, indice:str,s:int=0, file: UploadFile = File(...)) :
-    
+async def obtener_grafica(tipo_interpolacion : str, tipo_array:str, num: int, freq:str, indice:str,s:int=0, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados que han sido aumentados aplicando interpolación matemática: 
+    - **tipo_interpolacion**: tipo de interpolación a aplicar --> linear, cubic, quadratic
+    - **tipo_array**: inicio y fin del array tomado para interpolar --> min-max (desde el valor mínimo al máximo o viceversa), normal (desde el primero al último). Otro valor posible es spline --> interpolación tipo spline.
+    - **num**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **s** : parámetro interpolación spline
+    - **file** : csv con los datos 
+    """   
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15472,7 +16471,12 @@ async def obtener_datos(tipo_interpolacion : str, tipo_array:str, num: int, freq
 # Creación csv con datos obtenidos a partir de una interpolación a través del punto medio de los datos previos y posteriores
 @app.post("/Aumentar/Interpolacion/Medio")
 async def obtener_datos(freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados aplicando el tipo de interpolación punto medio: 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """   
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15498,7 +16502,12 @@ async def obtener_datos(freq:str, indice:str, file: UploadFile = File(...)) :
 # Gráfica de datos obtenidos con una interpolación a través del punto medio de los datos previos y posteriores
 @app.post("/Plot/Aumentar/Interpolacion/Medio")
 async def obtener_grafica(freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos graficados que han sido aumentados aplicando el tipo de interpolación punto medio: 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15536,8 +16545,14 @@ def sampling(df,size,freq):
 
 # Creación csv con los datos obtenidos mediante sampling 
 @app.post("/Aumentar/Sampling")
-async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
-    
+async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(...)) :   
+    """
+    Devuelve un csv con los datos aumentados mediante selección aleatoria y añadir ruido:
+    - **size**: número de datos a crear 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15563,7 +16578,13 @@ async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(.
 # Gráfica con los datos obtenidos mediante sampling 
 @app.post("/Plot/Aumentar/Sampling")
 async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos graficados que han sido aumentados mediante selección aleatoria y añadir ruido:
+    - **size**: número de datos a crear 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15636,7 +16657,13 @@ def box_muller(df,freq,size):
 # Creación csv de datos obtenidos con una distribución normal con la media y desv típica de los datos
 @app.post("/Aumentar/Normal")
 async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados obteniendo la media y la desviación de los datos existentes y generando los nuevos datos con una distribución normal con estos parámetros:
+    - **size**: número de datos a crear 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15662,7 +16689,13 @@ async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(.
 # Gráfica de los datos obtenidos con una distribución normal con la media y desv típica de los datos
 @app.post("/Plot/Aumentar/Normal")
 async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una gráfica con los datos graficados que han sido aumentados obteniendo la media y la desviación de los datos existentes y generando los nuevos datos con una distribución normal con estos parámetros:
+    - **size**: número de datos a crear 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15685,7 +16718,13 @@ async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File
 # Creación csv de datos obtenidos con una distribución lognormal
 @app.post("/Aumentar/Lognormal")
 async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados obteniendo la media y la desviación de los datos existentes y generando los nuevos datos con una distribución lognormal con estos parámetros:
+    - **size**: número de datos a crear 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15711,7 +16750,13 @@ async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(.
 # Gráfica de los datos obtenidos con una distribución lognormal
 @app.post("/Plot/Aumentar/Lognormal")
 async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos graficados que han sido aumentados obteniendo la media y la desviación de los datos existentes y generando los nuevos datos con una distribución lognormal con estos parámetros:
+    - **size**: número de datos a crear 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15734,7 +16779,13 @@ async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File
 # Creación csv de datos obtenidos con box muller
 @app.post("/Aumentar/Muller")
 async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados obteniendo la media y la desviación de los datos existentes y generando los nuevos datos a través de la fórmula: media + z1 * desv_tipica donde z1 =  (-2 np.log(u1))<sup>1/2</sup> cos(2 π u2) donde u1, u2 son valores entre 0 e 1
+    - **size**: número de datos a crear 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15760,7 +16811,13 @@ async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(.
 # Gráfica de datos obtenidos con box muller
 @app.post("/Plot/Aumentar/Muller")
 async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos graficados que han sido aumentados obteniendo la media y la desviación de los datos existentes y generando los nuevos datos a través de la fórmula: media + z1 * desv_tipica donde z1 =  (-2 np.log(u1))<sup>1/2</sup> cos(2 π u2) donde u1, u2 son valores entre 0 e 1
+    - **size**: número de datos a crear 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15800,7 +16857,12 @@ def agregar_bootstrapping(df,freq):
 # Creación csv barajando los originales + introduciendo ruido
 @app.post("/Aumentar/Bootstrap")
 async def obtener_datos(freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados tras barajarlos e introducir ruido: 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """ 
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15826,7 +16888,12 @@ async def obtener_datos(freq:str, indice:str, file: UploadFile = File(...)) :
 # Gráfica barajando los originales + introduciendo ruido
 @app.post("/Plot/Aumentar/Bootstrap")
 async def obtener_grafica(freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos graficados tras ser aumentados al barajarlos e introducir ruido: 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """ 
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15874,7 +16941,14 @@ def duplicados(df,freq,duplication_factor=0.3,perturbation_std=0.05):
 # Creación csv con algunos datos duplicados y con ruido
 @app.post("/Aumentar/Duplicado")
 async def obtener_datos(freq:str,duplication_factor:float, perturbation_std: float, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados tras duplicar algunos de los datos e introducir cierto ruido 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **duplication_factor**: factor entre 0 y 1, si el valor aleatorio generado es menor que él entonces se duplica el dato
+    - **perturbacion_std**: desviación típica del ruido 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """ 
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15901,7 +16975,14 @@ async def obtener_datos(freq:str,duplication_factor:float, perturbation_std: flo
 # Gráfica con algunos datos duplicados y con ruido
 @app.post("/Plot/Aumentar/Duplicado")
 async def obtener_grafica(freq:str,duplication_factor:float, perturbation_std: float, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos graficados tras duplicar algunos de los datos e introducir cierto ruido: 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **duplication_factor**: factor entre 0 y 1, si el valor aleatorio generado es menor que él entonces se duplica el dato
+    - **perturbacion_std**: desviación típica del ruido 
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """ 
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15950,7 +17031,14 @@ def agregar_comb(df,freq,size,window_size):
 # Creación csv con datos obtenidos como combinación lineal de los previos
 @app.post("/Aumentar/Comb_lineal")
 async def obtener_datos(freq:str,size:int, indice:str,window_size:int, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados mediante combinación lineal de los datos previos: 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **size**: número de datos a generar
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **window_size**: tamaño de ventana, número de datos previos tomados para realizar la combinación lineal
+    - **file** : csv con los datos 
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -15976,7 +17064,14 @@ async def obtener_datos(freq:str,size:int, indice:str,window_size:int, file: Upl
 # Gráfica con los datos obtenidos como combinación lineal de los datos previos
 @app.post("/Plot/Aumentar/Comb_lineal")
 async def obtener_grafica(freq:str,size:int, indice:str,window_size:int, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos graficados tras ser aumentados mediante combinación lineal de los datos previos: 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **size**: número de datos a generar
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **window_size**: tamaño de ventana, número de datos previos tomados para realizar la combinación lineal
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16017,7 +17112,13 @@ def traslacion(df,shift,freq):
 # Creación csv con los datos trasladados
 @app.post("/Aumentar/Traslacion")
 async def obtener_datos(shift:float, freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados mediante una traslación de los datos previos: 
+    - **shift**: desplazamiento hacia arriba/abajo de los datos
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16043,7 +17144,13 @@ async def obtener_datos(shift:float, freq:str, indice:str, file: UploadFile = Fi
 # Gráfica con los datos trasladados 
 @app.post("/Plot/Aumentar/Traslacion")
 async def obtener_grafica(shift:float, freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos graficados tras ser aumentados mediante una traslación de los datos previos: 
+    - **shift**: desplazamiento hacia arriba/abajo de los datos
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16093,7 +17200,13 @@ def add_harmonic_noise(df,freq,size):
 # Creación csv con datos con ruido harmónico
 @app.post("/Aumentar/Harmonico")
 async def obtener_datos(freq:str, indice:str,size:int, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados mediante adición de ruido harmónico: 
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **size** : número de datos a generar
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16119,7 +17232,13 @@ async def obtener_datos(freq:str, indice:str,size:int, file: UploadFile = File(.
 # Gráfica obtenida tras aplicar ruido harmónico 
 @app.post("/Plot/Aumentar/Harmonico")
 async def obtener_grafica(freq:str, indice:str,size:int, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos aumentados mediante la técnica de adición de ruido harmñonico : 
+    - **shift**: desplazamiento hacia arriba/abajo de los datos
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16159,7 +17278,13 @@ def escalado(df,freq,factor):
 # Creación csv con los datos obtenidos al escalar los datos
 @app.post("/Aumentar/Escalado")
 async def obtener_datos(factor:float, freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados mediante un escalado de los datos previos: 
+    - **factor**: factor por el que se multiplican los datos
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """   
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16185,7 +17310,13 @@ async def obtener_datos(factor:float, freq:str, indice:str, file: UploadFile = F
 # Gráfica de los datos obtenidos tras realizar un escalado de los datos 
 @app.post("/Plot/Aumentar/Escalado")
 async def obtener_grafica(factor:float, freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos aumentados mediante un escalado de los datos previos: 
+    - **factor**: factor por el que se multiplican los datos
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16205,28 +17336,6 @@ async def obtener_grafica(factor:float, freq:str, indice:str, file: UploadFile =
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-# Saltos
-def pulse_noise(data, num_pulses=5, amplitude=1):
-    pulse_indices = np.random.choice(len(data), num_pulses, replace=False)
-    pulse_data = list()
-    for i in pulse_indices:
-        pulse_data.append(data[i]+ np.random.uniform(-amplitude, amplitude))
-    return pulse_data
-
-# Calculamos nuevos datos splicando saltos en datos aleatorios
-def agregar_saltos(df,freq,num_saltos,amplitud):
-    np.random.seed(1)
-    for x in df.columns:
-        data = df[x]
-        data_augmented = pulse_noise(data,num_saltos,amplitud)
-        datos=np.concatenate((data.values,data_augmented))
-        if x == df.columns[0]:
-            indice = series_periodos(df.index[0],len(datos),freq)
-            df_saltos = pd.DataFrame(data=datos,index=indice,columns=[x])
-        else:
-            df_new = pd.DataFrame(data = datos,index=indice,columns=[x])
-            df_saltos = df_saltos.join(df_new, how="outer")
-    return df_saltos
 
 # Mix up: creación de un nuevo dato a partir del data set previo y un dato al azar, usando una comb lineal obtenida con una distribución beta
 def mixup(data, alpha=0.2):
@@ -16254,7 +17363,13 @@ def agregar_mixup(df,freq,alpha=0.2):
 # Creación csv a partir de la técnica de mixup
 @app.post("/Aumentar/Mixup")
 async def obtener_datos(alpha:float, freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve un csv con los datos aumentados mediante combinaciones de dos datos: 
+    - **alpha**: factor de imnportancia del primer dato
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16280,7 +17395,13 @@ async def obtener_datos(alpha:float, freq:str, indice:str, file: UploadFile = Fi
 # Gráfica de la técnica de mixup
 @app.post("/Plot/Aumentar/Mixup")
 async def obtener_grafica(alpha:float, freq:str, indice:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos graficados que han sido aumentados mediante combinaciones de dos datos: 
+    - **alpha**: factor de imnportancia del primer dato
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16293,76 +17414,6 @@ async def obtener_grafica(alpha:float, freq:str, indice:str, file: UploadFile = 
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
     df1 = agregar_mixup(df,freq,alpha)
-    plot_df(df1)
-    buffer = io.BytesIO()
-    plt.savefig(buffer,format="png")
-    buffer.seek(0)
-    plt.close()
-    return StreamingResponse(buffer,media_type="image/png")
-
-# Tomamos dos valores al azar y realizamos la media de los valores
-def random_mix(data, n_samples=100):
-    mixed_data = []
-    for _ in range(n_samples):
-        i, j = np.random.choice(len(data), 2, replace=False)
-        mixed_data.append((data[i] + data[j]) / 2)
-    return np.array(mixed_data)
-
-# Los valores se calculan tomando dos valores al azar y haciendo la media
-def agregar_random_mix(df,freq,n_samples):
-    np.random.seed(1)
-    indice=series_periodos(df.index[0],n_samples+df.shape[0],freq)
-    for x in df.columns:
-        sampled_data = random_mix(df[x],n_samples)
-        if x == df.columns[0]:
-            df_sampling=pd.DataFrame(data=np.concatenate((df[x],sampled_data)),index=indice,columns=[x])
-        else:
-            df_new = pd.DataFrame(data=np.concatenate((df[x],sampled_data)),index=indice,columns=[x])
-            df_sampling= df_sampling.join(df_new, how="outer")
-    return df_sampling
-
-# Creación csv de la técnica de randon mix
-@app.post("/Aumentar/Random_mix")
-async def obtener_datos(n_samples:int, freq:str, indice:str, file: UploadFile = File(...)) :
-    
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = agregar_random_mix(df,freq,n_samples)
-    # Convertir el DataFrame a un buffer de CSV
-    stream = io.StringIO()
-    df1.to_csv(stream,index_label="Indice")
-    stream.seek(0)
-
-    # Devolver el archivo CSV como respuesta
-    response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=aumentar-random-mix.csv"
-    return response 
-
-# Gráfica de la técnica de randon mix
-@app.post("/Plot/Aumentar/Random_mix")
-async def obtener_grafica(n_samples:int, freq:str, indice:str, file: UploadFile = File(...)) :
-    
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = agregar_random_mix(df,freq,n_samples)
     plot_df(df1)
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
@@ -16401,7 +17452,21 @@ def agregar_matematica(df,freq,funcion,factor=1):
 # Creación csv con los datos obtenidos de aplicar la técnica de aumentación de datos 
 @app.post("/Aumentar/Matematica")
 async def obtener_datos(funcion:str, freq:str, indice:str,factor : Union[float,None] = 1, file: UploadFile = File(...)) :
-
+    """
+    Devuelve un csv con los datos aumentados tras aplicar alguna operación matemática:
+    - **funcion**: función matemática que se aplica. Opciones:
+        1. sqrt --> raíz cuadrada
+        2. log --> logaritmo 
+        3. exp --> exponencial
+        4. sin --> seno
+        5. cos --> coseno
+        6. trig --> seno + coseno
+        7. sigmoide --> 1 / (1 + *e*<sup>x</sup>)
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **factor** : factor por el que se dividen los datos en el caso de la exponencial para evitar que salgan valores muy altos
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
     try:
@@ -16425,7 +17490,21 @@ async def obtener_datos(funcion:str, freq:str, indice:str,factor : Union[float,N
 # Gráfica de la técnica de aumentación de datos mediante transformaciones matemáticas
 @app.post("/Plot/Aumentar/Matematica")
 async def obtener_grafica(funcion:str, freq:str, indice:str,factor : Union[float,None] = 1, file: UploadFile = File(...)) :
-
+    """
+    Devuelve una imagen con los datos graficados tras ser aumentados al aplicar alguna operación matemática:
+    - **funcion**: función matemática que se aplica. Opciones:
+        1. sqrt --> raíz cuadrada
+        2. log --> logaritmo 
+        3. exp --> exponencial
+        4. sin --> seno
+        5. cos --> coseno
+        6. trig --> seno + coseno
+        7. sigmoide --> 1 / (1 + *e*<sup>x</sup>)
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **factor** : factor por el que se dividen los datos en el caso de la exponencial para evitar que salgan valores muy altos
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
     try:
@@ -16465,7 +17544,17 @@ def estadist(df,freq,num,tipo):
 # Creación csv con los datos obtenidos de aplicar la técnica de aumentación de datos 
 @app.post("/Aumentar/Estadistica")
 async def obtener_datos(tipo:int, num:int,freq:str, indice:str, file: UploadFile = File(...)) :
-
+    """
+    Devuelve un csv con los datos aumentados por medidas estadísticas:
+    - **tipo**: medida estadística con la que se aumentan los datos. Opciones:
+        1. Media
+        2. Mediana
+        3. Moda
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num** : número de datos a generar
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
     try:
@@ -16491,7 +17580,17 @@ async def obtener_datos(tipo:int, num:int,freq:str, indice:str, file: UploadFile
 # Gráfica de la técnica de aumentación de datos mediante transformaciones matemáticas
 @app.post("/Plot/Aumentar/Estadistica")
 async def obtener_grafica(tipo:int,num:int, freq:str, indice:str, file: UploadFile = File(...)) :
-
+    """
+    Devuelve una imagen con los datos graficados tras ser aumentados por medidas estadísticas:
+    - **tipo**: medida estadística con la que se aumentan los datos. Opciones:
+        1. Media
+        2. Mediana
+        3. Moda
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **num** : número de datos a generar
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
     try:
@@ -16523,7 +17622,12 @@ def ventanas(df,ventana):
 # Creación csv con la técnica de ventana deslizante
 @app.post("/Aumentar/Ventana")
 async def obtener_datos(ventana:int, indice:str, file: UploadFile = File(...)) :
-
+    """
+    Devuelve un csv con los datos obtenidos mediante ventana deslizante:
+    - **ventana**: tamaño de la ventana deslizante
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16548,7 +17652,12 @@ async def obtener_datos(ventana:int, indice:str, file: UploadFile = File(...)) :
 # Gráfica con la técnica de ventana deslizante
 @app.post("/Plot/Aumentar/Ventana")
 async def obtener_grafica(ventana:int, indice:str, file: UploadFile = File(...)) :
-
+    """
+    Devuelve una imagen con los datos graficados obtenidos mediante ventana deslizante:
+    - **ventana**: tamaño de la ventana deslizante
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16566,68 +17675,22 @@ async def obtener_grafica(ventana:int, indice:str, file: UploadFile = File(...))
     buffer.seek(0)
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
-     
-# Recorte
-def crop(series, start, end):
-    return series[start:end]
-
-# Recortamos la serie quedándonos solo con una parte desde la posición de inicio al fin
-def recorte(df_i,start,end):
-    df_o = df_i.copy()
-    for x in df_o.columns:
-        df_o[x] = crop(df_o[x],start,end)
-    df_o=df_o.dropna()
-    return df_o
-
-# Creación csv con la técnica de recorte
-@app.post("/Aumentar/Recorte")
-async def obtener_datos(start:int,end:int, indice:str, file: UploadFile = File(...)) :
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-
-    df1 = recorte(df,start,end)
-    # Convertir el DataFrame a un buffer de CSV
-    stream = io.StringIO()
-    df1.to_csv(stream,index_label="Indice")
-    stream.seek(0)
-
-    # Devolver el archivo CSV como respuesta
-    response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=aumentar-recorte.csv"
-    return response 
-
-# Gráfrica técnica de recorte
-@app.post("/Plot/Aumentar/Recorte")
-async def obtener_grafica(start:int,end:int, indice:str, file: UploadFile = File(...)) :
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-
-    df1 = recorte(df,start,end)
-    plot_df(df1)
-    buffer = io.BytesIO()
-    plt.savefig(buffer,format="png")
-    buffer.seek(0)
-    plt.close()
-    return StreamingResponse(buffer,media_type="image/png")
 
 
 # Creación csv con la técnica de recorte
 @app.post("/Aumentar/Descomponer")
 async def obtener_datos(indice:str,freq:str, size:int,tipo:str, file: UploadFile = File(...)) :
+    """
+    Devuelve un csv con los datos aumentados a través de la descomposición de la serie:
+    - **size**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **tipo**:
+        1. additive: realiza una descomposición aditiva de la serie en tendencia y estacionalidad. Usa esto para predecir los siguientes valores
+        2. multiplicative: realiza una descomposición multiplicativa de la serie en tendencia y estacionalidad. Usa esto para predecir los siguientes valores
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
+    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16687,6 +17750,16 @@ async def obtener_datos(indice:str,freq:str, size:int,tipo:str, file: UploadFile
 # Gráfrica técnica de recorte
 @app.post("/Plot/Aumentar/Descomponer")
 async def obtener_grafica( indice:str,freq:str,size:int,tipo:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados tras ser aumentados a través de la descomposición de la serie:
+    - **size**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **tipo**:
+        1. additive: realiza una descomposición aditiva de la serie en tendencia y estacionalidad. Usa esto para predecir los siguientes valores
+        2. multiplicative: realiza una descomposición multiplicativa de la serie en tendencia y estacionalidad. Usa esto para predecir los siguientes valores
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16853,6 +17926,13 @@ def plot_prediccion_sarimax(datos,datos_train, columna):
 
 @app.post("/Datos/Sarimax")
 async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    """
+    Devuelve un csv con los datos aumentados utilizando la predicción del modelo Sarimax:
+    - **size**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16880,6 +17960,13 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
 
 @app.post("/Plot/Datos/Sarimax")
 async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    """
+    Devuelve una gráfica con los datos graficados tras ser aumentados utilizando la predicción del modelo Sarimax:
+    - **size**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16906,8 +17993,14 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
     return StreamingResponse(buffer,media_type="image/png")
 
 # Error cuadrático medio modelo Sarimax
-@app.post("/Modelo/Sarimax")
+@app.post("/Error/Sarimax")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
+    """
+    Devuelve el error cuadrático medio entre la predicción del modelo sarimax y los valores reales de test (20% finales):
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -16924,8 +18017,14 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     return {prediccion_sarimax(df,df[:train],df[train:], df.columns[0]) }
 
 # Gráfica modelo sarimax
-@app.post("/Plot/Modelo/Sarimax")
-async def obtener_grafica(indice:str,freq:str,size:int=0, file: UploadFile = File(...)) :
+@app.post("/Plot/Sarimax")
+async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos del test(20% últimos) y los datos de predicción de Sarimax graficados:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17032,8 +18131,15 @@ def plot_backtesting_forecasterAutoreg(datos_train,size,lags,steps):
 
     return predicciones
 
-@app.post("/Datos/ForecasterAutoreg")
+@app.post("/Datos/ForecasterRF")
 async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    """
+    Devuelve un csv con los datos aumentados mediante la predicción del modelo Random Forest:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **size**: número de datos a generar
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17058,8 +18164,15 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
     response.headers["Content-Disposition"] = "attachment; filename=prediccion-ForecasterRF.csv"
     return response 
 
-@app.post("/Plot/Datos/ForecasterAutoreg")
+@app.post("/Plot/Datos/ForecasterRF")
 async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados tras ser aumentados con la predicción del modelo Random Forest:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **size**: número de datos a generar
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17085,8 +18198,14 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
     return StreamingResponse(buffer,media_type="image/png")
 
 # Error cuadrático medio del modelo autorregresivo Random Forest
-@app.post("/Modelo/ForecasterRF")
+@app.post("/Error/ForecasterRF")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
+    """
+    Devuelve el error cuadrático medio entre los datos de test (el 20% final) y la predicción del modelo Random Forest:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17103,8 +18222,14 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     return {error_backtesting_forecasterAutoreg(df[:train],df[train:],10,180) }
 
 # Gráfica del modelo autorregresivo Random Forest
-@app.post("/Plot/Modelo/ForecasterRF")
+@app.post("/Plot/ForecasterRF")
 async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos de test (el 20% final) y la predicción del modelo Random Forest graficados:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17214,6 +18339,13 @@ def predicciones_backtesting_forecasterAutoregDirect(datos_train,steps,lags):
 
 @app.post("/Datos/AutoregRidge")
 async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    """
+    Devuelve el csv con los datos aumentados usando la predicción Ridge:
+    - **size**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17240,6 +18372,13 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
 
 @app.post("/Plot/Datos/AutoregRidge")
 async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos graficados tras ser aumentados usando la predicción Ridge:
+    - **size**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17265,8 +18404,15 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
     return StreamingResponse(buffer,media_type="image/png")
 
 # Error cuadrático del modelo autorregresivo Ridge
-@app.post("/Modelo/AutoregRidge")
+@app.post("/Error/AutoregRidge")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
+    """
+    Devuelve el error cuadrático medio entre los datos de test (20% finales) y la predicción de Ridge:
+    - **size**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17283,8 +18429,15 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     return {error_backtesting_forecasterAutoregDirect(df[:train], df[train:].shape[0],5) }
 
 # Gráfica del modelo autorregresivo Ridge
-@app.post("/Plot/Modelo/AutoregRidge")
+@app.post("/Plot/AutoregRidge")
 async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos de test (20% finales) y los datos predecidos por el modelo Ridge graficados :
+    - **size**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17346,6 +18499,13 @@ def pred_prophet_prediccion(data_train,size):
 
 @app.post("/Datos/Prophet")
 async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    """
+    Devuelve el csv con los datos aumentados usando el modelo Prophet:
+    - **size**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17372,6 +18532,13 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
 
 @app.post("/Plot/Datos/Prophet")
 async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
+    """
+    Devuelve la imagen con los datos graficas tras ser aumentados usando la predicción Prophet:
+    - **size**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17397,8 +18564,14 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
     return StreamingResponse(buffer,media_type="image/png")
 
 # Error cuadrático medio del modelo Prophet
-@app.post("/Modelo/Prophet")
+@app.post("/Error/Prophet")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
+    """
+    Devuelve el error cuadrático medio entre los datos de test (20% finales) y los datos predecidos con Prophet
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17415,8 +18588,14 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     return {error_prophet_prediccion(df[:train],df[train:]) }
 
 # Gráfica del modelo de predicción Prophet
-@app.post("/Plot/Modelo/Prophet")
+@app.post("/Plot/Prophet")
 async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos de test (20 % finales) y los datos predecidos usando el modelo Prophet:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17435,8 +18614,8 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     plt.figure()
     y_true=df[train:].values
     result = pd.DataFrame({
-    'Valores Reales': y_true.reshape(-1),
-    'Predicciones': y_pred
+        'Valores Reales': y_true.reshape(-1),
+        'Predicciones': y_pred
     })
     result.index=df[train:].index
     result.plot(title="Predicciones Modelo Prophet",figsize=(13,7))
@@ -17448,10 +18627,15 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     return StreamingResponse(buffer,media_type="image/png")
 
 
-
 # Error cuadrático medio de todos los modelos de predicción 
-@app.post("/Modelos")
+@app.post("/Errores")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
+    """
+    Devuelve el error cuadrático medio entre los datos de test (20% finales) y todos los modelos estudiados:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17477,6 +18661,12 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
 # Gráfica de los valores reales vs los valores de predicción de todos los modelos
 @app.post("/Modelos/Plot")
 async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos de test (20 % finales) y los datos predecidos usando los distintos modelos:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17512,6 +18702,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
+
 # Entrenamiento de modelo regresivo lineal devolviendo la predicción / error cuadrático medio.
 def error_entrenar_linearReg(df,columns_predict):
     modelo = LinearRegression()
@@ -17530,44 +18721,17 @@ def pred_entrenar_linearReg(df,columns_predict):
     df_pred['Predicciones'] = modelo.predict(df[l:].drop(columns=columns_predict))
     return df_pred
 
-def datos_pred_entrenar_linearReg(df,columns_predict,size):
-    modelo = LinearRegression()
-    l = df.shape[0] -size
-    modelo.fit(X=df[:l])
-    df_pred = df[l:].copy()
-    df_pred['Predicciones'] = modelo.predict(df[l:])
-    return df_pred
 
 # Error cuadrático medio de regresión lineal
-@app.post("/Datos/RegLineal")
-async def obtener_datos(indice:str,freq:str,columna:str,size:int, file: UploadFile = File(...)) :
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df.index = pd.to_datetime(df.index)
-    df.index.freq=freq
-    df2 = datos_pred_entrenar_linearReg(df,columna,size)
-    # Convertir el DataFrame a un buffer de CSV
-    stream = io.StringIO()
-    df2.to_csv(stream,index_label="Indice")
-    stream.seek(0)
-
-    # Devolver el archivo CSV como respuesta
-    response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=prediccion-LinearReg.csv"
-    return response 
-
-
-# Error cuadrático medio de regresión lineal
-@app.post("/Modelo/RegLineal")
+@app.post("/Error/RegLineal")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve el error cuadrático medio entre los datos de test (20% finales) y datos predecidos con el modelo de regresión lineal :
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17583,8 +18747,15 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
     return {error_entrenar_linearReg(df,columna) }
 
 # Gráfica modelo de regresión lineal
-@app.post("/Plot/Modelo/RegLineal")
+@app.post("/Plot/RegLineal")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos de test (20% finales) y los datos predecidos con el modelo de regresión lineal graficados:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17663,8 +18834,15 @@ def pred_entrenar_TreeReg(df,columns_predict):
     return df_pred
 
 # Error cuadrático medio modelo árbol de decisión
-@app.post("/Modelo/DecisionTree")
+@app.post("/Error/DecisionTree")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve el error cuadrático medio entre los datos de test (20% finales) y datos predecidos con el modelo de árbol de decisión :
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17680,8 +18858,15 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
     return {error_entrenar_TreeReg(df,columna) }
 
 # Gráfica modelo árbol de decisión
-@app.post("/Plot/Modelo/DecisionTree")
+@app.post("/Plot/DecisionTree")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+    """
+    Devuelve una imagen con los datos de test (20% finales) y los datos predecidos con el modelo de árbol de decisión graficados:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17763,9 +18948,15 @@ def pred_entrenar_RandomForestReg(df,columns_predict):
     return df_pred
 
 # Error cuadrático medio modelo Random Forest
-@app.post("/Modelo/RandomForest")
+@app.post("/Error/RandomForest")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve el error cuadrático medio entre los datos de test (20% finales) y los datos predecidos con el modelo Random Forest:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17781,9 +18972,15 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
     return {error_entrenar_RandomForestReg(df,columna) }
 
 # Gráfica modelo Random Forest
-@app.post("/Plot/Modelo/RandomForest")
+@app.post("/Plot/RandomForest")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos de test (20% finales) y los datos predecidos con el modelo Random Forest graficados:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17867,9 +19064,15 @@ def pred_entrenar_GradientBoostReg(df,columns_predict):
     return df_pred
 
 # Error modelo Gradient Boosting
-@app.post("/Modelo/GradientBoosting")
+@app.post("/Error/GradientBoosting")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve el error cuadrático medio entre los datos de test (20% finales) y los predecidos con el modelo Gradient Boosting :
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17885,9 +19088,15 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
     return {error_entrenar_GradientBoostReg(df,columna) }
 
 # Gráfica modelo Gradient Boosting
-@app.post("/Plot/Modelo/GradientBoosting")
+@app.post("/Plot/GradientBoosting")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos de test (20% finales) y los datos predecidos con el modelo de gradient boosting graficados:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """   
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17968,9 +19177,15 @@ def pred_entrenar_ExtraTreeReg(df,columns_predict):
     return df_pred
 
 # Error cuadrático medio modelo Extra Tree
-@app.post("/Modelo/ExtraTree")
+@app.post("/Error/ExtraTree")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve el error cuadrático medio entre los datos de test (20% finales) y los predecidos con el modelo extra tree :
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -17986,9 +19201,15 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
     return {error_entrenar_ExtraTreeReg(df,columna) }
 
 # Gráfica modelo Extra Tree
-@app.post("/Plot/Modelo/ExtraTree")
+@app.post("/Plot/ExtraTree")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos de test (20% finales) y los datos predecidos con el modelo Extra Tree graficados:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -18014,7 +19235,13 @@ async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = Fi
 # Error cuadrático medio que comete cada modelo
 @app.post("/Modelos/Error")
 async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve el error cuadrático medio entre los datos de test (20% finales) y todos los modelos vistos:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -18037,7 +19264,13 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
 # Gráfica con los valores reales vs los valores de predicción de cada modelo
 @app.post("/Plot/Modelos")
 async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una imagen con los datos de test (20% finales) y los datos predecidos con los modelos graficados:
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    - **columna**: nombre de la columna que se predice
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -18108,7 +19341,14 @@ def detect_dataset_drift_ks(base_df,current_df,threshold):
 # Detección de drift mediante Kolmogorov-Smirnov
 @app.post("/Deteccion/KS")
 async def detectar_drift(indice:str,threshold_ks: float = 0.05, inicio: int = 1, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una dupla (Drfit,Report) donde Drift indica si se ha detectado drift mediante la técnica de Kolmogorov-Smirnov y el report informa en que columna se ha detectado el drift:
+    - **threshold_ks**: úmbral de detección
+    - **inicio**: dato desde el que se comienza a buscar el drift
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    Nota: la comparativa entre las distribuciones se realiza dividiendo en dos mitades el dataframe desde la posición de inicio
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -18191,7 +19431,14 @@ def detect_dataset_drift_js(base_df,current_df,threshold,num_bins=10):
 # Detección de drift mediante Jensen-Shannon
 @app.post("/Deteccion/JS")
 async def detectar_drift(indice:str,threshold_js: float = 0.2,inicio:int=1, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una dupla (Drift,Report) donde Drift indica si se ha detectado drift mediante la técnica de Jensen-Shannon y el report informa en que columna se ha detectado el drift:
+    - **threshold_js**: úmbral de detección
+    - **inicio**: dato desde el que se comienza a buscar el drift
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    Nota: la comparativa entre las distribuciones se realiza dividiendo en dos mitades el dataframe desde la posición de inicio
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -18266,7 +19513,15 @@ def detect_dataset_drift_psi(base_df,current_df,threshold,num_bins=10):
 # Detección de drift usando Population Stability Index
 @app.post("/Deteccion/PSI")
 async def detectar_drift(indice:str,threshold_psi: float = 2,num_bins :int =10,inicio:int=1, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una dupla (Drift,Report) donde Drift indica si se ha detectado drift mediante el Population Stability Index y el report informa en que columna se ha detectado el drift:
+    - **threshold_psi**: úmbral de detección
+    - **inicio**: dato desde el que se comienza a buscar el drift
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **num_bins**: número de cajas en la que se divide los datos
+    - **file** : csv con los datos 
+    Nota: la comparativa entre las distribuciones se realiza dividiendo el dataframe desde la posición de inicio en dos: 80% y 20%
+    """    
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -18359,7 +19614,15 @@ def detect_dataset_drift_psi_quantiles(base_df,current_df,threshold,num_quantile
 # Detección de drift usando Population Stability Index con cuantiles
 @app.post("/Deteccion/PSI/Cuantiles")
 async def detectar_drift(indice:str,threshold_psi: float = 2,num_quantiles :int =10,inicio:int=1, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una dupla (Drift,Report) donde Drift indica si se ha detectado drift mediante el Population Stability Index dividiendo en cuantiles y el report informa en que columna se ha detectado el drift:
+    - **threshold_psi**: úmbral de detección
+    - **inicio**: dato desde el que se comienza a buscar el drift
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **num_bins**: número de cuantiles
+    - **file** : csv con los datos 
+    Nota: la comparativa entre las distribuciones se realiza dividiendo el dataframe desde la posición de inicio en dos: 80% y 20%
+    """   
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -18403,7 +19666,14 @@ def detect_dataset_drift_cusum(df,threshold,drift=0.02):
 # Detección de drift usando CUSUM
 @app.post("/Deteccion/CUSUM")
 async def detectar_drift(indice:str,threshold_cusum: float = 1.5,drift_cusum :float = 0.5,inicio:int=1, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve si se detectado drift o no usando la técnica CUSUM:
+    - **threshold_cusum**: úmbral de detección
+    - **drift_cusum**: sensibilidad del modelo
+    - **inicio**: dato desde el que se comienza a buscar el drift
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """       
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -19443,7 +20713,15 @@ def detect_dataset_drift_ph(df,min_instances=30, delta=0.005, threshold=50, alph
 # Detección de drift usando Page Hinkley
 @app.post("/Deteccion/PH")
 async def detectar_drift(indice:str,min_instances:int=30, delta:float=0.005, threshold:float=50, alpha:float=1 - 0.0001, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve una dupla (Drift,Report) donde Drift indica si se ha detectado drift mediante el método Page-Hinkley y el report informa en que columna se ha detectado el drift:
+    - **threshold**: úmbral de detección
+    - **min_instances**: dato desde el que se comienza a buscar el drift
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **delta**: umbral de ruido
+    - **alpha**: tasa de penalización
+    - **file** : csv con los datos 
+    """   
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -19474,7 +20752,13 @@ def detect_dataset_drift_mcusum(df,min_inst=100,lambd=0.5):
 # Detección de drift usando MCUSUM
 @app.post("/Deteccion/MCUSUM")
 async def detectar_drift(indice:str,min_instances:int=100, lambd:float=0.5, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve si se ha detectado drift mediante el método MCUSUM:
+    - **min_instances**: dato desde el que se comienza a buscar el drift
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **lambd**: parámetro del modelo
+    - **file** : csv con los datos multivariables
+    """   
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -19505,7 +20789,15 @@ def detect_dataset_drift_pc_mewma(df,princ_comp,min_inst=100,lambd=0.1,alpha=0):
 # Detección de drift usando MEWMA y las componentes principales
 @app.post("/Deteccion/PC_MEWMA")
 async def detectar_drift(indice:str,princ_comp:int,min_instances:int=100, lambd:float=0.5,alpha:float=0, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve si se ha detectado drift mediante el método MCUSUM:
+    - **min_instances**: dato desde el que se comienza a buscar el drift
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **princ_comp**: número de componentes principales
+    - **lambd**: Peso del promedio exponencial
+    - **alpha**: Nivel de significancia estadística
+    - **file** : csv con los datos multivariables
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -19536,7 +20828,14 @@ def detect_dataset_drift_mewma(df,min_inst=100,lambd=0.1,alpha=0):
 # Detección de drift usando MEWMA
 @app.post("/Deteccion/MEWMA")
 async def detectar_drift(indice:str,min_instances:int=100, lambd:float=0.5,alpha:float=0, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve si se ha detectado drift mediante el método MCUSUM:
+    - **min_instances**: dato desde el que se comienza a buscar el drift
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **lambd**: Peso del promedio exponencial
+    - **alpha**: Nivel de significancia estadística
+    - **file** : csv con los datos multivariables
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 
@@ -19566,7 +20865,13 @@ def detect_dataset_drift_hotelling(df,min_inst=100,alpha=0):
 # Detección de drift usando Hotelling
 @app.post("/Deteccion/HOTELLING")
 async def detectar_drift(indice:str,min_instances:int=100,alpha:float=0, file: UploadFile = File(...)) :
-    
+    """
+    Devuelve si se ha detectado drift mediante el método MCUSUM:
+    - **min_instances**: dato desde el que se comienza a buscar el drift
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **alpha**: nivel de significancia
+    - **file** : csv con los datos multivariables
+    """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
 

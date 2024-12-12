@@ -6,6 +6,14 @@ import streamlit as st
 import pandas as pd 
 import matplotlib.pyplot as plt
 
+# Configurar la página
+st.set_page_config(
+    page_title="Aumentación",
+    page_icon="📊",
+    layout="centered",
+    initial_sidebar_state="expanded",
+)
+
 st.title("Petición Datos")
 uploaded_file = st.file_uploader("Cargar un archivo CSV", type=["csv"])
 
@@ -219,4 +227,8 @@ if uploaded_file is not None:
         
 
     
-    
+    st.header("Resultados previos a la aumentación")
+
+    st.header("Resultados posteriores a la aumentación")
+
+    st.header("Conclusiones")

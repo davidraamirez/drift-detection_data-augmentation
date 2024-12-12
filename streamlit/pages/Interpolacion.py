@@ -10,6 +10,14 @@ from PIL import Image
 from io import BytesIO
 from statsmodels.tsa.seasonal import seasonal_decompose
 
+# Configurar la página
+st.set_page_config(
+    page_title="Interpolación",
+    page_icon="📊",
+    layout="centered",
+    initial_sidebar_state="expanded",
+)
+
 st.title("Petición Datos")
 uploaded_file = st.file_uploader("Cargar un archivo CSV", type=["csv"])
 
@@ -210,8 +218,8 @@ if uploaded_file is not None:
         st.error(f"Error: {str(e)}")
         
     st.subheader("Forecaster Autoregresivos Random Forest")
-    api_urlAutoreg= "http://127.0.0.1:8000/Datos/ForecasterAutoreg?indice="+df.index.name+"&freq=M&size="+str(num)
-    api_urlAutoreg2 = "http://127.0.0.1:8000/Plot/Datos/ForecasterAutoreg?indice="+df.index.name+"&freq=M&size="+str(num)
+    api_urlAutoreg= "http://127.0.0.1:8000/Datos/ForecasterRF?indice="+df.index.name+"&freq=M&size="+str(num)
+    api_urlAutoreg2 = "http://127.0.0.1:8000/Plot/Datos/ForecasterRF?indice="+df.index.name+"&freq=M&size="+str(num)
     try:
         files = {'file': ('AutoregRf.csv', io.StringIO(csv_data), 'text/csv')}
         responseAutoreg= requests.post(api_urlAutoreg,files=files)
@@ -574,3 +582,5 @@ if uploaded_file is not None:
 
     # Mostrar el gráfico en Streamlit
     st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico
+
+    st.header("Conclusiones")
