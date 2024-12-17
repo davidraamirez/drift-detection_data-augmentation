@@ -33,7 +33,6 @@ if uploaded_file is not None:
         st.write("Datos cargados:", df)
 
     with col2:  
-        st.subheader("Graficar Datos")
         # Crear un gráfico de líneas usando pandas (esto utiliza Matplotlib por detrás)
         fig, ax = plt.subplots()  # Crear un objeto figure y un eje
         df.plot(ax=ax,title="Serie temporal",figsize=(13,5))  # Graficar en el eje creado
@@ -78,6 +77,7 @@ if uploaded_file is not None:
                 st.dataframe(df_media)
             with col6:
                 st.image(image, caption="Serie temporal aumentada con media") 
+            st.text("Rellenamos los "+ str(num)+ " datos faltantes usando la media de cada columna.")
         else:
             st.error(f"Error al consultar la API: {responseMedia.text}")
             
@@ -105,6 +105,9 @@ if uploaded_file is not None:
                 st.dataframe(df_mediana)
             with col8:
                 st.image(image, caption="Serie temporal aumentada con mediana")
+            
+            st.text("Rellenamos los "+ str(num)+ " datos faltantes usando la mediana de cada columna.")
+
         else:
             st.error(f"Error al consultar la API: {responseMediana.text}")
             
@@ -133,7 +136,8 @@ if uploaded_file is not None:
             with col10:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada con moda")
-                
+            st.text("Rellenamos los "+ str(num)+ " datos faltantes usando la moda de cada columna.")
+               
         else:
             st.error(f"Error al consultar la API: {responseModa.text}")
             
@@ -160,7 +164,8 @@ if uploaded_file is not None:
             with col12:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada con normal")
-                
+            st.text("Rellenamos los "+ str(num)+ " datos faltantes mediante una distribución normal a partir de la media y desviación típica que presenta cada columna.")
+        
         else:
             st.error(f"Error al consultar la API: {responseNormal.text}")
             
@@ -188,6 +193,8 @@ if uploaded_file is not None:
             with col14:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada con box-muller") 
+            st.text("Rellenamos los "+ str(num)+ " datos faltantes a través de la fórmula: media + z1 * desv_tipica donde z1 =  (-2 log(u1))**1/2 cos(2 π u2) donde u1, u2 son valores entre 0 e 1 y media y desv_tipica son la media y la desviación típica de cada una de las columnas.")
+
         else:
             st.error(f"Error al consultar la API: {responseMuller.text}")
             
@@ -216,6 +223,8 @@ if uploaded_file is not None:
             with col16:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada con modelo Sarimax")
+            st.text("Rellenamos los " + str(num) +" datos faltantes con los datos de la predicción del modelo Sarimax.")    
+        
         else:
             st.error(f"Error al consultar la API: {responseSarimax.text}")
             
@@ -227,7 +236,7 @@ if uploaded_file is not None:
     api_urlAutoreg2 = "http://127.0.0.1:8000/Plot/Datos/ForecasterRF?indice="+df.index.name+"&freq=M&size="+str(num)
     try:
         col17,col18 = st.columns([1,3])
-        files = {'file': ('AutoregRf.csv', io.StringIO(csv_data), 'text/csv')}
+        files = {'file': ('AutoregRF.csv', io.StringIO(csv_data), 'text/csv')}
         responseAutoreg= requests.post(api_urlAutoreg,files=files)
         files = {'file': ('AutoregRF.csv', io.StringIO(csv_data), 'text/csv')}
         responseAutoreg2 = requests.post(api_urlAutoreg2,files=files)
@@ -243,6 +252,8 @@ if uploaded_file is not None:
             with col18:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada con Modelo Autorregresivo Random Forest") 
+            st.text("Rellenamos los " + str(num) +" datos faltantes con los datos de la predicción del modelo autorregresivo random forest.")    
+
         else:
             st.error(f"Error al consultar la API: {responseAutoreg.text}")
             
@@ -271,7 +282,7 @@ if uploaded_file is not None:
             with col20:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada con Modelo Autorregresivo Ridge")
-                
+            st.text("Rellenamos los " + str(num) +" datos faltantes con los datos de la predicción del modelo autorregresivo ridge.")    
         else:
             st.error(f"Error al consultar la API: {responseRidge.text}")
             
@@ -299,6 +310,8 @@ if uploaded_file is not None:
             with col22:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada con Modelo Prophet") 
+            st.text("Rellenamos los " + str(num) +" datos faltantes con los datos de la predicción del modelo prophet.")    
+
         else:
             st.error(f"Error al consultar la API: {responseProphet.text}")
             
@@ -327,6 +340,8 @@ if uploaded_file is not None:
             with col24:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada mediante barajo y añadir ruido")
+            st.text("Rellenamos los " + str(num) +" datos faltantes con los datos obtenidos mediante selección aleatoria y adición de ruido.")    
+
         else:
             st.error(f"Error al consultar la API: {responseBootstrap.text}")
             
@@ -353,7 +368,8 @@ if uploaded_file is not None:
             with col26:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada obtenido al añadir ruido harmónico")
-                
+            st.text("Rellenamos los " + str(num) +" datos faltantes con los datos obtenidos mediante selección aleatoria y adición de ruido harmónico.")    
+      
         else:
             st.error(f"Error al consultar la API: {responseHarmonico.text}")
             
@@ -362,8 +378,11 @@ if uploaded_file is not None:
 
         
     st.text("Combinación Lineal")
-    api_urlCl = "http://127.0.0.1:8000/Aumentar/Comb_lineal?freq=M&size="+str(num)+"&indice="+df.index.name+"&window_size=5"
-    api_urlCl2 = "http://127.0.0.1:8000/Plot/Aumentar/Comb_lineal?freq=M&size="+str(num)+"&indice="+df.index.name+"&window_size=5"
+    
+    window_float = st.number_input(label="Tamaño de la ventana",value=5)
+    window = int(window_float)
+    api_urlCl = "http://127.0.0.1:8000/Aumentar/Comb_lineal?freq=M&size="+str(num)+"&indice="+df.index.name+"&window_size="+str(window)
+    api_urlCl2 = "http://127.0.0.1:8000/Plot/Aumentar/Comb_lineal?freq=M&size="+str(num)+"&indice="+df.index.name+"&window_size="+ str(window)
     try:
         col27,col28= st.columns([1,3])
 
@@ -381,7 +400,9 @@ if uploaded_file is not None:
                 st.dataframe(df_cl)
             with col28:
                 # Mostrar la imagen en la aplicación
-                st.image(image, caption="Serie temporal aumentada mediante combinación lineal de los últimos 5 valores") 
+                st.image(image, caption="Serie temporal aumentada mediante combinación lineal de los últimos " + str(window)+" valores") 
+            st.text("Rellenamos los " + str(num) +" datos faltantes con los datos obtenidos mediante una combinación lineal normalizada de los últimos " + str(window)+" valores.")    
+
         else:
             st.error(f"Error al consultar la API: {responseCl.text}")
             
@@ -419,7 +440,7 @@ if uploaded_file is not None:
             with col30:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada mediante descomposición aditiva en tendencia y estacionalidad") 
-                
+            st.text("Rellenamos los "+str(num)+" datos faltantes a través de la suma de la tendencia y estacionalidad de cada columna de la serie, obtenidas por descomposición aditiva de la serie.")    
         else:
             st.error(f"Error al consultar la API: {responseDesc2.text}")
             
@@ -459,6 +480,8 @@ if uploaded_file is not None:
             with col32:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada mediante descomposición multiplicativa en tendencia y estacionalidad") 
+            st.text("Rellenamos los "+str(num)+" datos faltantes a través del producto de la tendencia y estacionalidad de cada columna de la serie, obtenidas por descomposición multiplicativa de la serie.")    
+
         else:
             st.error(f"Error al consultar la API: {responseDescM2.text}")
             
@@ -485,14 +508,15 @@ if uploaded_file is not None:
         if responseInterpol.status_code == 200 and responseInterpol2.status_code ==200:
             datos_Interpol = responseInterpol.content
             # Leer el contenido de la imagen
-            image = Image.open(BytesIO(responseInterpol2.content))
-            
+            image = Image.open(BytesIO(responseInterpol2.content))    
             df_interpol = pd.read_csv(pd.io.common.BytesIO(datos_Interpol),index_col="Indice")
             with col33:
                 st.dataframe(df_interpol)
             with col34:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada mediante interpolación "+selected_option +" de los datos") 
+            st.text("Rellenamos los "+str(num)+" datos faltantes a través de interpolación "+selected_option+" de todos los datos.")    
+
         else:
             st.error(f"Error al consultar la API: {responseInterpol2.text}")
             
@@ -520,7 +544,8 @@ if uploaded_file is not None:
             with col36:
                 # Mostrar la imagen en la aplicación
                 st.image(image, caption="Serie temporal aumentada mediante interpolación "+selected_option +" de los datos entre el máximo y el mínimo")
-                
+            st.text("Rellenamos los "+str(num)+" datos faltantes a través de interpolación "+selected_option+" de los datos entre el máximo y el mínimo.")    
+  
         else:
             st.error(f"Error al consultar la API: {responseInterpolM2.text}")
             
@@ -548,6 +573,8 @@ if uploaded_file is not None:
                 with col38:
                     # Mostrar la imagen en la aplicación
                     st.image(image, caption="Serie temporal aumentada mediante interpolación spline "+selected_option )
+                st.text("Rellenamos los "+str(num)+" datos faltantes a través de interpolación spline "+selected_option+" de los datos.")    
+
             else:
                 st.error(f"Error al consultar la API: {responseInterpolS2.text}")
                 
@@ -643,5 +670,3 @@ if uploaded_file is not None:
 
     # Mostrar el gráfico en Streamlit
     #st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico
-
-    st.header("Conclusiones")

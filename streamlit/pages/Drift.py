@@ -15,10 +15,12 @@ st.set_page_config(
 )
 
 st.title("Datos que siguen una distribución normal")
+
+st.header("Petición Datos")
+
 col1,col2 =st.columns([1,2.05])
+
 with col1:
-    # Título de la aplicación
-    st.header("Petición Datos")
 
     # Entrada del usuario
     api_urlDatos = "http://127.0.0.1:8000/Datos/distribucion/fin?inicio=1%2F1%2F2000&fin=1%2F1%2F2020&freq=M&distr=1&columna=valor&params=55&params=0.2"
@@ -40,7 +42,6 @@ with col1:
         st.error(f"Error: {str(e)}")
             
 with col2:           
-    st.header("Graficar Datos")
 
     # Entrada del usuario
     api_urlPlot = "http://127.0.0.1:8000/Plot/distribucion/fin?inicio=1%2F1%2F2000&fin=1%2F1%2F2020&freq=M&distr=2&columna=valor&params=55&params=0.2"
@@ -116,21 +117,30 @@ try:
             st.json(responsePH.text)
     
         if driftKS["Drift"]  == "No detectado" and driftJS["Drift"]  == "No detectado":
-            st.write("No se han detectado cambios en la distribución entre la primera mitad de los datos y la segunda mitad de los datos, según las medidas de Kolmogorov-Smirnov y Jensen Shannon. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
+            st.write("No se han detectado cambios en la distribución entre la primera mitad de los datos y la segunda mitad de los datos, según las medidas de Kolmogorov-Smirnov y Jensen-Shannon. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
+            st.write("En el caso de Kolmogorov-Smirnov, hemos obtenido un p-value de "+ str(driftKS["Report"]["valor"]["p_value"]) + " que es superior al valor umbral, 0.05.")
+            st.write("En el caso de Jensen-Shannon, hemos obtenido el valor "+ str(driftJS["Report"]["valor"]["Jensen-Shannon"]) + " que es inferior al valor umbral, 0.2.")
+
         else :
             st.write("Se ha detectado un cambio en la distribución entre la primera mitad de los datos y la segunda mitad, gracias a las medidas de Kolmogorov-Smirnov y Jensen Shannon.")
-            
+            st.write("En el caso de Kolmogorov-Smirnov, hemos obtenido un p-value de "+ str(driftKS["Report"]["valor"]["p_value"]) + " que es inferior al valor umbral, 0.05.")
+            st.write("En el caso de Jensen-Shannon, hemos obtenido el valor "+ str(driftJS["Report"]["valor"]["Jensen-Shannon"]) + " que es superior al valor umbral, 0.2.")
+             
         if driftPSI["Drift"]  == "No detectado" and driftPSIQ["Drift"]  == "No detectado":
             st.write("No se han detectado cambios en la distribución entre los primeros datos (80%) y los últimos datos (20%), según el Population Stability Index. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
-        elif  driftPSI["Drift"]  == "Detectado":
+            st.write("Hemos obtenido un Population Stability Index de "+ str(driftPSI["Report"]["valor"]["PSI"]) + " que es inferior al valor umbral, 1. En el caso del uso de cuantiles, el valor del Population Stability Index es de "+ str(driftPSIQ["Report"]["valor"]["PSI"]) + " inferior al valor umbral 0.5." )
+
+        elif  driftPSIQ["Drift"]  == "No detectado":
             st.write("Solo se ha detectado un cambio en la distribución entre los primeros datos (80%) y los últimos datos (20%) con el Population Stability Index sin cuantiles. En el caso del uso de cuantiles, no se ha detectado un cambio. Esto indica que el cambio ha sido muy leve, por lo que se mantiene el modelo de los datos.")
+            st.write("Hemos obtenido un Population Stability Index de "+ str(driftPSI["Report"]["valor"]["PSI"]) + " que es superior al valor umbral, 1. En el caso del uso de cuantiles, el valor del Population Stability Index es de "+ str(driftPSIQ["Report"]["valor"]["PSI"]) + " inferior al valor umbral 0.5." )
         else :
             st.write("Se ha detectado un cambio en la distribución entre los primeros datos (80%) y los últimos datos (20%), gracias al Population Stability Index.")
-        
+            st.write("Hemos obtenido un Population Stability Index de "+ str(driftPSI["Report"]["valor"]["PSI"]) + " que es superior al valor umbral, 1. En el caso del uso de cuantiles, el valor del Population Stability Index es de "+ str(driftPSIQ["Report"]["valor"]["PSI"]) + " superior al valor umbral 0.5." )
+
         if driftCUSUM["Drift"] == "No detectado" and driftPH["Drift"]=="No detectado":
-            st.write("No se han detectado grandes desviaciones de los datos respecto a la media a lo largo del tiempo, respecto a CUSUM y Page-Hinkley. Esto indica que no hay una gran desviación del modelo respecto a su media.")
+            st.write("No se han detectado grandes desviaciones de los datos respecto a la media a lo largo del tiempo, respecto a CUSUM y Page-Hinkley con valores umbrales 10 y 1.5 respectivamente. Esto indica que no hay una gran desviación del modelo respecto a su media.")
         else:
-            st.write("Se han detectado desviaciones de los datos respecto a la media a lo largo del tiempo, gracias a CUSUM y Page-Hinkley. Esto podría indicar una desviación del modelo o simplemente que el modelo sigue una distribución con cierta desviación respecto de la media.")
+            st.write("Se han detectado desviaciones de los datos respecto a la media a lo largo del tiempo, gracias a CUSUM y Page-Hinkley con valores umbrales 10 y 1.5 respectivamente. Esto podría indicar una desviación del modelo o simplemente que el modelo sigue una distribución con cierta desviación respecto de la media.")
             
     else:
         st.error(f"Error al consultar la API KS: "+str(responseKS.status_code)+", "+ {responseKS.text}+ 
@@ -144,11 +154,9 @@ except Exception as e:
     
     
 st.title("Datos que sufren drift")     
-    
+st.header("Petición Datos")   
 col1,col2 =st.columns([1,2.05])
 with col1:   
-    # Título de la aplicación
-    st.header("Petición Datos")
 
     # Entrada del usuario
     api_urlDatos = "http://127.0.0.1:8000/Datos/drift/fin/periodico-tendencia?inicio=1%2F1%2F2000&fin=1%2F1%2F2030&freq=M&num_drift=150&tipo1=1&distr1=1&p1=12&tipo2=4&coef_error=0&columna=valor&params1=499&params1=3&params2=400&params2=30"
@@ -170,7 +178,6 @@ with col1:
         st.error(f"Error: {str(e)}")
         
 with col2:        
-    st.header("Graficar Datos")
 
     # Entrada del usuario
     api_urlPlot = "http://127.0.0.1:8000/Plot/drift/fin/periodico-tendencia?inicio=1%2F1%2F2000&fin=1%2F1%2F2030&freq=M&num_drift=150&tipo1=1&distr1=1&p1=12&tipo2=4&coef_error=0&columna=valor&params1=499&params1=3&params2=400&params2=30"
@@ -196,10 +203,10 @@ st.header("Detectar Drift")
 
 api_urlKS = "http://127.0.0.1:8000/Deteccion/KS?indice=Indice&threshold_ks=0.05&inicio=1"
 api_urlJS = "http://127.0.0.1:8000/Deteccion/JS?indice=Indice&threshold_js=0.2&inicio=1"
-api_urlPSI = "http://127.0.0.1:8000/Deteccion/PSI?indice=Indice&threshold_psi=2&num_bins=10&inicio=1"
-api_urlPSIQ = "http://127.0.0.1:8000/Deteccion/PSI/Cuantiles?indice=Indice&threshold_psi=0.2&num_quantiles=10&inicio=1"
+api_urlPSI = "http://127.0.0.1:8000/Deteccion/PSI?indice=Indice&threshold_psi=1&num_bins=10&inicio=1"
+api_urlPSIQ = "http://127.0.0.1:8000/Deteccion/PSI/Cuantiles?indice=Indice&threshold_psi=0.5&num_quantiles=10&inicio=1"
 api_urlCUSUM = 'http://127.0.0.1:8000/Deteccion/CUSUM?indice=Indice&threshold_cusum=1.5&drift_cusum=0.5&inicio=100'
-api_urlPH = 'http://127.0.0.1:8000/Deteccion/PH?indice=Indice&min_instances=100&delta=0.005&threshold=30&alpha=0.9999'
+api_urlPH = 'http://127.0.0.1:8000/Deteccion/PH?indice=Indice&min_instances=100&delta=0.005&threshold=10&alpha=0.9999'
 
 col3,col4 = st.columns(2)
 try:
@@ -246,21 +253,31 @@ try:
             st.json(responsePH.text)
         
         if driftKS["Drift"]  == "No detectado" and driftJS["Drift"]  == "No detectado":
-            st.write("No se han detectado cambios en la distribución entre la primera mitad de los datos y la segunda mitad de los datos, según las medidas de Kolmogorov-Smirnov y Jensen Shannon. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
+            st.write("No se han detectado cambios en la distribución entre la primera mitad de los datos y la segunda mitad de los datos, según las medidas de Kolmogorov-Smirnov y Jensen-Shannon. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
+            st.write("En el caso de Kolmogorov-Smirnov, hemos obtenido un p-value de "+ str(driftKS["Report"]["valor"]["p_value"]) + " que es superior al valor umbral, 0.05.")
+            st.write("En el caso de Jensen-Shannon, hemos obtenido el valor "+ str(driftJS["Report"]["valor"]["Jensen-Shannon"]) + " que es inferior al valor umbral, 0.2.")
+
         else :
             st.write("Se ha detectado un cambio en la distribución entre la primera mitad de los datos y la segunda mitad, gracias a las medidas de Kolmogorov-Smirnov y Jensen Shannon.")
+            st.write("En el caso de Kolmogorov-Smirnov, hemos obtenido un p-value de "+ str(driftKS["Report"]["valor"]["p_value"]) + " que es inferior al valor umbral, 0.05.")
+            st.write("En el caso de Jensen-Shannon, hemos obtenido el valor "+ str(driftJS["Report"]["valor"]["Jensen-Shannon"]) + " que es superior al valor umbral, 0.2.")
             
         if driftPSI["Drift"]  == "No detectado" and driftPSIQ["Drift"]  == "No detectado":
             st.write("No se han detectado cambios en la distribución entre los primeros datos (80%) y los últimos datos (20%), según el Population Stability Index. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
+            st.write("Hemos obtenido un Population Stability Index de "+ str(driftPSI["Report"]["valor"]["PSI"]) + " que es inferior al valor umbral, 1. En el caso del uso de cuantiles, el valor del Population Stability Index es de "+ str(driftPSIQ["Report"]["valor"]["PSI"]) + " inferior al valor umbral, 0.5." )
+
         elif  driftPSIQ["Drift"]  == "No detectado":
             st.write("Solo se ha detectado un cambio en la distribución entre los primeros datos (80%) y los últimos datos (20%) con el Population Stability Index sin cuantiles. En el caso del uso de cuantiles, no se ha detectado un cambio. Esto indica que el cambio ha sido muy leve, por lo que se mantiene el modelo de los datos.")
+            st.write("Hemos obtenido un Population Stability Index de "+ str(driftPSI["Report"]["valor"]["PSI"]) + " que es superior al valor umbral, 1. En el caso del uso de cuantiles, el valor del Population Stability Index es de "+ str(driftPSIQ["Report"]["valor"]["PSI"]) + " inferior al valor umbral, 0.5." )
         else :
             st.write("Se ha detectado un cambio en la distribución entre los primeros datos (80%) y los últimos datos (20%), gracias al Population Stability Index.")
+            st.write("Hemos obtenido un Population Stability Index de "+ str(driftPSI["Report"]["valor"]["PSI"]) + " que es superior al valor umbral, 1. En el caso del uso de cuantiles, el valor del Population Stability Index es de "+ str(driftPSIQ["Report"]["valor"]["PSI"]) + " superior al valor umbral, 0.5." )
+
         
         if driftCUSUM["Drift"] == "No detectado" and driftPH["Drift"]=="No detectado":
-            st.write("No se han detectado grandes desviaciones de los datos respecto a la media a lo largo del tiempo, respecto a CUSUM y Page-Hinkley. Esto podría indicar una desviación del modelo o simplemente que el modelo sigue una distribución con cierta desviación respecto de la media.")
+            st.write("No se han detectado grandes desviaciones de los datos respecto a la media a lo largo del tiempo, respecto a CUSUM y Page-Hinkley con valores umbrales 10 y 1.5 respectivamente. Esto podría indicar una desviación del modelo o simplemente que el modelo sigue una distribución con cierta desviación respecto de la media.")
         else:
-            st.write("Se han detectado desviaciones de los datos respecto a la media a lo largo del tiempo, gracias a CUSUM y Page-Hinkley. Esto podría indicar una desviación del modelo o simplemente que el modelo sigue una distribución con cierta desviación respecto de la media.")
+            st.write("Se han detectado desviaciones de los datos respecto a la media a lo largo del tiempo, gracias a CUSUM y Page-Hinkley con valores umbrales 10 y 1.5 respectivamente. Esto podría indicar una desviación del modelo o simplemente que el modelo sigue una distribución con cierta desviación respecto de la media.")
             
     else:
         st.error(f"Error al consultar la API KS: "+str(responseKS.status_code)+", "+ {responseKS.text}+ 

@@ -11,9 +11,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Agregar un banner o imagen de encabezado (opcional)
-#st.image("https://via.placeholder.com/1200x300.png?text=Drift+Detection+App", use_column_width=True)
-
 # Título principal
 st.title("Aplicación de comprobación de drift, interpolación de datos y creación de variables exógenas")
 
