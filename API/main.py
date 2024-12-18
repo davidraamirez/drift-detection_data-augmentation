@@ -18508,14 +18508,14 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
 
 
 # Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test y devolvemos el error cuadrçatocp ,edop- 
-def error_prophet_prediccion(data_train,data_test):
+def error_prophet_prediccion(data_train,data_test,frequ):
     
     data_train=data_train.reset_index()
     data_train.rename(columns={data_train.columns[0] : 'ds', data_train.columns[1]: 'y'}, inplace=True)
     model = Prophet()
     model.fit(data_train)
     
-    future = model.make_future_dataframe(periods=len(data_test),freq='M')
+    future = model.make_future_dataframe(periods=len(data_test),freq=frequ)
     forecast=model.predict(future)
     
     y_true=data_test.values
@@ -18525,14 +18525,14 @@ def error_prophet_prediccion(data_train,data_test):
     return mae
 
 # Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test y devolvemos las predicciones
-def pred_prophet_prediccion(data_train,column,size):
+def pred_prophet_prediccion(data_train,column,size,frequ):
     
     data_train=data_train.reset_index()
     data_train.rename(columns={data_train.columns[0] : 'ds', column: 'y'}, inplace=True)
     model = Prophet()
     model.fit(data_train)
     
-    future = model.make_future_dataframe(periods=size,freq='M')
+    future = model.make_future_dataframe(periods=size,freq=frequ)
     forecast=model.predict(future)
     
     y_pred=forecast['yhat'][len(data_train):].values
@@ -18563,7 +18563,7 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
     indice = series_periodos(df.index[0],df.shape[0]+size,freq)
     for x in df.columns:
         data = df[x]
-        prediccion = pred_prophet_prediccion(df,x,size)
+        prediccion = pred_prophet_prediccion(df,x,size,freq)
         if x == df.columns[0]:
             df_prophet=pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
         else:
@@ -18603,7 +18603,7 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
     indice = series_periodos(df.index[0],df.shape[0]+size,freq)
     for x in df.columns:
         data = df[x]
-        prediccion = pred_prophet_prediccion(df,x,size)
+        prediccion = pred_prophet_prediccion(df,x,size,freq)
         if x == df.columns[0]:
             df_prophet=pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
         else:
@@ -18640,7 +18640,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
     train = int(df.shape[0]*0.8)
-    return {error_prophet_prediccion(df[:train],df[train:]) }
+    return {error_prophet_prediccion(df[:train],df[train:],freq) }
 
 # Gráfica del modelo de predicción Prophet
 @app.post("/Plot/Prophet")
@@ -18665,7 +18665,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index.freq=freq
     
     train = int(df.shape[0]*0.8)
-    y_pred=pred_prophet_prediccion(df[:train],df[train:].shape[0])
+    y_pred=pred_prophet_prediccion(df[:train],df[train:].shape[0],freq)
     plt.figure()
     y_true=df[train:].values
     result = pd.DataFrame({

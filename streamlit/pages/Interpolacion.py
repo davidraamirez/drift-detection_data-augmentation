@@ -434,6 +434,8 @@ if uploaded_file is not None:
                     with col53:
                         descomposicion = seasonal_decompose(df1[df1.columns[i]], model='additive', period=12)
                         st.pyplot(descomposicion.plot())
+            
+            image = Image.open(BytesIO(responseDesc2.content))
             df_desc = pd.read_csv(pd.io.common.BytesIO(datos_desc),index_col="Indice")
             with col29:
                 st.dataframe(df_desc)
@@ -620,7 +622,7 @@ if uploaded_file is not None:
         #     'Bootstrap': df_bootstrap[df.shape[0]-num:].values.reshape(-1),
         #     'Harmonica':df_harm[df.shape[0]-num:].values.reshape(-1),
         #     'Combinación lineal':df_cl[df.shape[0]-num:].values.reshape(-1),
-        #     'Descomposición aditivia':df_desc[df.shape[0]-num:].values.reshape(-1),
+        #     'Descomposición aditiva':df_desc[df.shape[0]-num:].values.reshape(-1),
         #     'Descomposición multiplicativa':df_descM[df.shape[0]-num:].values.reshape(-1),
         #     'Interpolación':df_interpol[df.shape[0]-num:].values.reshape(-1),
         #     'Interpolación entre máximo y mínimo':df_interpolM[df.shape[0]-num:].values.reshape(-1),
@@ -646,7 +648,7 @@ if uploaded_file is not None:
         #     'Bootstrap': df_bootstrap[df.shape[0]-num:].values.reshape(-1),
         #     'Harmonica':df_harm[df.shape[0]-num:].values.reshape(-1),
         #     'Combinación lineal':df_cl[df.shape[0]-num:].values.reshape(-1),
-        #     'Descomposición aditivia':df_desc[df.shape[0]-num:].values.reshape(-1),
+        #     'Descomposición aditiva':df_desc[df.shape[0]-num:].values.reshape(-1),
         #     'Descomposición multiplicativa':df_descM[df.shape[0]-num:].values.reshape(-1),
         #     'Interpolación':df_interpol[df.shape[0]-num:].values.reshape(-1),
         #     'Interpolación entre máximo y mínimo':df_interpolM[df.shape[0]-num:].values.reshape(-1),
