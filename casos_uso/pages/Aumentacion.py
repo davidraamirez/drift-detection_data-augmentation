@@ -68,7 +68,9 @@ if uploaded_file is not None:
             
     except Exception as e:
         st.error(f"Error: {str(e)}")
-        
+    
+    df.freq='M'
+    df_PCA.freq='M'
     target_column = 'Air Quality Numeric'  # Columna a predecir
     exog_columns = ['Temperature', 'Humidity', 'PM2.5', 'PM10', 'NO2', 'SO2', 'CO', 'Proximity_to_Industrial_Areas']  # Variables exógenas
 
@@ -116,8 +118,8 @@ if uploaded_file is not None:
 
     # Dividir los datos en conjunto de entrenamiento y prueba
     train_size2 = int(df_PCA.shape[0] * 0.8)  # 80% entrenamiento, 20% prueba
-    train_data2 = df_PCA[:train_size]
-    test_data2 = df_PCA[train_size:]
+    train_data2 = df_PCA[:train_size2]
+    test_data2 = df_PCA[train_size2:]
 
     # Separar variables objetivo y exógenas
     y_train2 = train_data2[target_column2]
@@ -127,10 +129,10 @@ if uploaded_file is not None:
 
     # Parámetros iniciales p, d, q, P, D, Q, s
     p, d, q = 1, 1, 1  # Parámetros no estacionales
-    P, D, Q, s = 1, 1, 1, 365  # Parámetros estacionales (suponiendo datos mensuales, ajusta "s" según corresponda)
+    P, D, Q, s = 1, 1, 1, 12  # Parámetros estacionales (suponiendo datos mensuales, ajusta "s" según corresponda)
 
-
-    model = SARIMAX(
+    print('Modelo 2')
+    model2 = SARIMAX(
         y_train2,
         exog=exog_train2,
         order=(p, d, q),
@@ -140,7 +142,7 @@ if uploaded_file is not None:
     )
     
     # Ajustar el modelo
-    sarimax_model2 = model.fit(disp=False)
+    sarimax_model2 = model2.fit(disp=False)
 
     # Predicciones
     pred_train2 = sarimax_model2.predict(start=0, end=len(y_train2)-1, exog=exog_train2)
@@ -152,3 +154,27 @@ if uploaded_file is not None:
 
     print(f'Train RMSE: {train_rmse2}')
     print(f'Test RMSE: {test_rmse2}')
+    
+    st.header("Modelo Sarimax")
+    
+    
+    st.text("Aplicamos el modelo Sarimax para predecir la variable objetivo 'Air Quality Numeric'")
+    st.subheader("Caso 1: Realizamos la predicción usando el dataset pasado")
+    col3,col4 = st.columns(2)
+    with col3:
+        st.write("Datos de entrenamiento",train_data)
+    with col4:
+        st.write("Datos de testeo",test_data)
+    st.text("Comparativa datos de testeo y datos predecidos:")
+    
+    st.text("Error cuadrático medio: "+ str(test_rmse))
+    st.subheader("Caso 2: Realizamos la predicción usando el dataset aumentado")
+    col3,col4 = st.columns(2)
+    with col3:
+        st.write("Datos de entrenamiento",train_data2)
+    with col4:
+        st.write("Datos de testeo",test_data2)
+    st.text("Comparativa datos de testeo y datos predecidos:")
+    
+    st.text("Error cuadrático medio: "+ str(test_rmse2))
+    
