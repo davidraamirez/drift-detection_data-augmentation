@@ -27,19 +27,31 @@ if uploaded_file is not None:
     col1,col2 = st.columns([1.65,2.05])
     # Convertir el archivo a un DataFrame de pandas
     df = pd.read_csv(uploaded_file)
+    df = df[:500]
     df.set_index(df.columns[0],inplace=True)
     with col1:
         # Mostrar el DataFrame cargado
         st.write("Datos cargados:", df)
 
-    with col2:
-        
-        # Crear un gráfico de líneas usando pandas (esto utiliza Matplotlib por detrás)
-        fig, ax = plt.subplots()  # Crear un objeto figure y un eje
-        df.plot(ax=ax,title="Serie temporal",figsize=(13,5))  # Graficar en el eje creado
+    i=0
+    for x in df.columns:
+        if i%2==0:
+            with col2:  
+            # Crear un gráfico de líneas usando pandas (esto utiliza Matplotlib por detrás)
+               fig, ax = plt.subplots()  # Crear un objeto figure y un eje
+               df[x].plot(ax=ax,title=x,figsize=(13,5))  # Graficar en el eje creado
 
-        # Mostrar el gráfico en Streamlit
-        st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico
+               # Mostrar el gráfico en Streamlit
+               st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico
+        else:
+            with col1:  
+            # Crear un gráfico de líneas usando pandas (esto utiliza Matplotlib por detrás)
+               fig, ax = plt.subplots()  # Crear un objeto figure y un eje
+               df[x].plot(ax=ax,title=x,figsize=(13,5))  # Graficar en el eje creado
+
+               # Mostrar el gráfico en Streamlit
+               st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico
+        i = i+1
         
     csv_data = df.to_csv(index=df.index.name)
     st.subheader("Principal Component Analysis")
@@ -47,7 +59,7 @@ if uploaded_file is not None:
     api_urlPCA2 = "http://127.0.0.1:8000/Plot/Variables/PCA?indice="+df.index.name+"&columna=PCA"
 
     try:
-        col3,col4 = st.columns([2,3])
+        col3,col4 = st.columns([1,1])
         files = {'file': ('PCA.csv', io.StringIO(csv_data), 'text/csv')}
         responsePCA= requests.post(api_urlPCA,files=files)
         files = {'file': ('PCA.csv', io.StringIO(csv_data), 'text/csv')}
@@ -61,8 +73,11 @@ if uploaded_file is not None:
             with col3:
                 st.dataframe(df_PCA)
             with col4:
-                # Mostrar la imagen en la aplicación
-                st.image(image, caption="Serie temporal con aumento de variable a través de PCA") 
+               fig, ax = plt.subplots()  # Crear un objeto figure y un eje
+               df_PCA['PCA'].plot(ax=ax,title="Serie temporal",figsize=(13,5))  # Graficar en el eje creado
+
+               # Mostrar el gráfico en Streamlit
+               st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico
             st.text("Creación de una nueva variable PCA que se ha construido mediante estandarización y aplicando Principal Component Analysis sobre las variables.")    
         else:
             st.error(f"Error al consultar la API: {responsePCA.text}")
@@ -89,7 +104,6 @@ if uploaded_file is not None:
     # Parámetros iniciales p, d, q, P, D, Q, s
     p, d, q = 1, 1, 1  # Parámetros no estacionales
     P, D, Q, s = 1, 1, 1, 12  # Parámetros estacionales (suponiendo datos mensuales, ajusta "s" según corresponda)
-
 
     model = SARIMAX(
         y_train,

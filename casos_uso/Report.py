@@ -65,12 +65,13 @@ if uploaded_file is not None:
                             'Outliers':((df < (Q1 - 1.5 * IQR)) | (df > (Q3 + 1.5 * IQR))).sum(),
                             'Valores Nulos': df.isnull().sum(),
                             'Porcentajes Nulos': (df.isnull().sum() / len(df)) * 100})
-  
+    
+    st.text("Reporte estadístico")
     df_informacion = pd.concat([df.describe(),df_infor.T],axis=0)
     st.table(df_informacion)
     
     colh1,colh2 = st.columns([1,1])
-    i =0
+    i=0
     for x in df.columns :
         fig, ax = plt.subplots()
         if i%2==0:
