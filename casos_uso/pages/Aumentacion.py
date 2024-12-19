@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn.metrics import mean_squared_error
 import numpy as np
+import pandas as pd
 
 # Configurar la página
 st.set_page_config(
@@ -84,7 +85,7 @@ if uploaded_file is not None:
     y_test = test_data[target_column]
     exog_train = train_data[exog_columns]
     exog_test = test_data[exog_columns]
-
+    
     # Parámetros iniciales p, d, q, P, D, Q, s
     p, d, q = 1, 1, 1  # Parámetros no estacionales
     P, D, Q, s = 1, 1, 1, 12  # Parámetros estacionales (suponiendo datos mensuales, ajusta "s" según corresponda)
@@ -109,9 +110,9 @@ if uploaded_file is not None:
     # Evaluar el modelo
     train_rmse = np.sqrt(mean_squared_error(y_train, pred_train))
     test_rmse = np.sqrt(mean_squared_error(y_test, pred_test))
-
-    print(f'Train RMSE: {train_rmse}')
-    print(f'Test RMSE: {test_rmse}')
+    pred_test.index=y_test.index
+    df_test= pd.DataFrame({'Valores reales': y_test,
+                             'Predicciones': pred_test})
     
     target_column2 = 'Air Quality Numeric'  # Columna a predecir
     exog_columns2 = ['Temperature', 'Humidity', 'PM2.5', 'PM10', 'NO2', 'SO2', 'CO', 'Proximity_to_Industrial_Areas','PCA']  # Variables exógenas
@@ -131,7 +132,6 @@ if uploaded_file is not None:
     p, d, q = 1, 1, 1  # Parámetros no estacionales
     P, D, Q, s = 1, 1, 1, 12  # Parámetros estacionales (suponiendo datos mensuales, ajusta "s" según corresponda)
 
-    print('Modelo 2')
     model2 = SARIMAX(
         y_train2,
         exog=exog_train2,
@@ -143,7 +143,7 @@ if uploaded_file is not None:
     
     # Ajustar el modelo
     sarimax_model2 = model2.fit(disp=False)
-
+    
     # Predicciones
     pred_train2 = sarimax_model2.predict(start=0, end=len(y_train2)-1, exog=exog_train2)
     pred_test2 = sarimax_model2.predict(start=len(y_train2), end=df.shape[0]-1, exog=exog_test2)
@@ -151,9 +151,10 @@ if uploaded_file is not None:
     # Evaluar el modelo
     train_rmse2 = np.sqrt(mean_squared_error(y_train2, pred_train2))
     test_rmse2 = np.sqrt(mean_squared_error(y_test2, pred_test2))
-
-    print(f'Train RMSE: {train_rmse2}')
-    print(f'Test RMSE: {test_rmse2}')
+    pred_test2.index=y_test2.index
+    df_test2 = pd.DataFrame({'Valores reales': y_test2,
+                             'Predicciones': pred_test2})
+    
     
     st.header("Modelo Sarimax")
     
@@ -166,15 +167,32 @@ if uploaded_file is not None:
     with col4:
         st.write("Datos de testeo",test_data)
     st.text("Comparativa datos de testeo y datos predecidos:")
-    
+    # Crear un gráfico de líneas usando pandas (esto utiliza Matplotlib por detrás)
+    fig, ax = plt.subplots()  # Crear un objeto figure y un eje
+    df_test.plot(ax=ax,title="Air Quality",figsize=(13,5))  # Graficar en el eje creado
+    st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico
+
     st.text("Error cuadrático medio: "+ str(test_rmse))
     st.subheader("Caso 2: Realizamos la predicción usando el dataset aumentado")
-    col3,col4 = st.columns(2)
-    with col3:
+    col5,col6 = st.columns(2)
+    with col5:
         st.write("Datos de entrenamiento",train_data2)
-    with col4:
+    with col6:
         st.write("Datos de testeo",test_data2)
     st.text("Comparativa datos de testeo y datos predecidos:")
-    
+    # Crear un gráfico de líneas usando pandas (esto utiliza Matplotlib por detrás)
+    fig, ax = plt.subplots()  # Crear un objeto figure y un eje
+    df_test2.plot(ax=ax,title="Air Quality",figsize=(13,5))  # Graficar en el eje creado
+    # Mostrar el gráfico en Streamlit
+    st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico
     st.text("Error cuadrático medio: "+ str(test_rmse2))
+    
+    df_test3 = pd.DataFrame({'Valores reales': y_test2,
+                             'Predicciones datos no aumentados': pred_test2,
+                             'Predicciones datos aumentados': pred_test})
+    st.subheader("Comparativa de la mejora")
+    fig, ax = plt.subplots()  # Crear un objeto figure y un eje
+    df_test3.plot(ax=ax,title="Air Quality",figsize=(13,5))  # Graficar en el eje creado
+    # Mostrar el gráfico en Streamlit
+    st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico
     
