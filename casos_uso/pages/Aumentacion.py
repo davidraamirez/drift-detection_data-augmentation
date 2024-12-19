@@ -85,7 +85,7 @@ if uploaded_file is not None:
 
     # Parámetros iniciales p, d, q, P, D, Q, s
     p, d, q = 1, 1, 1  # Parámetros no estacionales
-    P, D, Q, s = 1, 1, 1, 365  # Parámetros estacionales (suponiendo datos mensuales, ajusta "s" según corresponda)
+    P, D, Q, s = 1, 1, 1, 12  # Parámetros estacionales (suponiendo datos mensuales, ajusta "s" según corresponda)
 
 
     model = SARIMAX(
@@ -101,7 +101,7 @@ if uploaded_file is not None:
     sarimax_model = model.fit(disp=False)
 
     # Predicciones
-    pred_train = sarimax_model.predict(start=0, end=len(y_train)-1, exog=exog_train)
+    pred_train = sarimax_model.predict(start=0, end=len(y_train)-1, exog=exog_train,)
     pred_test = sarimax_model.predict(start=len(y_train), end=df.shape[0]-1, exog=exog_test)
 
     # Evaluar el modelo
