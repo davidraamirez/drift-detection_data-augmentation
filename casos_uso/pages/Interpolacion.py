@@ -186,15 +186,15 @@ if uploaded_file is not None :
     except Exception as e:
         st.error(f"Error: {str(e)}")
         
-    api_urlHarmonico = "http://127.0.0.1:8000/Aumentar/Harmonico?freq=M&indice="+df.index.name+"&size="+str(num)
+    api_urlArmonico = "http://127.0.0.1:8000/Aumentar/Armonico?freq=M&indice="+df.index.name+"&size="+str(num)
     try:
-        files = {'file': ('Harmonico.csv', io.StringIO(csv_data), 'text/csv')}
-        responseHarmonico= requests.post(api_urlHarmonico,files=files)
-        if responseHarmonico.status_code ==200:
-            datos_harm = responseHarmonico.content
-            df_harm = pd.read_csv(pd.io.common.BytesIO(datos_harm),index_col="Indice")
+        files = {'file': ('Armonico.csv', io.StringIO(csv_data), 'text/csv')}
+        responseArmonico= requests.post(api_urlArmonico,files=files)
+        if responseArmonico.status_code ==200:
+            datos_Arm = responseArmonico.content
+            df_Arm = pd.read_csv(pd.io.common.BytesIO(datos_Arm),index_col="Indice")
         else:
-            st.error(f"Error al consultar la API: {responseHarmonico.text}")
+            st.error(f"Error al consultar la API: {responseArmonico.text}")
             
     except Exception as e:
         st.error(f"Error: {str(e)}")
@@ -289,7 +289,7 @@ if uploaded_file is not None :
     error_ridge = mean_squared_error(y_true = df_test.values,y_pred = df_ridge[df.shape[0]-num:].values)
     error_prophet = mean_squared_error(y_true = df_test.values,y_pred = df_prophet[df.shape[0]-num:].values)
     error_bootstrap = mean_squared_error(y_true = df_test.values,y_pred = df_bootstrap[df.shape[0]-num:].values)
-    error_harm = mean_squared_error(y_true = df_test.values,y_pred = df_harm[df.shape[0]-num:].values)
+    error_Arm = mean_squared_error(y_true = df_test.values,y_pred = df_Arm[df.shape[0]-num:].values)
     error_cl = mean_squared_error(y_true = df_test.values,y_pred = df_cl[df.shape[0]-num:].values)
     error_desc = mean_squared_error(y_true = df_test.values,y_pred = df_desc[df.shape[0]-num:].values)
     error_descM = mean_squared_error(y_true = df_test.values,y_pred = df_descM[df.shape[0]-num:].values)
@@ -297,8 +297,8 @@ if uploaded_file is not None :
     error_interpolM = mean_squared_error(y_true = df_test.values,y_pred = df_interpolM[df.shape[0]-num:].values)
     error_interpolS = mean_squared_error(y_true = df_test.values,y_pred = df_interpolS[df.shape[0]-num:].values)
     datos_error = {
-        'Modelo': ['Media', 'Moda', 'Mediana', 'Normal','Muller','Sarimax','Random Forest','Ridge','Prophet','Bootstrap','Harmonico','Combinación Lineal','Descomposición aditiva','Descomposición multiplicativa','Interpolación', 'Interpolación min-max','Interpolación Spline'],
-        'Error cuadrático medio': [error_media, error_moda, error_mediana, error_normal,error_muller,error_sarimax,error_RF,error_ridge,error_prophet,error_bootstrap,error_harm,error_cl,error_desc,error_descM,error_interpol, error_interpolM,error_interpolS],
+        'Modelo': ['Media', 'Moda', 'Mediana', 'Normal','Muller','Sarimax','Random Forest','Ridge','Prophet','Bootstrap','Armonico','Combinación Lineal','Descomposición aditiva','Descomposición multiplicativa','Interpolación', 'Interpolación min-max','Interpolación Spline'],
+        'Error cuadrático medio': [error_media, error_moda, error_mediana, error_normal,error_muller,error_sarimax,error_RF,error_ridge,error_prophet,error_bootstrap,error_Arm,error_cl,error_desc,error_descM,error_interpol, error_interpolM,error_interpolS],
     }
     for x in df.columns:
         result = pd.DataFrame({
@@ -313,7 +313,7 @@ if uploaded_file is not None :
             'Forecaster Ridge': df_ridge[x][df.shape[0]-num:].values.reshape(-1),
             'Prophet': df_prophet[x][df.shape[0]-num:].values.reshape(-1),
             'Bootstrap': df_bootstrap[x][df.shape[0]-num:].values.reshape(-1),
-            'Harmonica':df_harm[x][df.shape[0]-num:].values.reshape(-1),
+            'Armonica':df_Arm[x][df.shape[0]-num:].values.reshape(-1),
             'Combinación lineal':df_cl[x][df.shape[0]-num:].values.reshape(-1),
             'Descomposición aditiva':df_desc[x][df.shape[0]-num:].values.reshape(-1),
             'Descomposición multiplicativa':df_descM[x][df.shape[0]-num:].values.reshape(-1),
@@ -359,8 +359,8 @@ if uploaded_file is not None :
         datos_df = df_prophet
     elif 'Bootstrap' == top:
         datos_df = df_bootstrap
-    elif 'Harmonico' == top:
-        datos_df = df_harm
+    elif 'Armonico' == top:
+        datos_df = df_Arm
     elif 'Combinación Lineal' == top:
         datos_df = df_cl
     elif 'Descomposición aditiva' == top:

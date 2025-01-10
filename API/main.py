@@ -15055,7 +15055,7 @@ async def obtener_grafica(a : float, b: float, indice:str, columna:str, file: Up
     return StreamingResponse(buffer,media_type="image/png")
 
 # Crea una columna Target: y = sumatorio a[i] * x ^ i
-def objetivo_polinomico(df_caract,a, columna):
+def objetivo_polinomico(df_caract,a,columna):
     df = df_caract.copy()
     df[columna] = np.zeros(df.shape[0])
     for i in range(0,len(a)):
@@ -15283,7 +15283,6 @@ async def obtener_datos(a:float, indice:str, columna:str, b :List[float]= Query(
         df = pd.read_csv(csv_data,index_col=indice)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-
     
     df1 = multivariante(df,a,b, columna)
     
@@ -15531,7 +15530,7 @@ def elegir_funcion(funcion):
     elif funcion == 'Raiz':
         return raiz
     elif funcion == 'Seno':
-        return math.sin
+        return math.s1in
     elif funcion == 'Coseno':
         return math.cos
     elif funcion == 'Tangente':
@@ -15911,7 +15910,7 @@ async def obtener_datos( funciones: List[str],condiciones: List[str] , indice:st
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **columna** : nombre de la nueva columna generada 
     - **file** : csv con los datos multivariable
-    Nota: Debe haber tantas funciones como condiciones. Si se cumple la n-ésima condición, entonces el valor de la nueva columba se obtiene de aplicar la n-ésima función
+    Nota: Debe haber tantas funciones como condiciones. Si se cumple la n-ésima condición, entonces el valor de la nueva columna se obtiene de aplicar la n-ésima función
     """  
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -15975,7 +15974,7 @@ async def obtener_grafica( funciones: List[str],condiciones: List[str] , indice:
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **columna** : nombre de la nueva columna generada 
     - **file** : csv con los datos multivariable
-    Nota: Debe haber tantas funciones como condiciones. Si se cumple la n-ésima condición, entonces el valor de la nueva columba se obtiene de aplicar la n-ésima función
+    Nota: Debe haber tantas funciones como condiciones. Si se cumple la n-ésima condición, entonces el valor de la nueva columna se obtiene de aplicar la n-ésima función
     """
     if file.content_type != 'text/csv':
         raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
@@ -17554,7 +17553,7 @@ async def obtener_grafica( indice:str,freq:str,size:int,tipo:str, file: UploadFi
     return StreamingResponse(buffer,media_type="image/png")
 
 # Definición de modelo autorregresivos con búsqueda de parámetros realizada por grid search devolviendo el error cuadrático medio
-def prediccion_sarimax(datos,datos_train,datos_test, columna):
+def error_sarimax(datos_train,datos_test, columna):
     
     # Grid search
     forecaster = ForecasterSarimax(
@@ -17572,12 +17571,12 @@ def prediccion_sarimax(datos,datos_train,datos_test, columna):
 
     resultados_grid = grid_search_sarimax(
                             forecaster            = forecaster,
-                            y                     = datos[columna],
+                            y                     = datos_train[columna],
                             param_grid            = param_grid,
                             steps                 = 12,
                             refit                 = True,
                             metric                = 'mean_absolute_error',
-                            initial_train_size    = len(datos_train),
+                            initial_train_size    = int(len(datos_train)*0.8),
                             fixed_train_size      = False,
                             return_best           = False,
                             n_jobs                = 'auto',
@@ -17595,8 +17594,8 @@ def prediccion_sarimax(datos,datos_train,datos_test, columna):
 
     metrica_m1, predicciones_m1 = backtesting_sarimax(
                                             forecaster            = forecaster_1,
-                                            y                     = datos[columna],
-                                            initial_train_size    = len(datos_train),
+                                            y                     = datos_train[columna],
+                                            initial_train_size    = int(len(datos_train)*0.8),
                                             steps                 = 72,
                                             metric                = 'mean_absolute_error',
                                             refit                 = True,
@@ -17610,7 +17609,7 @@ def prediccion_sarimax(datos,datos_train,datos_test, columna):
     return metrics.mean_squared_error(datos_test, predicciones_m1[:len(datos_test)])
     
 # Definición de modelo autorregresivos con búsqueda de parámetros realizada por grid search devolviendo la predicción
-def plot_prediccion_sarimax(datos,datos_train, columna):
+def prediccion_sarimax(datos,datos_train, columna):
     
     # Grid search
     forecaster = ForecasterSarimax(
@@ -17633,7 +17632,7 @@ def plot_prediccion_sarimax(datos,datos_train, columna):
                             steps                 = 12,
                             refit                 = True,
                             metric                = 'mean_absolute_error',
-                            initial_train_size    =int(len(datos_train)*0.8),
+                            initial_train_size    = int(len(datos_train)*0.8),
                             fixed_train_size      = False,
                             return_best           = False,
                             n_jobs                = 'auto',
@@ -17689,7 +17688,7 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
     indice = series_periodos(df.index[0],df.shape[0]+size,freq)
     for x in df.columns:
         data = df[x]
-        prediccion = plot_prediccion_sarimax(df,df,x)[:size]
+        prediccion = prediccion_sarimax(df,df,x)[:size]
         if x == df.columns[0]:
             df_sarimax=pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
         else:
@@ -17729,7 +17728,7 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
     indice = series_periodos(df.index[0],df.shape[0]+size,freq)
     for x in df.columns:
         data = df[x]
-        prediccion = plot_prediccion_sarimax(df,df,x)[:size]
+        prediccion = prediccion_sarimax(df,df,x)[:size]
         if x == df.columns[0]:
             df_sarimax=pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
         else:
@@ -17767,13 +17766,13 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index = pd.to_datetime(df.index)
     df.index.freq=freq
     train = int(df.shape[0]*0.8)
-    return {prediccion_sarimax(df,df[:train],df[train:], df.columns[0]) }
+    return {error_sarimax(df[:train],df[train:], df.columns[0]) }
 
 # Gráfica modelo sarimax
 @app.post("/Plot/Sarimax")
-async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+async def obtener_grafica_error(indice:str,freq:str, file: UploadFile = File(...)) :
     """
-    Devuelve una imagen con los datos del test(20% últimos) y los datos de predicción de Sarimax graficados:
+    Devuelve una imagen con los datos del test (20% últimos) y los datos de predicción de Sarimax graficados:
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **file** : csv con los datos 
@@ -17793,7 +17792,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     
     train = int(df.shape[0]*0.8)
     df_test = df[train:]
-    predicciones_m1=plot_prediccion_sarimax(df,df[:train], df.columns[0])
+    predicciones_m1=prediccion_sarimax(df,df[:train], df.columns[0])
     result = pd.merge(df_test, predicciones_m1, left_index=True, right_index=True)
     plt.figure()
     result.plot(title="Predicciones Sarimax",figsize=(13,5))
@@ -17848,7 +17847,7 @@ def error_backtesting_forecasterAutoreg(datos_train,datos_test,lags,steps):
 
     return error_mse
 
-def plot_backtesting_forecasterAutoreg(datos_train,column,size,lags,steps):
+def prediccion_backtesting_forecasterAutoreg(datos_train,column,size,lags,steps):
 
     forecaster = ForecasterAutoreg(
                     regressor = RandomForestRegressor(random_state=123),
@@ -17909,7 +17908,7 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
     indice = series_periodos(df.index[0],df.shape[0]+size,freq)
     for x in df.columns:
         data = df[x]
-        prediccion = plot_backtesting_forecasterAutoreg(df,x,size,10,180)
+        prediccion = prediccion_backtesting_forecasterAutoreg(df,x,size,10,180)
         if x == df.columns[0]:
             df_rf=pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
         else:
@@ -17950,7 +17949,7 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
     indice = series_periodos(df.index[0],df.shape[0]+size,freq)
     for x in df.columns:
         data = df[x]
-        prediccion = plot_backtesting_forecasterAutoreg(df,x,size,10,180)
+        prediccion = prediccion_backtesting_forecasterAutoreg(df,x,size,10,180)
         if x == df.columns[0]:
             df_rf=pd.DataFrame(data=np.concatenate((data,prediccion.values.reshape(-1))),index=indice,columns=[x])
         else:
@@ -17992,7 +17991,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
 
 # Gráfica del modelo autorregresivo Random Forest
 @app.post("/Plot/ForecasterRF")
-async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+async def obtener_grafica_error(indice:str,freq:str, file: UploadFile = File(...)) :
     """
     Devuelve una imagen con los datos de test (el 20% final) y la predicción del modelo Random Forest graficados:
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
@@ -18013,7 +18012,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index.freq=freq
     train = int(df.shape[0]*0.8)
     df_test = df[train:]
-    predicciones_m1=plot_backtesting_forecasterAutoreg(df[:train],df[train:].shape[0],10,180)
+    predicciones_m1=prediccion_backtesting_forecasterAutoreg(df[:train],df[train:].shape[0],10,180)
     result = pd.merge(df_test, predicciones_m1, left_index=True, right_index=True)
     plt.figure()
     result.plot(title="Predicciones Modelo Autorregresivo Random Forest",figsize=(13,7))
@@ -18213,7 +18212,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
 
 # Gráfica del modelo autorregresivo Ridge
 @app.post("/Plot/AutoregRidge")
-async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+async def obtener_grafica_error(indice:str,freq:str, file: UploadFile = File(...)) :
     """
     Devuelve una imagen con los datos de test (20% finales) y los datos predecidos por el modelo Ridge graficados :
     - **size**: número de datos a generar
@@ -18323,7 +18322,7 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
 @app.post("/Plot/Datos/Prophet")
 async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
     """
-    Devuelve la imagen con los datos graficas tras ser aumentados usando la predicción Prophet:
+    Devuelve la imagen con los datos graficados tras ser aumentados usando la predicción Prophet:
     - **size**: número de datos a generar
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -18385,7 +18384,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
 
 # Gráfica del modelo de predicción Prophet
 @app.post("/Plot/Prophet")
-async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+async def obtener_grafica_error(indice:str,freq:str, file: UploadFile = File(...)) :
     """
     Devuelve una imagen con los datos de test (20 % finales) y los datos predecidos usando el modelo Prophet:
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
@@ -18425,7 +18424,7 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
 
 # Error cuadrático medio de todos los modelos de predicción 
 @app.post("/Errores")
-async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
+async def obtener_errores(indice:str,freq:str, file: UploadFile = File(...)) :
     """
     Devuelve el error cuadrático medio entre los datos de test (20% finales) y todos los modelos estudiados:
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
@@ -18448,7 +18447,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     e_prophet = error_prophet_prediccion(df[:train],df[train:].shape[0])
     e_autoregRidge = error_backtesting_forecasterAutoregDirect(df[:train], df[train:].shape[0],5) 
     e_regRF = error_backtesting_forecasterAutoreg(df[:train],df[train:].shape[0],10,180)
-    e_autoreg=prediccion_sarimax(df,df[:train], df.columns[0])
+    e_autoreg=error_sarimax(df,df[:train], df.columns[0])
     return {"Error predicción autorregresivo Sarimax": e_autoreg,
             "Error predicción forecaster Random Forest": e_regRF,
             "Error predicción forecaster Ridge": e_autoregRidge,
@@ -18456,7 +18455,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     
 # Gráfica de los valores reales vs los valores de predicción de todos los modelos
 @app.post("/Modelos/Plot")
-async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
+async def obtener_grafica_errores(indice:str,freq:str, file: UploadFile = File(...)) :
     """
     Devuelve una imagen con los datos de test (20 % finales) y los datos predecidos usando los distintos modelos:
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
@@ -18477,8 +18476,8 @@ async def obtener_grafica(indice:str,freq:str, file: UploadFile = File(...)) :
     df.index.freq=freq
     train = int(df.shape[0]*0.8)  
     y_pred4=pred_prophet_prediccion(df[:train],df[train:].shape[0])
-    y_pred2=plot_backtesting_forecasterAutoreg(df[:train],df[train:],10,180)
-    y_pred1=plot_prediccion_sarimax(df,df[:train],df[train:], df.columns[0])
+    y_pred2=prediccion_backtesting_forecasterAutoreg(df[:train],df[train:],10,180)
+    y_pred1=prediccion_sarimax(df,df[:train],df[train:], df.columns[0])
     y_pred3=predicciones_backtesting_forecasterAutoregDirect(df[:train], df[train:].shape[0],5)
     plt.figure()
     y_true=df[train:].values
@@ -19030,7 +19029,7 @@ async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = Fi
 
 # Error cuadrático medio que comete cada modelo
 @app.post("/Modelos/Error")
-async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+async def obtener_errores(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     """
     Devuelve el error cuadrático medio entre los datos de test (20% finales) y todos los modelos vistos:
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
@@ -19059,7 +19058,7 @@ async def obtener_error(indice:str,freq:str,columna:str, file: UploadFile = File
     
 # Gráfica con los valores reales vs los valores de predicción de cada modelo
 @app.post("/Plot/Modelos")
-async def obtener_grafica(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
+async def obtener_grafica_errores(indice:str,freq:str,columna:str, file: UploadFile = File(...)) :
     """
     Devuelve una imagen con los datos de test (20% finales) y los datos predecidos con los modelos graficados:
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
@@ -20552,7 +20551,7 @@ async def detectar_drift(indice:str,min_instances:int=100, lambd:float=0.5, file
     Devuelve si se ha detectado drift mediante el método MCUSUM:
     - **min_instances**: dato desde el que se comienza a buscar el drift
     - **indice** : nombre de la columna que se usa como índice en el csv
-    - **lambd**: parámetro del modelo
+    - **lambda**: parámetro de de sensibilidad del modelo
     - **file** : csv con los datos multivariables
     """   
     if file.content_type != 'text/csv':
@@ -20590,8 +20589,8 @@ async def detectar_drift(indice:str,princ_comp:int,min_instances:int=100, lambd:
     - **min_instances**: dato desde el que se comienza a buscar el drift
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **princ_comp**: número de componentes principales
-    - **lambd**: Peso del promedio exponencial
-    - **alpha**: Nivel de significancia estadística
+    - **lambda**: Peso del promedio exponencial, parámetro de suavización entre 0 y 1. 
+    - **alpha**: Nivel de significación, porcentaje de falsos positivos permitidos
     - **file** : csv con los datos multivariables
     """
     if file.content_type != 'text/csv':
@@ -20628,8 +20627,8 @@ async def detectar_drift(indice:str,min_instances:int=100, lambd:float=0.5,alpha
     Devuelve si se ha detectado drift mediante el método MEWMA:
     - **min_instances**: dato desde el que se comienza a buscar el drift
     - **indice** : nombre de la columna que se usa como índice en el csv
-    - **lambd**: Peso del promedio exponencial
-    - **alpha**: Nivel de significancia estadística
+    - **lambda**: Peso del promedio exponencial, parámetro de suavización entre 0 y 1. 
+    - **alpha**: Nivel de significación, porcentaje de falsos positivos permitidos
     - **file** : csv con los datos multivariables
     """
     if file.content_type != 'text/csv':
@@ -20665,7 +20664,7 @@ async def detectar_drift(indice:str,min_instances:int=100,alpha:float=0, file: U
     Devuelve si se ha detectado drift mediante el método Hotelling:
     - **min_instances**: dato desde el que se comienza a buscar el drift
     - **indice** : nombre de la columna que se usa como índice en el csv
-    - **alpha**: nivel de significancia
+    - **alpha**: nivel de significación, porcentaje de falsos positivos aceptados
     - **file** : csv con los datos multivariables
     """
     if file.content_type != 'text/csv':
