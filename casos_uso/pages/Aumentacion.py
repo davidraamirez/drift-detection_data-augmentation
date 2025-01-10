@@ -209,4 +209,11 @@ if uploaded_file is not None:
     df_test3.plot(ax=ax,title="Air Quality",figsize=(13,5))  # Graficar en el eje creado
     # Mostrar el gráfico en Streamlit
     st.pyplot(fig)  # Usamos st.pyplot para mostrar el gráfico
-    
+    csv_datos = df_PCA.to_csv(index=df.columns[0])
+    st.download_button(
+        label="Descargar CSV con datos aumentados mediante PCA",
+        data=csv_datos,
+        file_name='aumentados-PCA.csv',
+        mime='text/csv',
+        help="Haz clic para descargar el archivo CSV con los datos."
+    )

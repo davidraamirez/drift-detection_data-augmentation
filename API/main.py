@@ -16837,82 +16837,6 @@ async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-
-# Bootstrapping 
-# Obtenemos nuevos datos barajando los originales + introduciendo ruido
-def agregar_bootstrapping(df,freq):
-    np.random.seed(1)
-    for x in df.columns:
-        synthetic_data = df.sample(frac=1, replace=True).reset_index(drop=True)
-        synthetic_data[x] += np.random.normal(0, 0.1, len(synthetic_data))  # Añadir ruido
-        indice=series_periodos(df.index[0],len(df)+len(synthetic_data),freq)
-        a=pd.concat([df[x],synthetic_data[x]])
-        a.index=indice
-        if x == df.columns[0]:
-            df_bootstrap=pd.DataFrame(data=a)
-        else:
-            df_bootstrap= df_bootstrap.join(a, how="outer")
-    return df_bootstrap
-
-# Creación csv barajando los originales + introduciendo ruido
-@app.post("/Aumentar/Bootstrap")
-async def obtener_datos(freq:str, indice:str, file: UploadFile = File(...)) :
-    """
-    Devuelve un csv con los datos aumentados tras barajarlos e introducir ruido. Parámetros: 
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **indice** : nombre de la columna que se usa como índice en el csv
-    - **file** : csv con los datos 
-    """ 
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = agregar_bootstrapping(df,freq)
-    # Convertir el DataFrame a un buffer de CSV
-    stream = io.StringIO()
-    df1.to_csv(stream,index_label="Indice")
-    stream.seek(0)
-
-    # Devolver el archivo CSV como respuesta
-    response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=aumentar-bootstrapping.csv"
-    return response 
-
-# Gráfica barajando los originales + introduciendo ruido
-@app.post("/Plot/Aumentar/Bootstrap")
-async def obtener_grafica(freq:str, indice:str, file: UploadFile = File(...)) :
-    """
-    Devuelve una imagen con los datos graficados tras ser aumentados al barajarlos e introducir ruido. Parámetros:
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **indice** : nombre de la columna que se usa como índice en el csv
-    - **file** : csv con los datos 
-    """ 
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = agregar_bootstrapping(df,freq)
-    plot_df(df1)
-    buffer = io.BytesIO()
-    plt.savefig(buffer,format="png")
-    buffer.seek(0)
-    plt.close()
-    return StreamingResponse(buffer,media_type="image/png")
-
 # Duplicar algunos datos y añadir ruido
 def duplicate_and_perturb(data, duplication_factor=0.3, perturbation_std=0.05):
     duplicated_data = []
@@ -17170,8 +17094,8 @@ async def obtener_grafica(shift:float, freq:str, indice:str, file: UploadFile = 
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
     
-# Agregación de ruido harmónico
-# Añadimos ruido harmonico a la muestra con cierta amplitud y frequencia
+# Agregación de ruido armónico
+# Añadimos ruido armonico a la muestra con cierta amplitud y frequencia
 def add_harmonic_noise(df,freq,size):
     np.random.seed(1)
     df_harm = df.copy()
@@ -17197,11 +17121,11 @@ def add_harmonic_noise(df,freq,size):
     
     return df_harm
 
-# Creación csv con datos con ruido harmónico
-@app.post("/Aumentar/Harmonico")
+# Creación csv con datos con ruido armónico
+@app.post("/Aumentar/Armonico")
 async def obtener_datos(freq:str, indice:str,size:int, file: UploadFile = File(...)) :
     """
-    Devuelve un csv con los datos aumentados mediante adición de ruido harmónico. Parámetros: 
+    Devuelve un csv con los datos aumentados mediante adición de ruido armónico. Parámetros: 
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **size** : número de datos a generar
@@ -17229,11 +17153,11 @@ async def obtener_datos(freq:str, indice:str,size:int, file: UploadFile = File(.
     response.headers["Content-Disposition"] = "attachment; filename=aumentar-ruido-harmonico.csv"
     return response 
 
-# Gráfica obtenida tras aplicar ruido harmónico 
-@app.post("/Plot/Aumentar/Harmonico")
+# Gráfica obtenida tras aplicar ruido armónico 
+@app.post("/Plot/Aumentar/Armonico")
 async def obtener_grafica(freq:str, indice:str,size:int, file: UploadFile = File(...)) :
     """
-    Devuelve una imagen con los datos aumentados mediante la técnica de adición de ruido harmñonico. Parámetros: 
+    Devuelve una imagen con los datos aumentados mediante la técnica de adición de ruido armónico. Parámetros: 
     - **shift**: desplazamiento hacia arriba/abajo de los datos
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -17337,90 +17261,6 @@ async def obtener_grafica(factor:float, freq:str, indice:str, file: UploadFile =
     return StreamingResponse(buffer,media_type="image/png")
 
 
-# Mix up: creación de un nuevo dato a partir del data set previo y un dato al azar, usando una comb lineal obtenida con una distribución beta
-def mixup(data, alpha=0.2):
-    lambda_ = np.random.beta(alpha, alpha)
-    indices = np.random.permutation(len(data))
-    data_mixup = lambda_ * data + (1 - lambda_) * data[indices]
-    return data_mixup
-
-# Agregar combinación lineal del dato junto a otro dato aleatorio
-def agregar_mixup(df,freq,alpha=0.2):
-    np.random.seed(1)
-    df_mix =df.copy()
-    for x in df_mix.columns:
-        data = df[x]
-        data_augmented = mixup(data,alpha)
-        datos = np.concatenate((data.values,data_augmented))
-        if x == df.columns[0]:
-            indice = series_periodos(df.index[0],len(datos),freq)
-            df_mix = pd.DataFrame(data=datos,index=indice,columns=[x])
-        else:
-            df_new = pd.DataFrame(data = datos,index=indice,columns=[x])
-            df_mix= df_mix.join(df_new, how="outer")
-    return df_mix
-
-# Creación csv a partir de la técnica de mixup
-@app.post("/Aumentar/Mixup")
-async def obtener_datos(alpha:float, freq:str, indice:str, file: UploadFile = File(...)) :
-    """
-    Devuelve un csv con los datos aumentados mediante combinaciones de dos datos. Parámetros: 
-    - **alpha**: factor de imnportancia del primer dato
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **indice** : nombre de la columna que se usa como índice en el csv
-    - **file** : csv con los datos 
-    """
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = agregar_mixup(df,freq,alpha)
-    # Convertir el DataFrame a un buffer de CSV
-    stream = io.StringIO()
-    df1.to_csv(stream,index_label="Indice")
-    stream.seek(0)
-
-    # Devolver el archivo CSV como respuesta
-    response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=aumentar-mixup.csv"
-    return response 
-
-# Gráfica de la técnica de mixup
-@app.post("/Plot/Aumentar/Mixup")
-async def obtener_grafica(alpha:float, freq:str, indice:str, file: UploadFile = File(...)) :
-    """
-    Devuelve una imagen con los datos graficados que han sido aumentados mediante combinaciones de dos datos. Parámetros: 
-    - **alpha**: factor de imnportancia del primer dato
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **indice** : nombre de la columna que se usa como índice en el csv
-    - **file** : csv con los datos 
-    """
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = agregar_mixup(df,freq,alpha)
-    plot_df(df1)
-    buffer = io.BytesIO()
-    plt.savefig(buffer,format="png")
-    buffer.seek(0)
-    plt.close()
-    return StreamingResponse(buffer,media_type="image/png")
-
 # Transformaciones matemáticas
 # Aplicamos operaciones matemáticas
 def agregar_matematica(df,freq,funcion,factor=1):
@@ -17461,7 +17301,7 @@ async def obtener_datos(funcion:str, freq:str, indice:str,factor : Union[float,N
         4. sin --> seno
         5. cos --> coseno
         6. trig --> seno + coseno
-        7. sigmoide --> 1 / (1 + *e*<sup>x</sup>)
+        7. sigmoide --> 1 / (1 + *e*<sup>-x</sup>)
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **factor** : factor por el que se dividen los datos en el caso de la exponencial para evitar que salgan valores muy altos
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -17499,7 +17339,7 @@ async def obtener_grafica(funcion:str, freq:str, indice:str,factor : Union[float
         4. sin --> seno
         5. cos --> coseno
         6. trig --> seno + coseno
-        7. sigmoide --> 1 / (1 + *e*<sup>x</sup>)
+        7. sigmoide --> 1 / (1 + *e*<sup>-x</sup>)
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **factor** : factor por el que se dividen los datos en el caso de la exponencial para evitar que salgan valores muy altos
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -17608,99 +17448,7 @@ async def obtener_grafica(tipo:int,num:int, freq:str, indice:str, file: UploadFi
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-# Técnicas de reducción 
-
-# Ventana deslizante
-# Calculo con ventanas deslizantes del tamaño pasado como parámetro
-def ventanas(df,ventana):
-    df_o = df.copy()
-    for x in df.columns:
-        df_o[x] = df_o[x].rolling(window=ventana).mean()
-    df_o = df_o.dropna()
-    return df_o
-
-# Creación csv con la técnica de ventana deslizante
-@app.post("/Aumentar/Ventana")
-async def obtener_datos(ventana:int, indice:str, file: UploadFile = File(...)) :
-    """
-    Devuelve un csv con los datos obtenidos mediante ventana deslizante. Parámetros:
-    - **ventana**: tamaño de la ventana deslizante
-    - **indice** : nombre de la columna que se usa como índice en el csv
-    - **file** : csv con los datos 
-    """
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-
-    df1 = ventanas(df,ventana)
-    # Convertir el DataFrame a un buffer de CSV
-    stream = io.StringIO()
-    df1.to_csv(stream,index_label="Indice")
-    stream.seek(0)
-
-    # Devolver el archivo CSV como respuesta
-    response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=aumentar-ventana.csv"
-    return response 
-
-# Gráfica con la técnica de ventana deslizante
-@app.post("/Plot/Aumentar/Ventana")
-async def obtener_grafica(ventana:int, indice:str, file: UploadFile = File(...)) :
-    """
-    Devuelve una imagen con los datos graficados obtenidos mediante ventana deslizante. Parámetros:
-    - **ventana**: tamaño de la ventana deslizante
-    - **indice** : nombre de la columna que se usa como índice en el csv
-    - **file** : csv con los datos 
-    """
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-
-    df1 = ventanas(df,ventana)
-    plot_df(df1)
-    buffer = io.BytesIO()
-    plt.savefig(buffer,format="png")
-    buffer.seek(0)
-    plt.close()
-    return StreamingResponse(buffer,media_type="image/png")
-
-
-# Creación csv con la técnica de recorte
-@app.post("/Aumentar/Descomponer")
-async def obtener_datos(indice:str,freq:str, size:int,tipo:str, file: UploadFile = File(...)) :
-    """
-    Devuelve un csv con los datos aumentados a través de la descomposición de la serie. Parámetros:
-    - **size**: número de datos a generar
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **tipo**:
-        1. additive: realiza una descomposición aditiva de la serie en tendencia y estacionalidad. Usa esto para predecir los siguientes valores
-        2. multiplicative: realiza una descomposición multiplicativa de la serie en tendencia y estacionalidad. Usa esto para predecir los siguientes valores
-    - **indice** : nombre de la columna que se usa como índice en el csv
-    - **file** : csv con los datos 
-    """
-    
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
+def descomp(df,size,freq,tipo):
     indice=series_periodos(df.index[0],size+df.shape[0],freq)
 
     for x in df.columns:
@@ -17736,7 +17484,33 @@ async def obtener_datos(indice:str,freq:str, size:int,tipo:str, file: UploadFile
         else:
             df_new = pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
             df_desc= df_desc.join(df_new, how="outer")
-            
+    return df_desc
+
+# Creación csv con la técnica de descomposición
+@app.post("/Aumentar/Descomponer")
+async def obtener_datos(indice:str,freq:str, size:int,tipo:str, file: UploadFile = File(...)) :
+    """
+    Devuelve un csv con los datos aumentados a través de la descomposición de la serie. Parámetros:
+    - **size**: número de datos a generar
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **tipo**:
+        1. additive: realiza una descomposición aditiva de la serie en tendencia y estacionalidad. Usa esto para predecir los siguientes valores
+        2. multiplicative: realiza una descomposición multiplicativa de la serie en tendencia y estacionalidad. Usa esto para predecir los siguientes valores
+    - **indice** : nombre de la columna que se usa como índice en el csv
+    - **file** : csv con los datos 
+    """
+    
+    if file.content_type != 'text/csv':
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
+
+    try:
+        contents = await file.read()
+        csv_data = StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_data,index_col=indice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
+
+    df_desc= descomp(df,size,freq,tipo)       
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
     df_desc.to_csv(stream,index_label="Indice")
@@ -17747,7 +17521,7 @@ async def obtener_datos(indice:str,freq:str, size:int,tipo:str, file: UploadFile
     response.headers["Content-Disposition"] = "attachment; filename=descomposicion.csv"
     return response 
 
-# Gráfrica técnica de recorte
+# Gráfrica técnica de descomposición
 @app.post("/Plot/Aumentar/Descomponer")
 async def obtener_grafica( indice:str,freq:str,size:int,tipo:str, file: UploadFile = File(...)) :
     """
@@ -17770,41 +17544,8 @@ async def obtener_grafica( indice:str,freq:str,size:int,tipo:str, file: UploadFi
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
-    indice=series_periodos(df.index[0],size+df.shape[0],freq)
-    for x in df.columns:
-        data = df[x]
-        # Descomposición de la serie
-        if tipo=="additive":
-            descomposicion = seasonal_decompose(data, model='additive', period=12)
-        elif tipo=="multiplicative":
-            descomposicion = seasonal_decompose(data, model='multiplicative', period=12)
-        tendencia = descomposicion.trend
-        estacionalidad = descomposicion.seasonal
-        residuo = descomposicion.resid
-        # Calcular la tasa de cambio promedio de la tendencia
-        tendencia_valida = tendencia.dropna()
-        cambios = tendencia_valida.diff().dropna()
-        tasa_cambio_promedio = cambios.mean()
+    df_desc= descomp(df,size,freq,tipo)       
 
-        # Extrapolar los valores de la tendencia
-        n_pasos = size
-        ultima_tendencia = tendencia_valida.iloc[-1]
-        tendencia_futura = [ultima_tendencia + (i + 1) * tasa_cambio_promedio for i in range(n_pasos)]
-        
-        # Replicar los valores estacionales
-        longitud_estacionalidad = 12  # Basado en la periodicidad detectada
-        estacionalidad_extrapolada = np.tile(estacionalidad[-longitud_estacionalidad:], int(size/12) +1)[:size]
-        if tipo=="additive":
-            prediccion = tendencia_futura + estacionalidad_extrapolada
-        elif tipo=="multiplicative":
-            prediccion = tendencia_futura * estacionalidad_extrapolada 
-             
-        if x == df.columns[0]:
-            df_desc=pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
-        else:
-            df_new = pd.DataFrame(data=np.concatenate((data,prediccion)),index=indice,columns=[x])
-            df_desc= df_desc.join(df_new, how="outer")
-            
     plot_df(df_desc)
     buffer = io.BytesIO()
     plt.savefig(buffer,format="png")
