@@ -15124,6 +15124,7 @@ async def obtener_grafica( indice:str, columna:str, a: List[float]= Query(...,de
 
 # Crea una columna Target: y = a * e ^ (b * x)
 def objetivo_exp(df_caract,a,b,columna):
+    
     df = df_caract.copy()
     df[columna] = a * np.exp(b* df_caract[df_caract.columns[0]])
     return df
@@ -15530,7 +15531,7 @@ def elegir_funcion(funcion):
     elif funcion == 'Raiz':
         return raiz
     elif funcion == 'Seno':
-        return math.s1in
+        return math.sin
     elif funcion == 'Coseno':
         return math.cos
     elif funcion == 'Tangente':
@@ -15543,8 +15544,8 @@ def elegir_funcion(funcion):
         return math.log10
     elif funcion == 'Log1p':
         return math.log1p
-    elif funcion == 'Log2p':
-        return math.log2p
+    elif funcion == 'Log2':
+        return math.log2
     elif funcion == 'Exp1':
         return math.expm1
     elif funcion == 'Ceil':
@@ -16302,7 +16303,7 @@ async def obtener_grafica( indice:str, columna:str, file: UploadFile = File(...)
     return StreamingResponse(buffer,media_type="image/png")
 
 
-# Definimos nuevos datos indicando el número de datos a generar, la frequencia y el tipo de interpolación (lineal/cubico).
+# Definimos nuevos datos indicando el número de datos a generar, la frequencia y el tipo de interpolación.
 def interpolacion_min_max(df,kind,num,freq):
     df=df.reset_index()
     indices=df.index.values
@@ -16396,7 +16397,7 @@ def interpolacion_spline(df,tipo,num,freq,s):
 async def obtener_datos(tipo_interpolacion : str, tipo_array:str,num: int,  freq:str, indice:str, s:int=1,file: UploadFile = File(...)) :
     """
     Devuelve un csv con los datos aumentados aplicando interpolación matemática. Parámetros: 
-    - **tipo_interpolacion**: tipo de interpolación a aplicar --> linear, cubic, quadratic
+    - **tipo_interpolacion**: tipo de interpolación a aplicar --> ‘linear’, ‘nearest’, ‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, or ‘next’. ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’
     - **tipo_array**: inicio y fin del array tomado para interpolar --> min-max (desde el valor mínimo al máximo o viceversa), normal (desde el primero al último). Otro valor posible es spline --> interpolación tipo spline.
     - **num**: número de datos a generar
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
@@ -16620,19 +16621,6 @@ def normal(df,freq,size):
             df_normal= df_normal.join(df_new, how="outer")
     return df_normal
 
-# Devuelve df con datos añadidos calculados a partir de una distribución lognormal cuya media es el logaritmo de la media de los datos pasados 
-def log_normal(df,freq,size):
-    np.random.seed(1)
-    indice=series_periodos(df.index[0],size+df.shape[0],freq)
-    for x in df.columns:
-        data = df[x].values
-        data_augmented = np.random.lognormal(mean=np.log(data.mean()),sigma=np.log(np.std(data)),size=size)
-        if x == df.columns[0]:
-            df_lognormal=pd.DataFrame(data=np.concatenate((df[x].values,data_augmented)),index=indice,columns=[x])
-        else:
-            df_new = pd.DataFrame(data=np.concatenate((data,data_augmented)),index=indice,columns=[x])
-            df_lognormal= df_lognormal.join(df_new, how="outer")
-    return df_lognormal
 
 # Calcula nuevos datos usando: media + z * desv donde la media y las desv son las de los datos pasados y z = raiz (-2 * log u1) cos(2 pi u2) tal que u1,u2 son dos randoms entre 0 e 1
 def box_muller_transform(mean, std_dev, size=100):
@@ -16714,66 +16702,6 @@ async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-# Creación csv de datos obtenidos con una distribución lognormal
-@app.post("/Aumentar/Lognormal")
-async def obtener_datos(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
-    """
-    Devuelve un csv con los datos aumentados obteniendo la media y la desviación de los datos existentes y generando los nuevos datos con una distribución lognormal con estos parámetros. Parámetros:
-    - **size**: número de datos a crear 
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **indice** : nombre de la columna que se usa como índice en el csv
-    - **file** : csv con los datos 
-    """    
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = log_normal(df,freq,size)
-    # Convertir el DataFrame a un buffer de CSV
-    stream = io.StringIO()
-    df1.to_csv(stream,index_label="Indice")
-    stream.seek(0)
-
-    # Devolver el archivo CSV como respuesta
-    response = StreamingResponse(stream, media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=aumentar-lognormal.csv"
-    return response 
-
-# Gráfica de los datos obtenidos con una distribución lognormal
-@app.post("/Plot/Aumentar/Lognormal")
-async def obtener_grafica(size:int,freq:str, indice:str, file: UploadFile = File(...)) :
-    """
-    Devuelve una imagen con los datos graficados que han sido aumentados obteniendo la media y la desviación de los datos existentes y generando los nuevos datos con una distribución lognormal con estos parámetros. Parámetros:
-    - **size**: número de datos a crear 
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **indice** : nombre de la columna que se usa como índice en el csv
-    - **file** : csv con los datos 
-    """
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
-
-    # Leer el archivo CSV en un DataFrame de pandas
-    try:
-        contents = await file.read()
-        csv_data = StringIO(contents.decode('utf-8'))
-        df = pd.read_csv(csv_data,index_col=indice)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
-    
-    df1 = log_normal(df,freq,size)
-    plot_df(df1)
-    buffer = io.BytesIO()
-    plt.savefig(buffer,format="png")
-    buffer.seek(0)
-    plt.close()
-    return StreamingResponse(buffer,media_type="image/png")
 
 # Creación csv de datos obtenidos con box muller
 @app.post("/Aumentar/Muller")
@@ -18247,7 +18175,8 @@ async def obtener_grafica_error(indice:str,freq:str, file: UploadFile = File(...
     return StreamingResponse(buffer,media_type="image/png")
 
 
-# Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test y devolvemos el error cuadrçatocp ,edop- 
+# Definimos el modelo de predicción prophet cuyos parámetros son unos datos de entrenamiento y otros de test y devolvemos el error cuadratico medio
+
 def error_prophet_prediccion(data_train,data_test,frequ):
     
     data_train=data_train.reset_index()
