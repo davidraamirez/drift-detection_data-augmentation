@@ -147,11 +147,11 @@ def plot_df(df):
     df.plot(title="Serie temporal",figsize=(13,5))
     plt.xlabel("Tiempo")  
 
-# Report estadístico del modelo de tendencia determinista
-@app.get("/Report/tendencia/fin")
-def obtener_report(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
+# reporte estadístico del modelo de tendencia determinista
+@app.get("/reporte/tendencia/fin")
+def obtener_reporte(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
    """
-    Devuelve un report estadístico del modelo de tendencia determinista. Parámetros:
+    Devuelve un reporte estadístico del modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -245,11 +245,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, tipo:int , error: Unio
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de un modelo de tendencia determinista
-@app.get("/Report/tendencia/periodos")
-def obtener_report(inicio: str, periodos: int, freq:str, tipo:int , error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
+# reporte estadístico de un modelo de tendencia determinista
+@app.get("/reporte/tendencia/periodos")
+def obtener_reporte(inicio: str, periodos: int, freq:str, tipo:int , error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
     """
-    Devuelve un report estadístico del modelo de tendencia determinista. Parámetros:
+    Devuelve un reporte estadístico del modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -482,11 +482,11 @@ def crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params):
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
-# Report estadístico de un modelo que sigue cierta distribución
-@app.get("/Report/distribucion/fin")
-def obtener_report(inicio: str, fin: str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
+# reporte estadístico de un modelo que sigue cierta distribución
+@app.get("/reporte/distribucion/fin")
+def obtener_reporte(inicio: str, fin: str, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     """
-    Devuelve un report estadístico de cierta distribución. Parámetros:
+    Devuelve un reporte estadístico de cierta distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -820,11 +820,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int , columna: L
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de los datos siguiendo cierta distribución
-@app.get("/Report/distribucion/periodos")
-def obtener_report(inicio: str, periodos: int, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
+# reporte estadístico de los datos siguiendo cierta distribución
+@app.get("/reporte/distribucion/periodos")
+def obtener_reporte(inicio: str, periodos: int, freq:str, distr:int , columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la distribución")):
     """
-    Devuelve un report estadístico sobre cierta distribución. Parámetros:
+    Devuelve un reporte estadístico sobre cierta distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -1204,11 +1204,11 @@ def crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tip
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
-# Report estadístico de datos periódicos según ciertas distribuciones
-@app.get("/Report/periodicos/fin")
-async def obtener_report(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
+# reporte estadístico de datos periódicos según ciertas distribuciones
+@app.get("/reporte/periodicos/fin")
+async def obtener_reporte(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     """
-    Devuelve un report estadístico sobre los datos periódicos que siguen cierta distribución. Parámetros:
+    Devuelve un reporte estadístico sobre los datos periódicos que siguen cierta distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -1561,11 +1561,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int, p: int, tip
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de datos periódicos según ciertas distribuciones 
-@app.get("/Report/periodicos/periodos")
-async def obtener_report(inicio: str, periodos:int, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
+# reporte estadístico de datos periódicos según ciertas distribuciones 
+@app.get("/reporte/periodicos/periodos")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, distr:int, p: int, tipo:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params: Optional[List[float]]= Query([],description="Parametros de la distribución")):
     """
-    Devuelve un report estadístico sobre los datos periódicos que siguen cierta distribución. Parámetros:
+    Devuelve un reporte estadístico sobre los datos periódicos que siguen cierta distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar .
@@ -2079,11 +2079,11 @@ def crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s=0,phi=[],teta=[
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df 
 
-# Report estadístico de modelo ARMA
-@app.get("/Report/ARMA/fin")
-async def obtener_report(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+# reporte estadístico de modelo ARMA
+@app.get("/reporte/ARMA/fin")
+async def obtener_reporte(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve un report estadístico sobre el modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un reporte estadístico sobre el modelo autorregresivo y de medias móviles. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -2185,11 +2185,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, c:float, desv:float, s
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico del modelo ARMA
-@app.get("/Report/ARMA/periodos")
-async def obtener_report(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+# reporte estadístico del modelo ARMA
+@app.get("/reporte/ARMA/periodos")
+async def obtener_reporte(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve un report estadístico de los datos que siguen un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un reporte estadístico de los datos que siguen un modelo autorregresivo y de medias móviles. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -2507,11 +2507,11 @@ def crear_df_periodos_DRIFT(inicio,periodos,freq,columna,params1,params2,tipo,nu
     df.plot(title='Serie Temporal',figsize=(13,5))
     return df  
 
-# Report estadístico de modelo con drift que cambia de distribución
-@app.get("/Report/drift/fin/dist-dist")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):  
+# reporte estadístico de modelo con drift que cambia de distribución
+@app.get("/reporte/drift/fin/dist-dist")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):  
     """
-    Devuelve un report estadísitico de los datos generados a partir de un drift cambiando de una fistribución a otra. Parámetros:
+    Devuelve un reporte estadísitico de los datos generados a partir de un drift cambiando de una fistribución a otra. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -3119,11 +3119,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
     plt.close()
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estádistico del drift de cambio de una distribución a otra 
-@app.get("/Report/drift/periodos/dist-dist")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la distribución")): 
+# reporte estádistico del drift de cambio de una distribución a otra 
+@app.get("/reporte/drift/periodos/dist-dist")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la distribución")): 
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un drift cambiando de una distribución a otra. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un drift cambiando de una distribución a otra. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -3733,11 +3733,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico del drift de cambio de una distribución a un modelo ARMA
-@app.get("/Report/drift/fin/dist-ARMA")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+# reporte estadístico del drift de cambio de una distribución a un modelo ARMA
+@app.get("/reporte/drift/fin/dist-ARMA")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve un report estadístico de los datos generados a partir de un drift cambiando una distribución por un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un reporte estadístico de los datos generados a partir de un drift cambiando una distribución por un modelo autorregresivo y de medias móviles. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -4115,11 +4115,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de datos de cambio de una distribución a modelo ARMA
-@app.get("/Report/drift/periodos/dist-ARMA")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
+# reporte estadístico de datos de cambio de una distribución a modelo ARMA
+@app.get("/reporte/drift/periodos/dist-ARMA")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve un report estadístico de los datos graficados a partir de un drift cambiando una distribución por un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un reporte estadístico de los datos graficados a partir de un drift cambiando una distribución por un modelo autorregresivo y de medias móviles. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -4497,11 +4497,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico con drift del cambio de una distribución a un modelo periódico
-@app.get("/Report/drift/fin/dist-periodico")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico con drift del cambio de una distribución a un modelo periódico
+@app.get("/reporte/drift/fin/dist-periodico")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico con los datos generados a partir de un drift cambiando de una distribución a un modelo periódico que sigue cierta distribución. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un drift cambiando de una distribución a un modelo periódico que sigue cierta distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -5131,11 +5131,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico con drift del cambio de una distribución a un modelo periódico
-@app.get("/Report/drift/periodos/dist-periodico")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico con drift del cambio de una distribución a un modelo periódico
+@app.get("/reporte/drift/periodos/dist-periodico")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico con los datos generados a partir de un drift cambiando de una distribución a un modelo periódico que sigue cierta distribución. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un drift cambiando de una distribución a un modelo periódico que sigue cierta distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -5765,11 +5765,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico con drift del cambio de una distribución a un modelo de tendencia determinista
-@app.get("/Report/drift/fin/dist-tendencia")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[float,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+# reporte estadístico con drift del cambio de una distribución a un modelo de tendencia determinista
+@app.get("/reporte/drift/fin/dist-tendencia")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[float,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     """
-    Devuelve un report estadísitico sobre los datos generados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
+    Devuelve un reporte estadísitico sobre los datos generados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -6141,11 +6141,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico con drift del cambio de una distribución a un modelo de tendencia determinista
-@app.get("/Report/drift/periodos/dist-tendencia")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[float,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
+# reporte estadístico con drift del cambio de una distribución a un modelo de tendencia determinista
+@app.get("/reporte/drift/periodos/dist-tendencia")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[float,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     """
-    Devuelve un report estadístico con los datos generados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -6518,11 +6518,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo ARMA por otro modelo ARMA
-@app.get("/Report/drift/fin/ARMA-ARMA")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+# reporte estadístico de drift de un modelo ARMA por otro modelo ARMA
+@app.get("/reporte/drift/fin/ARMA-ARMA")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     """
-    Devuelve un report estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a otro. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a otro. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -6673,11 +6673,11 @@ async def obtener_gráfica(inicio: str, fin:str, freq:str, num_drift:int ,c1:flo
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo ARMA por otro modelo ARMA
-@app.get("/Report/drift/periodos/ARMA-ARMA")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+# reporte estadístico de drift de un modelo ARMA por otro modelo ARMA
+@app.get("/reporte/drift/periodos/ARMA-ARMA")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     """
-    Devuelve un report estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a otro. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a otro. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -6828,11 +6828,11 @@ async def obtener_gráfica(inicio: str, periodos:int, freq:str, num_drift:int ,c
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo ARMA por una distribución
-@app.get("/Report/drift/fin/ARMA-dist")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo ARMA por una distribución
+@app.get("/reporte/drift/fin/ARMA-dist")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un distribución. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -7215,11 +7215,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo ARMA por una distribución
-@app.get("/Report/drift/periodos/ARMA-dist")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo ARMA por una distribución
+@app.get("/reporte/drift/periodos/ARMA-dist")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un distribución. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -7600,11 +7600,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo ARMA por uno periódico
-@app.get("/Report/drift/fin/ARMA-periodico")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, dist2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo ARMA por uno periódico
+@app.get("/reporte/drift/fin/ARMA-periodico")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, dist2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -8006,11 +8006,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, c:float
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo ARMA por uno periódico
-@app.get("/Report/drift/periodos/ARMA-periodico")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, c:float, desv:float, tipo2:int, dist2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo ARMA por uno periódico
+@app.get("/reporte/drift/periodos/ARMA-periodico")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, c:float, desv:float, tipo2:int, dist2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico de los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico. Parámetros:
+    Devuelve un reporte estadístico de los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -8411,11 +8411,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo ARMA por una tendencia
-@app.get("/Report/drift/fin/ARMA-tendencia")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo ARMA por una tendencia
+@app.get("/reporte/drift/fin/ARMA-tendencia")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo de tendencia determinista. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -8557,11 +8557,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo ARMA por una tendencia
-@app.get("/Report/drift/periodos/ARMA-tendencia")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo ARMA por una tendencia
+@app.get("/reporte/drift/periodos/ARMA-tendencia")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo de tendencia determinista. Parámetros:
+    Devuelve un reporte estadístico con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -8705,11 +8705,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo periódico por otro periódico
-@app.get("/Report/drift/fin/periodico-periodico")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo periódico por otro periódico
+@app.get("/reporte/drift/fin/periodico-periodico")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a otro. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a otro. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -9355,11 +9355,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo periódico por otro periódico
-@app.get("/Report/drift/periodos/periodico-periodico")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo periódico por otro periódico
+@app.get("/reporte/drift/periodos/periodico-periodico")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a otro. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a otro. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -10007,11 +10007,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo periódico por una distribución
-@app.get("/Report/drift/fin/periodico-distr")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo periódico por una distribución
+@app.get("/reporte/drift/fin/periodico-distr")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a una distribución. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a una distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -10639,11 +10639,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo periódico por una distribución
-@app.get("/Report/drift/periodos/periodico-distr")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo periódico por una distribución
+@app.get("/reporte/drift/periodos/periodico-distr")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a una distribución. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a una distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -11272,11 +11272,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo periódico por un modelo ARMA
-@app.get("/Report/drift/fin/periodico-ARMA")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+# reporte estadístico de drift de un modelo periódico por un modelo ARMA
+@app.get("/reporte/drift/fin/periodico-ARMA")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -11680,11 +11680,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo periódico por un modelo ARMA
-@app.get("/Report/drift/periodos/periodico-ARMA")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+# reporte estadístico de drift de un modelo periódico por un modelo ARMA
+@app.get("/reporte/drift/periodos/periodico-ARMA")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, c2:float, desv2:float, s2 : Union[None,int] = 0,  columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"),  phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     """
-    Devuelve un report estadístico con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un reporte estadístico con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -12085,11 +12085,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo periódico por una tendencia
-@app.get("/Report/drift/fin/periodico-tendencia")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+# reporte estadístico de drift de un modelo periódico por una tendencia
+@app.get("/reporte/drift/fin/periodico-tendencia")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -12478,11 +12478,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo periódico por una tendencia
-@app.get("/Report/drift/periodos/periodico-tendencia")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+# reporte estadístico de drift de un modelo periódico por una tendencia
+@app.get("/reporte/drift/periodos/periodico-tendencia")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int,coef_error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -12873,11 +12873,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo de tendencia determinista por otro
-@app.get("/Report/drift/fin/tendencia-tendencia")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+# reporte estadístico de drift de un modelo de tendencia determinista por otro
+@app.get("/reporte/drift/fin/tendencia-tendencia")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a otro. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a otro. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -13009,11 +13009,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo de tendencia determinista por otro
-@app.get("/Report/drift/periodos/tendencia-tendencia")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
+# reporte estadístico de drift de un modelo de tendencia determinista por otro
+@app.get("/reporte/drift/periodos/tendencia-tendencia")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,tipo2:int, coef_error1: Union[float, None] = 0,coef_error2: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda tendencia")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a otro. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a otro. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -13146,11 +13146,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo de tendencia determinista por una distribución
-@app.get("/Report/drift/fin/tendencia-distr")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,dist2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo de tendencia determinista por una distribución
+@app.get("/reporte/drift/fin/tendencia-distr")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,dist2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a una distribución. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a una distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -13521,11 +13521,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo de tendencia determinista por una distribución
-@app.get("/Report/drift/periodos/tendencia-distr")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,dist2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo de tendencia determinista por una distribución
+@app.get("/reporte/drift/periodos/tendencia-distr")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,dist2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a una distribución. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a una distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -13895,11 +13895,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo de tendencia determinista por uno ARMA
-@app.get("/Report/drift/fin/tendencia-ARMA")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+# reporte estadístico de drift de un modelo de tendencia determinista por uno ARMA
+@app.get("/reporte/drift/fin/tendencia-ARMA")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -14044,11 +14044,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo de tendencia determinista por uno ARMA
-@app.get("/Report/drift/periodos/tendencia-ARMA")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
+# reporte estadístico de drift de un modelo de tendencia determinista por uno ARMA
+@app.get("/reporte/drift/periodos/tendencia-ARMA")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int,c2:float,desv2:float,s2: Union[int,None] = 0, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo autorregresivo y de medias móviles. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -14192,11 +14192,11 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo de tendencia determinista por uno periódico
-@app.get("/Report/periodos/fin/tendencia-periodico")
-async def obtener_report(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, dist2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo de tendencia determinista por uno periódico
+@app.get("/reporte/periodos/fin/tendencia-periodico")
+async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, tipo2:int, dist2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo periódico. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo periódico. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
@@ -14589,11 +14589,11 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
 
     return StreamingResponse(buffer,media_type="image/png")
 
-# Report estadístico de drift de un modelo de tendencia determinista por uno periódico
-@app.get("/Report/drift/periodos/tendencia-periodico")
-async def obtener_report(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, dist2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
+# reporte estadístico de drift de un modelo de tendencia determinista por uno periódico
+@app.get("/reporte/drift/periodos/tendencia-periodico")
+async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, tipo2:int, dist2:int, p2:int, coef_error1: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: List[float] = Query(...,description="Parametros de la primera tendencia"), params2: List[float]= Query(...,description="Parametros de la segunda distribución")):
     """
-    Devuelve un report estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo periódico. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a un modelo periódico. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
@@ -16117,7 +16117,7 @@ async def obtener_grafica( funciones: str , indice:str, columna:str, file: Uploa
 @app.post("/Variables/PCA")
 async def obtener_datos( indice:str, columna:str, file: UploadFile = File(...)) :
     """
-    Devuelve un csv con los datos generados añadiendole una columna a partir de aplicar estandarización y Principal Component Analysis sobre las variables. Parámetros: 
+    Devuelve un csv con los datos generados añadiendole una nueva columna con la primera componente principal tras aplicar estandarización sobre las variables. Parámetros: 
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **columna** : nombre de la nueva columna generada 
     - **file** : csv con los datos multivariable
@@ -16153,7 +16153,7 @@ async def obtener_datos( indice:str, columna:str, file: UploadFile = File(...)) 
 @app.post("/Plot/Variables/PCA")
 async def obtener_grafica( indice:str, columna:str, file: UploadFile = File(...)) :
     """
-    Devuelve una imagen con los datos graficados añadiendole una columna a partir de aplicar estadarización y Principal Component Analysis sobre las variables. Parámetros: 
+    Devuelve una imagen con los datos graficados añadiendole una nueva columna con la primera componente principal tras aplicar estandarización sobre las variables. Parámetros: 
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **columna** : nombre de la nueva columna generada 
     - **file** : csv con los datos multivariable
@@ -17814,7 +17814,7 @@ def prediccion_backtesting_forecasterAutoreg(datos_train,column,size,lags,steps)
 @app.post("/Datos/ForecasterRF")
 async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
     """
-    Devuelve un csv con los datos aumentados mediante la predicción del modelo Random Forest:
+    Devuelve un csv con los datos aumentados mediante la predicción del modelo de forecasting autorregresivo con regresor Random Forest:
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **size**: número de datos a generar
@@ -17856,7 +17856,7 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
 @app.post("/Plot/Datos/ForecasterRF")
 async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
     """
-    Devuelve una imagen con los datos graficados tras ser aumentados con la predicción del modelo Random Forest:
+    Devuelve una imagen con los datos graficados tras ser aumentados con la predicción del modelo de forecasting autorregresivo con regresor Random Forest:
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **size**: número de datos a generar
@@ -17897,7 +17897,7 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
 @app.post("/Error/ForecasterRF")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     """
-    Devuelve el error cuadrático medio entre los datos de test (el 20% final) y la predicción del modelo Random Forest:
+    Devuelve el error cuadrático medio entre los datos de test (el 20% final) y la predicción del modelo modelo de forecasting autorregresivo con regresor Random Forest:
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **file** : csv con los datos 
@@ -17921,7 +17921,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
 @app.post("/Plot/ForecasterRF")
 async def obtener_grafica_error(indice:str,freq:str, file: UploadFile = File(...)) :
     """
-    Devuelve una imagen con los datos de test (el 20% final) y la predicción del modelo Random Forest graficados:
+    Devuelve una imagen con los datos de test (el 20% final) y la predicción del modelo de forecasting autorregresivo con regresor Random Forest graficados:
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **file** : csv con los datos 
@@ -18036,7 +18036,7 @@ def predicciones_backtesting_forecasterAutoregDirect(datos_train,column,steps,la
 @app.post("/Datos/AutoregRidge")
 async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
     """
-    Devuelve el csv con los datos aumentados usando la predicción Ridge:
+    Devuelve el csv con los datos aumentados usando la predicción del modelo de forecasting autorregresivo con regresor lineal con penalización Ridge:
     - **size**: número de datos a generar
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -18077,7 +18077,7 @@ async def obtener_datos(indice:str,freq:str,size:int, file: UploadFile = File(..
 @app.post("/Plot/Datos/AutoregRidge")
 async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(...)) :
     """
-    Devuelve una imagen con los datos graficados tras ser aumentados usando la predicción Ridge:
+    Devuelve una imagen con los datos graficados tras ser aumentados usando la predicción del modelo de forecasting autorregresivo con regresor lineal con penalización Ridge:
     - **size**: número de datos a generar
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -18117,7 +18117,7 @@ async def obtener_grafica(indice:str,freq:str,size:int, file: UploadFile = File(
 @app.post("/Error/AutoregRidge")
 async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
     """
-    Devuelve el error cuadrático medio entre los datos de test (20% finales) y la predicción de Ridge:
+    Devuelve el error cuadrático medio entre los datos de test (20% finales) y la predicción del modelo de forecasting autorregresivo con regresor lineal con penalización Ridge:
     - **size**: número de datos a generar
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -18142,7 +18142,7 @@ async def obtener_error(indice:str,freq:str, file: UploadFile = File(...)) :
 @app.post("/Plot/AutoregRidge")
 async def obtener_grafica_error(indice:str,freq:str, file: UploadFile = File(...)) :
     """
-    Devuelve una imagen con los datos de test (20% finales) y los datos predecidos por el modelo Ridge graficados :
+    Devuelve una imagen con los datos de test (20% finales) y los datos predecidos por el modelo modelo de forecasting autorregresivo con regresor lineal con penalización Ridge:
     - **size**: número de datos a generar
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -19042,7 +19042,7 @@ async def obtener_grafica_errores(indice:str,freq:str,columna:str, file: UploadF
 def detect_dataset_drift_ks(base_df,current_df,threshold):
   
   status = True
-  report={}
+  reporte={}
   
   for column in base_df.columns:
     
@@ -19056,17 +19056,17 @@ def detect_dataset_drift_ks(base_df,current_df,threshold):
       status = False
       is_found=True
 
-    report.update({column:{
+    reporte.update({column:{
     "p_value":float(is_same_dist.pvalue),
     "drift_status":is_found}}) 
     
-  return (status,report)
+  return (status,reporte)
 
 # Detección de drift mediante Kolmogorov-Smirnov
 @app.post("/Deteccion/KS")
 async def detectar_drift(indice:str,threshold_ks: float = 0.05, inicio: int = 1, file: UploadFile = File(...)) :
     """
-    Devuelve una dupla (Drfit,Report) donde Drift indica si se ha detectado drift mediante la técnica de Kolmogorov-Smirnov y el report informa en que columna se ha detectado el drift:
+    Devuelve una dupla (Drfit,reporte) donde Drift indica si se ha detectado drift mediante la técnica de Kolmogorov-Smirnov y el reporte informa en que columna se ha detectado el drift:
     - **threshold_ks**: úmbral de detección
     - **inicio**: dato desde el que se comienza a buscar el drift
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -19084,12 +19084,12 @@ async def detectar_drift(indice:str,threshold_ks: float = 0.05, inicio: int = 1,
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
     sep = int((df.shape[0]-inicio)*0.5)
-    status,report = detect_dataset_drift_ks(df[inicio:sep],df[sep:],threshold_ks)
+    status,reporte = detect_dataset_drift_ks(df[inicio:sep],df[sep:],threshold_ks)
     if status:
         drift = "No detectado"
     else: 
         drift = "Detectado"
-    return {"Drift": drift, "Report":report}
+    return {"Drift": drift, "reporte":reporte}
 
 # Divide the continuous data in bins 
 def preparation_data(base_df,current_df,col_name,num_bins=10):
@@ -19133,7 +19133,7 @@ def jensenshannon(p, q, base=None, *, axis=0, keepdims=False):
 def detect_dataset_drift_js(base_df,current_df,threshold,num_bins=10):
     
     status = True
-    report={}
+    reporte={}
     
     for column in base_df.columns:
         
@@ -19146,17 +19146,17 @@ def detect_dataset_drift_js(base_df,current_df,threshold,num_bins=10):
           status = False
           is_found=True
 
-        report.update({column:{
+        reporte.update({column:{
         "Jensen-Shannon":float(js),
         "drift_status":is_found}}) 
     
-    return (status,report)
+    return (status,reporte)
 
 # Detección de drift mediante Jensen-Shannon
 @app.post("/Deteccion/JS")
 async def detectar_drift(indice:str,threshold_js: float = 0.2,inicio:int=1, file: UploadFile = File(...)) :
     """
-    Devuelve una dupla (Drift,Report) donde Drift indica si se ha detectado drift mediante la técnica de Jensen-Shannon y el report informa en que columna se ha detectado el drift:
+    Devuelve una dupla (Drift,reporte) donde Drift indica si se ha detectado drift mediante la técnica de Jensen-Shannon y el reporte informa en que columna se ha detectado el drift:
     - **threshold_js**: úmbral de detección
     - **inicio**: dato desde el que se comienza a buscar el drift
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -19174,12 +19174,12 @@ async def detectar_drift(indice:str,threshold_js: float = 0.2,inicio:int=1, file
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
     sep = int((df.shape[0]-inicio)*0.5)
-    status,report = detect_dataset_drift_js(df[inicio:sep],df[sep:],threshold_js)
+    status,reporte = detect_dataset_drift_js(df[inicio:sep],df[sep:],threshold_js)
     if status:
         drift = "No detectado"
     else: 
         drift = "Detectado"
-    return {"Drift": drift, "Report":report}
+    return {"Drift": drift, "reporte":reporte}
 
 
 def population_stability_index(dev_data, val_data,col_name, num_bins=10):
@@ -19217,7 +19217,7 @@ def population_stability_index(dev_data, val_data,col_name, num_bins=10):
 def detect_dataset_drift_psi(base_df,current_df,threshold,num_bins=10):
     
     status = True
-    report={}
+    reporte={}
     for column in base_df.columns:
         
         psiC = population_stability_index(base_df,current_df,column,num_bins)
@@ -19228,17 +19228,17 @@ def detect_dataset_drift_psi(base_df,current_df,threshold,num_bins=10):
           status = False
           is_found=True
 
-        report.update({column:{
+        reporte.update({column:{
         "PSI":float(psiC),
         "drift_status":is_found}}) 
     
-    return (status,report)
+    return (status,reporte)
 
 # Detección de drift usando Population Stability Index
 @app.post("/Deteccion/PSI")
 async def detectar_drift(indice:str,threshold_psi: float = 2,num_bins :int =10,inicio:int=1, file: UploadFile = File(...)) :
     """
-    Devuelve una dupla (Drift,Report) donde Drift indica si se ha detectado drift mediante el Population Stability Index y el report informa en que columna se ha detectado el drift:
+    Devuelve una dupla (Drift,reporte) donde Drift indica si se ha detectado drift mediante el Population Stability Index y el reporte informa en que columna se ha detectado el drift:
     - **threshold_psi**: úmbral de detección
     - **inicio**: dato desde el que se comienza a buscar el drift
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -19257,12 +19257,12 @@ async def detectar_drift(indice:str,threshold_psi: float = 2,num_bins :int =10,i
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
 
     sep = int((df.shape[0]-inicio)*0.8)
-    status,report = detect_dataset_drift_psi(df[inicio:sep],df[sep:],threshold_psi,num_bins)
+    status,reporte = detect_dataset_drift_psi(df[inicio:sep],df[sep:],threshold_psi,num_bins)
     if status:
         drift = "No detectado"
     else: 
         drift = "Detectado"
-    return {"Drift": drift, "Report":report}
+    return {"Drift": drift, "reporte":reporte}
 
 def scale_range (input, min, max):
     input += -(np.min(input))
@@ -19309,7 +19309,7 @@ def calculate_psi_quantiles(expected, actual, buckets=10):
 def detect_dataset_drift_psi_quantiles(base_df,current_df,threshold,num_quantiles=10):
   
     status = True
-    report={}
+    reporte={}
     psi_values = np.empty(base_df.shape[1])
     psi_values = calculate_psi_quantiles(base_df,current_df,num_quantiles)
     
@@ -19327,19 +19327,19 @@ def detect_dataset_drift_psi_quantiles(base_df,current_df,threshold,num_quantile
           status = False
           is_found=True
 
-        report.update({column:{
+        reporte.update({column:{
         "PSI":float(psiC),
         "drift_status":is_found}}) 
         
         i=i+1
     
-    return (status,report)
+    return (status,reporte)
 
 # Detección de drift usando Population Stability Index con cuantiles
 @app.post("/Deteccion/PSI/Cuantiles")
 async def detectar_drift(indice:str,threshold_psi: float = 2,num_quantiles :int =10,inicio:int=1, file: UploadFile = File(...)) :
     """
-    Devuelve una dupla (Drift,Report) donde Drift indica si se ha detectado drift mediante el Population Stability Index dividiendo en cuantiles y el report informa en que columna se ha detectado el drift:
+    Devuelve una dupla (Drift,reporte) donde Drift indica si se ha detectado drift mediante el Population Stability Index dividiendo en cuantiles y el reporte informa en que columna se ha detectado el drift:
     - **threshold_psi**: úmbral de detección
     - **inicio**: dato desde el que se comienza a buscar el drift
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -19357,17 +19357,17 @@ async def detectar_drift(indice:str,threshold_psi: float = 2,num_quantiles :int 
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     sep = int((df.shape[0]-inicio)*0.8)
-    status,report = detect_dataset_drift_psi_quantiles(df[inicio:sep],df[sep:],threshold_psi,num_quantiles)
+    status,reporte = detect_dataset_drift_psi_quantiles(df[inicio:sep],df[sep:],threshold_psi,num_quantiles)
     if status:
         drift = "No detectado"
     else: 
         drift = "Detectado"
-    return {"Drift": drift, "Report":report}
+    return {"Drift": drift, "reporte":reporte}
 
 def detect_dataset_drift_cusum(df,threshold,drift=0.02):
     
     status = True
-    report={}
+    reporte={}
     i=0
     
     for column in df.columns:
@@ -19381,11 +19381,11 @@ def detect_dataset_drift_cusum(df,threshold,drift=0.02):
           status = False
           is_found=True
 
-        report.update({column:{
+        reporte.update({column:{
         "drift_status":is_found}}) 
         i=i+1   
     
-    return (status,report)
+    return (status,reporte)
 
 # Detección de drift usando CUSUM
 @app.post("/Deteccion/CUSUM")
@@ -19408,12 +19408,12 @@ async def detectar_drift(indice:str,threshold_cusum: float = 1.5,drift_cusum :fl
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
-    status,report = detect_dataset_drift_cusum(df[inicio:],threshold_cusum,drift_cusum)
+    status,reporte = detect_dataset_drift_cusum(df[inicio:],threshold_cusum,drift_cusum)
     if status:
         drift = "No detectado"
     else: 
         drift = "Detectado"
-    return {"Drift": drift, "Report":report}
+    return {"Drift": drift, "reporte":reporte}
 
 
 def clone(estimator, safe=True):
@@ -20412,7 +20412,7 @@ class PageHinkley(BaseDriftDetector):
 def detect_dataset_drift_ph(df,min_instances=30, delta=0.005, threshold=50, alpha=1 - 0.0001):
   
   status = True
-  report={}
+  reporte={}
   
   for column in df.columns:
     
@@ -20430,15 +20430,15 @@ def detect_dataset_drift_ph(df,min_instances=30, delta=0.005, threshold=50, alph
           status=False
           isFound=True
           
-    report.update({column: {"drift_status": isFound}})
+    reporte.update({column: {"drift_status": isFound}})
     
-  return (status,report)
+  return (status,reporte)
 
 # Detección de drift usando Page Hinkley
 @app.post("/Deteccion/PH")
 async def detectar_drift(indice:str,min_instances:int=30, delta:float=0.005, threshold:float=50, alpha:float=1 - 0.0001, file: UploadFile = File(...)) :
     """
-    Devuelve una dupla (Drift,Report) donde Drift indica si se ha detectado drift mediante el método Page-Hinkley y el report informa en que columna se ha detectado el drift:
+    Devuelve una dupla (Drift,reporte) donde Drift indica si se ha detectado drift mediante el método Page-Hinkley y el reporte informa en que columna se ha detectado el drift:
     - **threshold**: úmbral de detección
     - **min_instances**: dato desde el que se comienza a buscar el drift
     - **indice** : nombre de la columna que se usa como índice en el csv
@@ -20456,12 +20456,12 @@ async def detectar_drift(indice:str,min_instances:int=30, delta:float=0.005, thr
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo CSV: {e}")
     
-    status,report = detect_dataset_drift_ph(df,min_instances, delta, threshold,alpha)
+    status,reporte = detect_dataset_drift_ph(df,min_instances, delta, threshold,alpha)
     if status:
         drift = "No detectado"
     else: 
         drift = "Detectado"
-    return {"Drift": drift, "Report":report}
+    return {"Drift": drift, "reporte":reporte}
 
 
 def detect_dataset_drift_mcusum(df,min_inst=100,lambd=0.5):
