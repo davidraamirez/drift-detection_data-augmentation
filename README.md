@@ -1,10 +1,6 @@
 # Análisis de Data Drift en Series Temporales: Generación de Datos Sintéticos, Aumentación de Datos y Evaluación de Modelos Predictivos
 
-Este proyecto es una herramienta para la **predicción de rendimientos agrícolas** utilizando **series temporales multivariantes**. Incorpora modelos autorregresivos como **SARIMAX**, modelos de **Random Forest (Bosques Aleatorios)** y un modelo **ensamblado** entre ellos, permitiendo parametrización automática y predicción anual de cultivos.
-
-El objetivo principal es proporcionar una solución fácil de usar, modular y extensible, adecuada tanto para investigación como para aplicaciones prácticas en el sector agrícola.
-
----
+Este proyecto ofrece un entorno completo para el **análisis y monitoreo de drift en series temporales**, complementado con herramientas de **generación de datos sintéticos**, **técnicas de aumentación** y **evaluación de modelos predictivos multivariantes**. 
 
 ## 🚀 Instalación
 
