@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # Título principal
-st.title("Aplicación de comprobación de drift, interpolación de datos y creación de variables exógenas")
+st.title("Aplicación de comprobación de drift, ampliación de datos y creación de variables exógenas")
 
 # Descripción breve de la aplicación
 st.markdown(
@@ -20,7 +20,7 @@ st.markdown(
     ### Bienvenido/a 👋
     Esta aplicación te permite:
     - Detectar *drift* en conjuntos de datos.
-    - Interpolar datos faltantes para un análisis más completo.
+    - Ampliar las características para obtener más datos.
     - Crear variables exógenas personalizadas para tus modelos.
     
     Usa el menú de la izquierda para navegar entre las funcionalidades disponibles.

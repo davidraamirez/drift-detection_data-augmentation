@@ -4,8 +4,8 @@ import streamlit as st
 import pandas as pd 
 import matplotlib.pyplot as plt
 import requests
-from PIL import Image
-from io import BytesIO
+from dotenv import load_dotenv
+import os
 
 # Configurar la página
 st.set_page_config(
@@ -14,6 +14,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+load_dotenv()
+url_api = os.getenv("URL_API")
 
 st.title("Técnica de detección de drift")
 
@@ -43,12 +46,12 @@ if uploaded_file is not None:
             
     st.header("Detectar Drift")
 
-    api_urlKS = "http://127.0.0.1:8000/Deteccion/KS?indice="+df.index.name+"&threshold_ks=0.05&inicio=1"
-    api_urlJS = "http://127.0.0.1:8000/Deteccion/JS?indice="+df.index.name+"&threshold_js=0.2&inicio=1"
-    api_urlPSI = "http://127.0.0.1:8000/Deteccion/PSI?indice="+df.index.name+"&threshold_psi=1&num_bins=10&inicio=1"
-    api_urlPSIQ = "http://127.0.0.1:8000/Deteccion/PSI/Cuantiles?indice="+df.index.name+"&threshold_psi=0.5&num_quantiles=10&inicio=1"
-    api_urlCUSUM = 'http://127.0.0.1:8000/Deteccion/CUSUM?indice='+df.index.name+'&threshold_cusum=1.5&drift_cusum=0.5&inicio=1'
-    api_urlPH = 'http://127.0.0.1:8000/Deteccion/PH?indice='+df.index.name+'&min_instances=30&delta=0.005&threshold=10&alpha=0.9999'
+    api_urlKS = "http://"+url_api+"/Deteccion/KS?indice="+df.index.name+"&threshold_ks=0.05&inicio=1"
+    api_urlJS = "http://"+url_api+"/Deteccion/JS?indice="+df.index.name+"&threshold_js=0.2&inicio=1"
+    api_urlPSI = "http://"+url_api+"/Deteccion/PSI?indice="+df.index.name+"&threshold_psi=1&num_bins=10&inicio=1"
+    api_urlPSIQ = "http://"+url_api+"/Deteccion/PSI/Cuantiles?indice="+df.index.name+"&threshold_psi=0.5&num_quantiles=10&inicio=1"
+    api_urlCUSUM = 'http://'+url_api+'/Deteccion/CUSUM?indice='+df.index.name+'&threshold_cusum=1.5&drift_cusum=0.5&inicio=1'
+    api_urlPH = 'http://'+url_api+'/Deteccion/PH?indice='+df.index.name+'&min_instances=30&delta=0.005&threshold=10&alpha=0.9999'
     col3,col4 =st.columns(2)
     # Convertir el DataFrame a CSV para enviar en el POST
     csv_data = df.to_csv(index=df.index.name)
@@ -97,56 +100,56 @@ if uploaded_file is not None:
         
         
             if driftKS["Drift"]  == "No detectado":
-                st.write("No se han detectado cambios en la distribución entre la primera mitad de los datos y la segunda mitad de los datos, según las medidas de Kolmogorov-Smirnov. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
+                st.write("No se han detectado cambios en la distribución entre la primera mitad de los datos y la segunda mitad de los datos, según la medida de Kolmogorov-Smirnov. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
                 for x in df.columns:
-                    st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftKS["Report"][x]["p_value"]) + " que es superior al valor umbral, 0.05.")
+                    st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftKS["reporte"][x]["p_valor"]) + " que es superior al valor umbral, 0.05.")
 
             else :
                 st.write("Se ha detectado un cambio en la distribución entre la primera mitad de los datos y la segunda mitad, gracias a las medidas de Kolmogorov-Smirnov.")
                 for x in df.columns:
-                    if driftKS["Report"][x]["drift_status"]==True:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftKS["Report"][x]["p_value"]) + " que es inferior al valor umbral, 0.05. Por tanto, detectamos drift en esta columna.")
+                    if driftKS["reporte"][x]["drift"]==True:
+                        st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftKS["reporte"][x]["p_valor"]) + " que es inferior al valor umbral, 0.05. Por tanto, detectamos drift en esta columna.")
                     else:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftKS["Report"][x]["p_value"]) + " que es superior al valor umbral, 0.05. Por tanto, NO detectamos drift en esta columna.")
+                        st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftKS["reporte"][x]["p_valor"]) + " que es superior al valor umbral, 0.05. Por tanto, NO detectamos drift en esta columna.")
 
             if driftJS["Drift"]  == "No detectado":
                 st.write("No se han detectado cambios en la distribución entre la primera mitad de los datos y la segunda mitad de los datos, según la medida de Jensen-Shannon. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
                 for x in df.columns:
-                    st.write("En el caso de la columna "+x+", hemos obtenido un valor de "+ str(driftJS["Report"][x]["Jensen-Shannon"]) + " que es inferior al valor umbral, 0.2.")
+                    st.write("En el caso de la columna "+x+", hemos obtenido un valor de "+ str(driftJS["reporte"][x]["Jensen-Shannon"]) + " que es inferior al valor umbral, 0.2.")
 
             else :
                 st.write("Se ha detectado un cambio en la distribución entre la primera mitad de los datos y la segunda mitad, gracias a las medidas de Kolmogorov-Smirnov.")
                 for x in df.columns:
-                    if driftPSI["Report"][x]["drift_status"]==True:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftJS["Report"][x]["Jensen-Shannon"]) + " que es superior al valor umbral, 0.2. Por tanto, detectamos drift en esta columna.")
+                    if driftPSI["reporte"][x]["drift"]==True:
+                        st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftJS["reporte"][x]["Jensen-Shannon"]) + " que es superior al valor umbral, 0.2. Por tanto, detectamos drift en esta columna.")
                     else:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftJS["Report"][x]["Jensen-Shannon"]) + " que es inferior al valor umbral, 0.2. Por tanto, NO detectamos drift en esta columna.")
+                        st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftJS["reporte"][x]["Jensen-Shannon"]) + " que es inferior al valor umbral, 0.2. Por tanto, NO detectamos drift en esta columna.")
 
             if driftPSI["Drift"]  == "No detectado":
                 st.write("No se han detectado cambios en la distribución entre los primeros datos (80%) y los últimos datos (20%), según el Population Stability Index. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
                 for x in df.columns:
-                    st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["Report"][x]["PSI"]) + " que es inferior al valor umbral, 1.")
+                    st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["reporte"][x]["PSI"]) + " que es inferior al valor umbral, 1.")
 
             else :
                 st.write("Se ha detectado un cambio en la distribución entre los primeros datos (80%) y los últimos datos (20%), gracias al Population Stability Index.")
                 for x in df.columns:
-                    if driftPSI["Report"][x]["drift_status"]==True:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["Report"][x]["PSI"]) + " que es superior al valor umbral, 1. Por tanto, detectamos drift en esta columna.")
+                    if driftPSI["reporte"][x]["drift"]==True:
+                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["reporte"][x]["PSI"]) + " que es superior al valor umbral, 1. Por tanto, detectamos drift en esta columna.")
                     else:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["Report"][x]["PSI"]) + " que es inferior al valor umbral, 1. Por tanto, NO detectamos drift en esta columna.")
+                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["reporte"][x]["PSI"]) + " que es inferior al valor umbral, 1. Por tanto, NO detectamos drift en esta columna.")
            
             if driftPSIQ["Drift"]  == "No detectado":
                 st.write("No se han detectado cambios en la distribución entre los primeros datos (80%) y los últimos datos (20%), según el Population Stability Index con cuantiles. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
                 for x in df.columns:
-                    st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSIQ["Report"][x]["PSI"]) + " que es inferior al valor umbral, 1.")
+                    st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSIQ["reporte"][x]["PSI"]) + " que es inferior al valor umbral, 1.")
 
             else :
                 st.write("Se ha detectado un cambio en la distribución entre los primeros datos (80%) y los últimos datos (20%), gracias al Population Stability Index con cuantiles.")
                 for x in df.columns:
-                    if driftPSIQ["Report"][x]["drift_status"]==True:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index con cuantiles de "+ str(driftPSIQ["Report"][x]["PSI"]) + " que es superior al valor umbral, 1. Por tanto, detectamos drift en esta columna.")
+                    if driftPSIQ["reporte"][x]["drift"]==True:
+                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index con cuantiles de "+ str(driftPSIQ["reporte"][x]["PSI"]) + " que es superior al valor umbral, 1. Por tanto, detectamos drift en esta columna.")
                     else:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index con cuantiles de "+ str(driftPSIQ["Report"][x]["PSI"]) + " que es inferior al valor umbral, 1. Por tanto, NO detectamos drift en esta columna.")
+                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index con cuantiles de "+ str(driftPSIQ["reporte"][x]["PSI"]) + " que es inferior al valor umbral, 1. Por tanto, NO detectamos drift en esta columna.")
 
             if driftCUSUM["Drift"] == "No detectado":
                 st.write("No se han detectado grandes desviaciones de los datos respecto a la media a lo largo del tiempo, respecto a CUSUM con valor umbral 1.5. Esto podría indicar una desviación del modelo o simplemente que el modelo sigue una distribución con cierta desviación respecto de la media.")
