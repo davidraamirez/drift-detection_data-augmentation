@@ -10,7 +10,7 @@ git clone https://github.com/davidraamirez/trabajo_fin_grado.git
 cd tu-repositorio
 ```
 
-2. **Crea un entorno virtual e instala las dependecias:**
+2. **Crea un entorno virtual e instala las dependencias:**
 ```bash
 python -m venv env
 source env/bin/activate
