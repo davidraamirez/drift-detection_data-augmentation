@@ -46,7 +46,7 @@ def prediccion_sarimax(datos,datos_train, columna,size):
                             forecaster            = forecaster,
                             y                     = datos[columna],
                             param_grid            = param_grid,
-                            steps                 = 12,
+                            steps                 = size,
                             refit                 = True,
                             metric                = 'mean_absolute_error',
                             initial_train_size    = int(len(datos_train)*0.8),
@@ -112,10 +112,10 @@ def error_sarimax(datos_train,datos_test, columna):
                             forecaster            = forecaster,
                             y                     = datos_train[columna],
                             param_grid            = param_grid,
-                            steps                 = 12,
+                            steps                 = len(datos_test),
                             refit                 = True,
                             metric                = 'mean_absolute_error',
-                            initial_train_size    = int(len(datos_train)*0.8),
+                            initial_train_size    = int(len(datos_train)*0.8)-int(len(datos_train)*0.8)%len(datos_test),
                             fixed_train_size      = False,
                             return_best           = False,
                             n_jobs                = 'auto',
@@ -134,7 +134,7 @@ def error_sarimax(datos_train,datos_test, columna):
     metrica_m1, predicciones_m1 = backtesting_sarimax(
                                             forecaster            = forecaster_1,
                                             y                     = datos_train[columna],
-                                            initial_train_size    = int(len(datos_train)*0.8),
+                                            initial_train_size    = int(len(datos_train)*0.8)-int(len(datos_train)*0.8)%len(datos_test),
                                             steps                 = len(datos_test),
                                             metric                = 'mean_absolute_error',
                                             refit                 = True,
@@ -251,7 +251,7 @@ def predicciones_backtesting_forecasterAutoregDirect(datos_train,column,steps,pa
     Returns:
         np.ndarray o pd.Series: Predicciones generadas por el modelo ajustado.
     """
-
+    
     resultados_grid = grid_search_forecaster(
                         forecaster         = forecaster,
                         y                  = datos_train[column],
@@ -273,7 +273,7 @@ def predicciones_backtesting_forecasterAutoregDirect(datos_train,column,steps,pa
 
     return predicciones
 
-def error_backtesting_forecasterAutoregDirect(datos_train,datos_test,steps,lags_grid,param_grid,forecaster):
+def error_backtesting_forecasterAutoregDirect(datos_train,datos_test,steps,param_grid,lags_grid,forecaster):
     """
     Ajusta un modelo autorregresivo directo utilizando búsqueda de hiperparámetros (Grid Search), 
     genera predicciones y calcula el error cuadrático medio (MSE) sobre el conjunto de prueba.
@@ -282,13 +282,14 @@ def error_backtesting_forecasterAutoregDirect(datos_train,datos_test,steps,lags_
         datos_train (pd.DataFrame): Datos de entrenamiento con la serie temporal.
         datos_test (pd.Series o pd.DataFrame): Datos de prueba para evaluación.
         steps (int): Número de pasos para cada iteración del backtesting.
-        lags_grid (list o np.array): Valores de lags a evaluar durante el grid search.
         param_grid (dict): Diccionario con hiperparámetros para explorar en el grid search.
+        lags_grid (list o np.array): Valores de lags a evaluar durante el grid search.
         forecaster (ForecasterAutoregDirect): Instancia del modelo `ForecasterAutoregDirect`.
 
     Returns:
         float: Valor del error cuadrático medio (MSE) entre las predicciones y los valores reales.
     """
+    print(param_grid)
     resultados_grid = grid_search_forecaster(
                         forecaster         = forecaster,
                         y                  = datos_train[datos_train.columns[0]],

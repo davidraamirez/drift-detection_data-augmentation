@@ -41,68 +41,84 @@ def plot_df(df):
 # reporte estadístico del modelo de tendencia determinista
 @app.get("/reporte/tendencia/fin")
 def obtener_reporte(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
-   """
-    Devuelve un reporte estadístico del modelo de tendencia determinista. Parámetros:
-
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **tipo**: lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **error**: coeficiente de error que se usa para generar los datos.
-    - **columna**: nombre de la columna con los datos generados.
-    - **params**: parámetros de la tendencia.
     """
-   if tipo == 1:
-       subtipo = "lineal"
-       tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params[0]) + ", b = " +str (params[1]) +" y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+    Genera un reporte estadístico a partir de un modelo de tendencia determinista. Parámetros:
 
-   elif tipo ==2:
-       subtipo ="polinómica de grado "+ str(len(params)-1)
-       tendencia= "La serie es de tipo y = a + b[1] * t"  
-       for k in range (2,len(params)):
-           tendencia += " + b ["+str(k)+"] * t ** " + str(k)
-       tendencia = tendencia + " + e0"
-       tendencia = tendencia + " donde a = " + str(params[0]) + ", b[1] = " + str (params[1])
-       for k in range (2,len(params)):
-           tendencia = tendencia  + ", b["+ str(k)+"] = " + str (params[k])
-       tendencia = tendencia +" y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
-   
-   elif tipo == 3: 
-       subtipo ="exponencial"
-       tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params[0]) + ", b = " + str(params[1]) + " y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
-   
-   elif tipo == 4:
-       subtipo = "logaritmica" 
-       tendencia = "La serie es de tipo y = a + b * log(t) + e0 donde a = " + str(params[0]) + " b = " + str(params[1]) + " y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+    - **inicio**: fecha de inicio del análisis (formato ISO 8601, ej. '2023-01-01').
+    - **fin**: fecha de fin del análisis (formato ISO 8601).
+    - **freq**: frecuencia de la serie temporal. Ejemplos: 'D' (diaria), 'M' (mensual), 'h' (horaria), etc.
+    - **tipo**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **error**: nivel de ruido aleatorio a aplicar a los datos generados.
+    - **columna**: lista con los nombres de las columnas objetivo.
+    - **params**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
 
-   tipos = "Modelo de tendencia determinista con tendencia " + subtipo
-   explicacion = "Inicio: fecha de inicio " + str(inicio)
-   explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
-   explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
-   explicacion = explicacion + ". Tipo: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo)
-   explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(error)
-   explicacion = explicacion + ". Columna: nombre de la columna --> " + columna[0]
-   for k in range (1, len (columna)):
-       explicacion = explicacion+", " + columna [k]
-   explicacion = explicacion + ". Params: parámetros de la tendencia, a = params[0] y b[k] = params[k] --> "+str(params [0])
-   for k in range (1, len (params)):
-       explicacion = explicacion+", " + str(params [k])
-   return {"Tipo": tipos, "Serie" : tendencia, "Parámetros" : explicacion }
+    Devuelve:
+    - **dict**: reporte con las estadísticas generadas por el modelo de tendencia.
+    """
+    if tipo == 1:
+        subtipo = "lineal"
+        tendencia= "La serie es de tipo y = a + t * b + e0 donde a = " + str(params[0]) + ", b = " +str (params[1]) +" y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+
+    elif tipo ==2:
+        subtipo ="polinómica de grado "+ str(len(params)-1)
+        tendencia= "La serie es de tipo y = a + b[1] * t"  
+        for k in range (2,len(params)):
+            tendencia += " + b ["+str(k)+"] * t ** " + str(k)
+        tendencia = tendencia + " + e0"
+        tendencia = tendencia + " donde a = " + str(params[0]) + ", b[1] = " + str (params[1])
+        for k in range (2,len(params)):
+            tendencia = tendencia  + ", b["+ str(k)+"] = " + str (params[k])
+        tendencia = tendencia +" y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+    
+    elif tipo == 3: 
+        subtipo ="exponencial"
+        tendencia = "La serie es de tipo y = e ** (a + b*t + e0) donde a = " + str(params[0]) + ", b = " + str(params[1]) + " y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+    
+    elif tipo == 4:
+        subtipo = "logaritmica" 
+        tendencia = "La serie es de tipo y = a + b * log(t) + e0 donde a = " + str(params[0]) + " b = " + str(params[1]) + " y e0 es un random con valores entre [- " + str(error)+ " , "+ str(error) +" ]"
+
+    tipos = "Modelo de tendencia determinista con tendencia " + subtipo
+    explicacion = "Inicio: fecha de inicio " + str(inicio)
+    explicacion = explicacion +". Fin: fecha de fin --> "+ str(fin)
+    explicacion = explicacion + ". Freq: frequencia de la serie temporal --> " + str(freq)
+    explicacion = explicacion + ". Tipo: lineal(1), polinómica(2), exponencial(3), logarítmica(4) --> " + str(tipo)
+    explicacion = explicacion + ". Error: coeficiente de error (e0) --> " + str(error)
+    explicacion = explicacion + ". Columna: nombre de la columna --> " + columna[0]
+    for k in range (1, len (columna)):
+        explicacion = explicacion+", " + columna [k]
+    explicacion = explicacion + ". Params: parámetros de la tendencia, a = params[0] y b[k] = params[k] --> "+str(params [0])
+    for k in range (1, len (params)):
+        explicacion = explicacion+", " + str(params [k])
+    return {"Tipo": tipos, "Serie" : tendencia, "Parámetros" : explicacion }
 
 # Creación de un csv con datos de una serie temporal con tendencia determinista
 @app.get("/Datos/tendencia/fin")
 async def obtener_datos(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
     """
-    Devuelve un csv con los datos generados con un modelo de tendencia determinista. Parámetros:
+    Genera y devuelve una imagen PNG con la representación gráfica de una serie temporal
+    construida a partir de un modelo de tendencia determinista. Parámetros: 
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **tipo**: lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **error**: coeficiente de error que se usa para generar los datos.
-    - **columna**: nombre de la columna con los datos generados.
-    - **params**: parámetros de la tendencia.
+    - **inicio** (str): Fecha de inicio del rango temporal (formato ISO 8601, ej. '2023-01-01').
+    - **fin** (str): Fecha de fin del rango temporal (formato ISO 8601).
+    - **freq** (str): Frecuencia de los datos generados. Ejemplos válidos: 'B' (días hábiles), 'D' (días calendario), 'W' (semanal), 'M' (mensual), 'Q' (trimestral), 'Y' (anual), 'h' (horaria), 'min' (minutaria), 's' (segundos), 'ms' (milisegundos), 'us' (microsegundos), 'ns' (nanosegundos).
+    - **tipo** (int): Tipo de tendencia a utilizar para la generación de datos: 1: Lineal, 2: Polinómica, 3: Exponencial, 4: Logarítmica.
+    - **error** (float, opcional): Nivel de ruido aleatorio a aplicar a los datos. Si se omite, no se aplica error.
+    - **columna** (List[str]): Lista de nombres para las columnas generadas en la serie temporal.
+    - **params** (List[float]): Parámetros numéricos que definen la forma del modelo de tendencia.
+
+    Devuelve:
+    - **StreamingResponse**: Imagen PNG con la gráfica de la tendencia generada.
     """
+
     df = crear_df_fin_tend_det(inicio,fin,freq,columna,params,tipo,error)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
@@ -117,15 +133,23 @@ async def obtener_datos(inicio: str, fin:str, freq:str, tipo:int , error: Union[
 @app.get("/Plot/tendencia/fin")
 async def obtener_grafica(inicio: str, fin:str, freq:str, tipo:int , error: Union[float, None] = None, columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float] = Query(...,description="Parametros de la tendencia")):
     """
-    Devuelve una imagen con los datos graficados que siguen un modelo de tendencia determinista. Parámetros:
+    Genera y devuelve una imagen PNG con la representación gráfica de una serie temporal
+    construida a partir de un modelo de tendencia determinista. Parámetros:
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **tipo**: lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **error**: coeficiente de error que se usa para generar los datos.
-    - **columna**: nombre de la columna con los datos generados.
-    - **params**: parámetros de la tendencia.
+    - **inicio**: fecha de inicio del rango temporal (formato ISO 8601, ej. '2023-01-01').
+    - **fin**: fecha de fin del rango temporal (formato ISO 8601).
+    - **freq**: frecuencia de los datos generados. Ejemplos: 'B' (días hábiles), 'D' (días calendario), 'W' (semanal), 'M' (mensual), 'Q' (trimestral), 'Y' (anual), 'h' (horaria), 'min' (minutaria), 's' (segundos), 'ms' (milisegundos), 'us' (microsegundos), 'ns' (nanosegundos).
+    - **tipo**: tipo de tendencia a utilizar para la generación de datos:
+        - 1: Lineal
+        - 2: Polinómica
+        - 3: Exponencial
+        - 4: Logarítmica
+    - **error**: nivel de ruido aleatorio a aplicar a los datos. Si se omite, no se aplica error.
+    - **columna**: lista con los nombres de las columnas generadas.
+    - **params**: lista de parámetros numéricos que definen la forma del modelo de tendencia.
+
+    Devuelve:
+    - **StreamingResponse**: imagen PNG con la gráfica de la tendencia generada.
     """
     df = crear_df_fin_tend_det(inicio,fin,freq,columna,params,tipo,error)
     plot_df(df)
@@ -142,13 +166,20 @@ def obtener_reporte(inicio: str, periodos: int, freq:str, tipo:int , error: Unio
     """
     Devuelve un reporte estadístico del modelo de tendencia determinista. Parámetros:
 
-    - **inicio**: fecha de inicio.
+    - **inicio**: fecha de inicio del análisis (formato ISO 8601, ej. '2023-01-01').
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **tipo**: lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **freq**: frecuencia de los datos. Valores posibles: 'B' (business day frequency), 'D' (calendar day frequency), 'W' (weekly frequency), 'M' (monthly frequency), 'Q' (quarterly frequency), 'Y' (yearly frequency), 'h' (hourly frequency), 'min' (minutely frequency), 's' (secondly frequency), 'ms' (milliseconds), 'us' (microseconds), 'ns' (nanoseconds).
+    - **tipo**: tipo de modelo de tendencia:
+        - 1: Lineal
+        - 2: Polinómica
+        - 3: Exponencial
+        - 4: Logarítmica
     - **error**: coeficiente de error que se usa para generar los datos.
     - **columna**: nombre de la columna con los datos generados.
     - **params**: parámetros de la tendencia.
+
+    Devuelve:
+    - **dict**: reporte con las estadísticas generadas por el modelo de tendencia.
     """
     
     if tipo == 1:
@@ -192,15 +223,22 @@ def obtener_reporte(inicio: str, periodos: int, freq:str, tipo:int , error: Unio
 @app.get("/Datos/tendencia/periodos")
 async def obtener_datos(inicio: str, periodos:int, freq:str, tipo:int , error: Union[float, None] = None,  columna: List[str]= Query(...,description="Nombres de las columnas"), params: List[float]= Query(...,description="Parametros de la tendencia")):
     """
-    Devuelve un csv con los datos generados con un modelo de tendencia determinista. Parámetros:
+    Devuelve un CSV con los datos generados con un modelo de tendencia determinista. Parámetros:
 
-    - **inicio**: fecha de inicio.
+    - **inicio**: fecha de inicio del rango temporal (formato ISO 8601, ej. '2023-01-01').
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **tipo**: lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **freq**: frecuencia de los datos. Valores posibles: 'B' (business day frequency), 'D' (calendar day frequency), 'W' (weekly frequency), 'M' (monthly frequency), 'Q' (quarterly frequency), 'Y' (yearly frequency), 'h' (hourly frequency), 'min' (minutely frequency), 's' (secondly frequency), 'ms' (milliseconds), 'us' (microseconds), 'ns' (nanoseconds).
+    - **tipo**: tipo de tendencia a utilizar:
+        - 1: Lineal
+        - 2: Polinómica
+        - 3: Exponencial
+        - 4: Logarítmica
     - **error**: coeficiente de error que se usa para generar los datos.
     - **columna**: nombre de la columna con los datos generados.
     - **params**: parámetros de la tendencia.
+
+    Devuelve:
+    - **StreamingResponse**: archivo CSV con los datos generados.
     """
     df=crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,error)
     
@@ -221,13 +259,20 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, tipo:int , error:
     """
     Devuelve una imagen con los datos graficados que siguen un modelo de tendencia determinista. Parámetros:
 
-    - **inicio**: fecha de inicio.
+    - **inicio**: fecha de inicio del rango temporal (formato ISO 8601, ej. '2023-01-01').
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **tipo**: lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **freq**: frecuencia de los datos. Valores posibles: 'B' (business day frequency), 'D' (calendar day frequency), 'W' (weekly frequency), 'M' (monthly frequency), 'Q' (quarterly frequency), 'Y' (yearly frequency), 'h' (hourly frequency), 'min' (minutely frequency), 's' (secondly frequency), 'ms' (milliseconds), 'us' (microseconds), 'ns' (nanoseconds).
+    - **tipo**: tipo de tendencia a utilizar:
+        - 1: Lineal
+        - 2: Polinómica
+        - 3: Exponencial
+        - 4: Logarítmica
     - **error**: coeficiente de error que se usa para generar los datos.
     - **columna**: nombre de la columna con los datos generados.
     - **params**: parámetros de la tendencia.
+
+    Devuelve:
+    - **StreamingResponse**: imagen PNG con la gráfica generada.
     """
     df = crear_df_periodos_tend_det(inicio,periodos,freq,columna,params,tipo,error)
     plot_df(df)
@@ -244,28 +289,31 @@ def obtener_reporte(inicio: str, fin: str, freq:str, distr:int , columna: List[s
     """
     Devuelve un reporte estadístico de cierta distribución. Parámetros:
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+    - **inicio**: fecha de inicio del rango temporal (formato ISO 8601, ej. '2023-01-01').
+    - **fin**: fecha de fin del rango temporal (formato ISO 8601).
+    - **freq**: frecuencia de los datos. Valores posibles: 'B' (business day frequency), 'D' (calendar day frequency), 'W' (weekly frequency), 'M' (monthly frequency), 'Q' (quarterly frequency), 'Y' (yearly frequency), 'h' (hourly frequency), 'min' (minutely frequency), 's' (secondly frequency), 'ms' (milliseconds), 'us' (microseconds), 'ns' (nanoseconds).
+    - **Distr, params**: indica la distribución a seguir y los parámetros de esta distribución. Casos:
+        1. Normal: parámetros media y desviación típica.
+        2. Binomial: parámetros n (nº pruebas) y p (probabilidad éxito). Opcional: localización de los datos.
+        3. Poisson: parámetro mu. Opcional: localización de los datos.
+        4. Geométrica: parámetro p (probabilidad éxito). Opcional: localización de los datos.
+        5. Hipergeométrica: parámetros M (tamaño población), n (nº aciertos), N (tamaño muestra). Opcional: localización de los datos.
+        6. Constante: valor constante de los datos.
+        7. Uniforme: sin parámetros, solo localización, o localización y escala.
+        8. Lognormal: parámetro s. Opcional: localización o localización y escala.
+        9. Exponencial: sin parámetros, solo localización, o localización y escala.
+        10. Gamma: parámetro a. Opcional: localización o localización y escala.
+        11. Beta: parámetros a y b. Opcional: localización o localización y escala.
+        12. Chi-Cuadrado: parámetro df. Opcional: localización o localización y escala.
+        13. T-Student: parámetro t. Opcional: localización o localización y escala.
+        14. Pareto: parámetro b. Opcional: localización o localización y escala.
+        15. Lineal descendente: parámetros dato inicial y pendiente (valor absoluto). Mínimo 0; al alcanzarlo, datos constantes.
+        16. Lineal ascendente: parámetros dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **dict**: reporte con las estadísticas generadas por la distribución.
     """
 
     if distr == 1 :
@@ -502,29 +550,33 @@ async def obtener_datos(inicio: str, fin:str, freq:str, distr:int , columna: Lis
     """
     Devuelve un csv con los datos que siguen cierta distribución. Parámetros:
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+    - **inicio**: fecha de inicio del rango temporal (formato ISO 8601, ej. '2023-01-01').
+    - **fin**: fecha de fin del rango temporal (formato ISO 8601).
+    - **freq**: frecuencia de los datos. Valores posibles: 'B' (business day frequency), 'D' (calendar day frequency), 'W' (weekly frequency), 'M' (monthly frequency), 'Q' (quarterly frequency), 'Y' (yearly frequency), 'h' (hourly frequency), 'min' (minutely frequency), 's' (secondly frequency), 'ms' (milliseconds), 'us' (microseconds), 'ns' (nanoseconds).
+    - **Distr, params**: indica la distribución a seguir y los parámetros de esta distribución. Casos:
+        1. Normal: parámetros media y desviación típica.
+        2. Binomial: parámetros n (nº pruebas) y p (probabilidad éxito). Opcional: localización de los datos.
+        3. Poisson: parámetro mu. Opcional: localización de los datos.
+        4. Geométrica: parámetro p (probabilidad éxito). Opcional: localización de los datos.
+        5. Hipergeométrica: parámetros M (tamaño población), n (nº aciertos), N (tamaño muestra). Opcional: localización de los datos.
+        6. Constante: valor constante de los datos.
+        7. Uniforme: sin parámetros, solo localización, o localización y escala.
+        8. Lognormal: parámetro s. Opcional: localización o localización y escala.
+        9. Exponencial: sin parámetros, solo localización, o localización y escala.
+        10. Gamma: parámetro a. Opcional: localización o localización y escala.
+        11. Beta: parámetros a y b. Opcional: localización o localización y escala.
+        12. Chi-Cuadrado: parámetro df. Opcional: localización o localización y escala.
+        13. T-Student: parámetro t. Opcional: localización o localización y escala.
+        14. Pareto: parámetro b. Opcional: localización o localización y escala.
+        15. Lineal descendente: parámetros dato inicial y pendiente (valor absoluto). Mínimo 0; al alcanzarlo, datos constantes.
+        16. Lineal ascendente: parámetros dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: archivo CSV con los datos generados según la distribución indicada.
     """
+
     df = crear_df_fin_datos(inicio,fin,freq,columna,distr,params)
     
     # Convertir el DataFrame a un buffer de CSV
@@ -546,26 +598,29 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int , columna: L
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day frequency), D (calendar day frequency), W (weekly frequency), M (monthly frequency), Q (quarterly frequency), Y (yearly frequency), h (hourly frequency), min (minutely frequency), s (secondly frequency), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **distr, params**: indica la distribución a seguir y sus parámetros. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (población), n (aciertos), N (muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, localización o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, localización o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto), mínimo 0.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: imagen PNG con la gráfica generada.
     """
     df = crear_df_fin_datos(inicio,fin,freq,columna,distr,params)
     plot_df(df)
@@ -584,27 +639,30 @@ def obtener_reporte(inicio: str, periodos: int, freq:str, distr:int , columna: L
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day frequency), D (calendar day frequency), W (weekly frequency), M (monthly frequency), Q (quarterly frequency), Y (yearly frequency), h (hourly frequency), min (minutely frequency), s (secondly frequency), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **distr, params**: indica la distribución a seguir y los parámetros. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (población), n (aciertos), N (muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, localización o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, localización o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto), mínimo 0.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **columna**: nombre de la columna con los datos generados.
-    """    
+
+    Devuelve:
+    - **dict**: reporte con las estadísticas generadas por la distribución.
+    """  
     if distr == 1 :
         subtipo = "normal"
         parametros ="Modelo con media = params[0] y desviación típica = params[1]. La media es " + str(params[0])+ " y la desviación típica es " + str(params[1])
@@ -841,26 +899,29 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, distr:int,  columna
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day frequency), D (calendar day frequency), W (weekly frequency), M (monthly frequency), Q (quarterly frequency), Y (yearly frequency), h (hourly frequency), min (minutely frequency), s (secondly frequency), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **Distr, params**: Indica la distribución a seguir y los parámetros de esta distribución. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas) y p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, localización o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, localización o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto), mínimo 0.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: archivo CSV con los datos generados.
     """    
     df = crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params)
     
@@ -885,24 +946,27 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, distr:int,  colum
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas) y p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, localización o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, localización o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto), mínimo 0.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: imagen PNG con la gráfica generada.
     """    
     df = crear_df_periodos_datos(inicio,periodos,freq,columna,distr,params)
     plot_df(df)
@@ -925,29 +989,33 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, distr:int, p: int, tip
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas) y p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, localización o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, localización o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto), mínimo 0.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **p**: indica la cantidad de periodos (tipo=2) / la amplitud de los periodos (tipo=1)
     - **tipo**: valores posibles
         1. p = amplitud de periodo
         2. p = número de periodos
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **dict**: reporte estadístico con medidas como media, desviación estándar, min, max, percentiles, etc.
     """
+
     if tipo==1:
         periodicidad = "periodos de amplitud " + str(p)
     elif tipo==2 :
@@ -1193,28 +1261,31 @@ async def obtener_datos(inicio: str, fin:str, freq:str, distr:int, p: int, tipo:
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas) y p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, localización o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, localización o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto), mínimo 0.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **p**: indica la cantidad de periodos (tipo=2) / la amplitud de los periodos (tipo=1)
     - **tipo**: valores posibles
         1. p = amplitud de periodo
         2. p = número de periodos
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: CSV con los datos generados según la distribución y parámetros indicados.
     """
     
     df =crear_df_fin_periodicos(inicio,fin,freq,columna,distr,params,p,tipo)
@@ -1240,28 +1311,31 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, distr:int, p: int, tip
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas) y p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, localización o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, localización o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto), mínimo 0.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **p**: indica la cantidad de periodos (tipo=2) / la amplitud de los periodos (tipo=1)
     - **tipo**: valores posibles
         1. p = amplitud de periodo
         2. p = número de periodos
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: imagen PNG con la gráfica generada.
     """
     df = crear_df_fin_periodicos(inicio,fin,freq,columna,distr,params, p,tipo)
     plot_df(df)
@@ -1279,31 +1353,34 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, distr:int, p: int
     Devuelve un reporte estadístico sobre los datos periódicos que siguen cierta distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
-    - **periodos**: número de datos a generar .
+    - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas) y p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, localización o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, localización o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto), mínimo 0.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **p**: indica la cantidad de periodos (tipo=2) / la amplitud de los periodos (tipo=1)
     - **tipo**: valores posibles
         1. p = amplitud de periodo
         2. p = número de periodos
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **dict**: reporte estadístico con resumen (media, mediana, desviación típica, etc.) de los datos generados.
     """
     if tipo==1:
         periodicidad = "periodos de amplitud " + str(p)
@@ -1548,29 +1625,33 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, distr:int, p:int, t
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas) y p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, localización o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, localización o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto), mínimo 0.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **p**: indica la cantidad de periodos (tipo=2) / la amplitud de los periodos (tipo=1)
     - **tipo**: valores posibles
         1. p = amplitud de periodo
         2. p = número de periodos
     - **columna**: nombre de la columna con los datos generados.
-    """
+
+    Devuelve:
+    - **StreamingResponse**: CSV con los datos generados periódicos siguiendo la distribución especificada.
+"""
+
     df= crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tipo)
     
     # Convertir el DataFrame a un buffer de CSV
@@ -1594,28 +1675,31 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, distr:int, p:int,
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **Distr, params** : Indica la distribución a seguir y los parámetros de esta distribución. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas) y p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, localización o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, localización o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto), mínimo 0.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre primer y segundo parámetro.
     - **p**: indica la cantidad de periodos (tipo=2) / la amplitud de los periodos (tipo=1)
     - **tipo**: valores posibles
         1. p = amplitud de periodo
         2. p = número de periodos
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: imagen PNG con la gráfica generada.
     """
     
     df = crear_df_periodos_periodicos(inicio,periodos,freq,columna,distr,params,p,tipo)
@@ -1632,15 +1716,20 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, distr:int, p:int,
 @app.get("/reporte/ARMA/fin")
 async def obtener_reporte(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve un reporte estadístico sobre el modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un reporte estadístico sobre un modelo autorregresivo y de medias móviles (ARMA). Parámetros:
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación)
-    - **desv**: desviación típica del ruido blanco
-    - **columna**: nombre de la columna con los datos generados.
+    - **inicio**: fecha de inicio para la generación de datos.
+    - **fin**: fecha de fin para la generación de datos.
+    - **freq**: frecuencia temporal de los datos generados. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **c**: constante del modelo ARMA.
+    - **phi**: parámetros del componente autorregresivo (AR).
+    - **teta**: parámetros del componente de medias móviles (MA).
+    - **s**: tamaño de la estacionalidad (número de observaciones por estación).
+    - **desv**: desviación estándar del ruido blanco que alimenta el modelo.
+    - **columna**: nombre de la columna donde se almacenan los datos generados.
+
+    Devuelve:
+    - **dict**: reporte estadístico que incluye medidas descriptivas y parámetros estimados del modelo.
     """
      
     if phi == []:
@@ -1689,16 +1778,21 @@ async def obtener_reporte(inicio: str, fin:str, freq:str,c:float, desv:float, s 
 @app.get("/Datos/ARMA/fin")
 async def obtener_datos(inicio: str, fin:str, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve un csv con los datos que siguen un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un CSV con los datos generados según un modelo autorregresivo y de medias móviles (ARMA). Parámetros:
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación)
-    - **desv**: desviación típica del ruido blanco
-    - **columna**: nombre de la columna con los datos generados.
-    """  
+    - **inicio**: fecha de inicio para la generación de datos.
+    - **fin**: fecha de fin para la generación de datos.
+    - **freq**: frecuencia temporal de los datos generados. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **c**: constante del modelo ARMA.
+    - **phi**: parámetros del componente autorregresivo (AR).
+    - **teta**: parámetros del componente de medias móviles (MA).
+    - **s**: tamaño de la estacionalidad (número de observaciones por estación).
+    - **desv**: desviación estándar del ruido blanco que alimenta el modelo.
+    - **columna**: nombre de la columna donde se almacenan los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: archivo con los datos simulados según el modelo ARMA.
+    """
     df = crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s,phi,teta)
     
     # Convertir el DataFrame a un buffer de CSV
@@ -1716,16 +1810,21 @@ async def obtener_datos(inicio: str, fin:str, freq:str,c:float, desv:float, s : 
 @app.get("/Plot/ARMA/fin")
 async def obtener_grafica(inicio: str, fin:str, freq:str, c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve una imagen con los datos graficados que siguen un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve una imagen con los datos graficados que siguen un modelo autorregresivo y de medias móviles (ARMA). Parámetros:
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación)
-    - **desv**: desviación típica del ruido blanco
-    - **columna**: nombre de la columna con los datos generados.
-    """  
+    - **inicio**: fecha de inicio para la generación de datos.
+    - **fin**: fecha de fin para la generación de datos.
+    - **freq**: frecuencia temporal de los datos generados. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **c**: constante del modelo ARMA.
+    - **phi**: parámetros del componente autorregresivo (AR).
+    - **teta**: parámetros del componente de medias móviles (MA).
+    - **s**: tamaño de la estacionalidad (número de observaciones por estación).
+    - **desv**: desviación estándar del ruido blanco que alimenta el modelo.
+    - **columna**: nombre de la columna donde se almacenan los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: imagen PNG con la gráfica generada.
+    """ 
     df = crear_df_fin_ARMA(inicio,fin,freq,columna,c,desv,s,phi,teta)
     plot_df(df)
     buffer = io.BytesIO()
@@ -1738,15 +1837,20 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, c:float, desv:float, s
 @app.get("/reporte/ARMA/periodos")
 async def obtener_reporte(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve un reporte estadístico de los datos que siguen un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un reporte estadístico de los datos que siguen un modelo autorregresivo y de medias móviles (ARMA). Parámetros:
 
-    - **inicio**: fecha de inicio.
-    - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación)
-    - **desv**: desviación típica del ruido blanco
-    - **columna**: nombre de la columna con los datos generados.
+    - **inicio**: fecha de inicio para la generación de los datos.
+    - **periodos**: número total de datos a generar.
+    - **freq**: frecuencia temporal de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **c**: constante del modelo ARMA.
+    - **phi**: parámetros del componente autorregresivo (AR).
+    - **teta**: parámetros del componente de medias móviles (MA).
+    - **s**: tamaño de la estacionalidad (cantidad de datos por estación).
+    - **desv**: desviación estándar del ruido blanco.
+    - **columna**: nombre de la columna donde se almacenan los datos generados.
+
+    Devuelve:
+    - **dict**: reporte estadístico con las principales características de la serie generada.
     """
     if phi == []:
         subtipo = "de medias móviles"
@@ -1797,15 +1901,20 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str,c:float, desv:floa
 @app.get("/Datos/ARMA/periodos")
 async def obtener_datos(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve un csv con los datos generados que siguen un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un CSV con los datos generados que siguen un modelo autorregresivo y de medias móviles (ARMA). Parámetros:
 
-    - **inicio**: fecha de inicio.
-    - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación)
-    - **desv**: desviación típica del ruido blanco
-    - **columna**: nombre de la columna con los datos generados.
+    - **inicio**: fecha de inicio para la generación de los datos.
+    - **periodos**: número total de datos a generar.
+    - **freq**: frecuencia temporal de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **c**: constante del modelo ARMA.
+    - **phi**: parámetros del componente autorregresivo (AR).
+    - **teta**: parámetros del componente de medias móviles (MA).
+    - **s**: tamaño de la estacionalidad (cantidad de datos por estación).
+    - **desv**: desviación estándar del ruido blanco.
+    - **columna**: nombre de la columna donde se almacenan los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: Un archivo CSV con los datos simulados que siguen el modelo ARMA definido.
     """
     df = crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s,phi,teta)
     # Convertir el DataFrame a un buffer de CSV
@@ -1823,15 +1932,20 @@ async def obtener_datos(inicio: str, periodos:int, freq:str,c:float, desv:float,
 @app.get("/Plot/ARMA/periodos") 
 async def obtener_grafica(inicio: str, periodos:int, freq:str,c:float, desv:float, s : Union[int, None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve una imagen con los datos graficados que siguen un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve una imagen con los datos graficados que siguen un modelo autorregresivo y de medias móviles (ARMA). Parámetros:
+    - **inicio**: fecha de inicio para la generación de los datos.
+    - **periodos**: número total de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **c, phi, teta**: parámetros del modelo ARMA. 
+        - c: constante del modelo.
+        - phi: lista o array con los parámetros autorregresivos (AR).
+        - teta: lista o array con los parámetros de medias móviles (MA).
+    - **s**: tamaño de la estacionalidad, es decir, el número de datos que conforman una estación completa.
+    - **desv**: desviación estándar del ruido blanco utilizado en el modelo.
+    - **columna**: nombre de la columna que contendrá los datos generados en la estructura resultante.
 
-    - **inicio**: fecha de inicio.
-    - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación)
-    - **desv**: desviación típica del ruido blanco
-    - **columna**: nombre de la columna con los datos generados.
+    Devuelve:
+    - **StreamingResponse**: Un archivo CSV con los datos simulados que siguen el modelo ARMA definido
     """
     df = crear_df_periodos_ARMA(inicio,periodos,freq,columna,c,desv,s,phi,teta)
     plot_df(df)
@@ -1847,49 +1961,36 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str,c:float, desv:floa
 @app.get("/reporte/drift/fin/dist-dist")
 async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):  
     """
-    Devuelve un reporte estadísitico de los datos generados a partir de un drift cambiando de una fistribución a otra. Parámetros:
+    Devuelve un reporte estadístico de los datos generados a partir de un drift que cambia de una distribución a otra.
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **columna**: nombre de la columna con los datos generados.
+    Parámetros:
+    - **inicio**: fecha de inicio para la generación de datos.
+    - **fin**: fecha de fin para la generación de datos.
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice o posición en la serie donde ocurre el cambio (drift) de la primera a la segunda distribución.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos (antes del drift). Las distribuciones posibles son:
+        1. Normal: parámetros = media, desviación típica.
+        2. Binomial: parámetros = n (número de pruebas), p (probabilidad de éxito), opcionalmente localización.
+        3. Poisson: parámetro = mu, opcionalmente localización.
+        4. Geométrica: parámetro = p, opcionalmente localización.
+        5. Hipergeométrica: parámetros = M (tamaño población), n (número aciertos), N (tamaño muestra), opcionalmente localización.
+        6. Constante: parámetro = valor constante.
+        7. Uniforme: sin parámetros, o con localización, o con localización y escala.
+        8. Lognormal: parámetro = s, opcionalmente localización o localización y escala.
+        9. Exponencial: sin parámetros, o con localización, o con localización y escala.
+        10. Gamma: parámetro = a, opcionalmente localización o localización y escala.
+        11. Beta: parámetros = a, b, opcionalmente localización o localización y escala.
+        12. Chi-Cuadrado: parámetro = df, opcionalmente localización o localización y escala.
+        13. T-Student: parámetro = t, opcionalmente localización o localización y escala.
+        14. Pareto: parámetro = b, opcionalmente localización o localización y escala.
+        15. Lineal descendente: parámetros = dato inicial, pendiente absoluta (mínimo 0, valor constante tras alcanzar 0).
+        16. Lineal ascendente: parámetros = dato inicial, pendiente.
+        17. Aleatorio: parámetros = valor mínimo, valor máximo.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos (después del drift), con las mismas opciones y parámetros que Dist1.
+    - **columna**: nombre de la columna que contendrá los datos generados en el resultado.
+
+    Devuelve:
+    - **dict**: reporte estadístico con las características principales de los datos generados, antes y después del drift.
     """
     if dist1 == 1 :
         subtipo1 = "normal"
@@ -2343,49 +2444,35 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 @app.get("/Datos/drift/fin/dist-dist")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un csv con los datos generados a partir de un drift cambiando de una distribución a otra. Parámetros:
-
+    Devuelve un CSV con los datos generados a partir de un drift que cambia de una distribución a otra. Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds.
+    - **num_drift**: índice donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos (igual que Dist1).
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: archivo CSV con los datos generados.
+
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -2403,49 +2490,34 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, dist1:int
 @app.get("/Plot/drift/fin/dist-dist")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, dist2:int, columna: List[str]= Query(...,description="Nombres de las columnas"),params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve una imagen con los datos graficados a partir de un drift cambiando de una distribución a otra. Parámetros:
-
+    Devuelve una imagen con los datos graficados a partir de un drift que cambia de una distribución a otra. Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds.
+    - **num_drift**: índice donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos (igual que Dist1).
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: imagen PNG con la gráfica generada.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
     plot_df(df)
@@ -2465,43 +2537,29 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, di
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos (igual que Dist1).
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **dict**: Diccionario con el reporte estadístico.
     """   
     if dist1 == 1 :
         subtipo1 = "normal"
@@ -2961,43 +3019,29 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, dist
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos (igual que Dist1).
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: CSV con los datos generados.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[dist2,params2],1,num_drift)
     
@@ -3022,44 +3066,30 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos (igual que Dist1).
     - **columna**: nombre de la columna con los datos generados.
-    """   
+
+    Devuelve:
+    - **StreamingResponse**: Imagen con los datos graficados.
+    """  
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna, [dist1,params1],[dist2,params2],1,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -3079,28 +3109,34 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles que sigue la segunda parte de los datos
-    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación), del modelo que sigue la segunda parte de los datos
+    - **Dist1, params1**: Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **c, phi, teta**: parámetros del modelo ARMA de la segunda parte de los datos:
+        - **c**: constante del modelo.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación), del modelo que sigue la segunda parte de los datos.
     - **columna**: nombre de la columna con los datos generados.
-    """      
+
+    Devuelve:
+    - **dict**: Diccionario con el reporte estadístico.
+    """     
     if dist1 == 1 :
         subtipo1 = "normal"
         parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
@@ -3369,33 +3405,39 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 @app.get("/Datos/drift/fin/dist-ARMA")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve un csv con los datos generados a partir de un drift cambiando una distribución por un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un archivo CSV con los datos generados a partir de un drift cambiando una distribución por un modelo autorregresivo y de medias móviles. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles que sigue la segunda parte de los datos
-    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación), del modelo que sigue la segunda parte de los datos
+    - **num_drift**: dato donde se produce el drift.
+    - **Dist1, params1**: Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **c, phi, teta**: parámetros del modelo ARMA de la segunda parte de los datos:
+        - **c**: constante del modelo.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación), del modelo que sigue la segunda parte de los datos.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: Archivo CSV con los datos generados.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
     
@@ -3414,33 +3456,39 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, dist1:int
 @app.get("/Plot/drift/fin/dist-ARMA")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, c:float, desv:float, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve una imagen de los datos graficados a partir de un drift cambiando una distribución por un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve una imagen con los datos graficados a partir de un drift, donde se cambia de una distribución inicial a un modelo autorregresivo y de medias móviles. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles que sigue la segunda parte de los datos
-    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación), del modelo que sigue la segunda parte de los datos
-    - **columna**: nombre de la columna con los datos generados.
+    - **freq**: frecuencia de los datos. Valores posibles:  B (días laborables), D (días calendario), W (semanal), M (mensual), Q (trimestral), Y (anual), h (horaria), min (cada minuto), s (cada segundo), ms (milisegundos), us (microsegundos), ns (nanosegundos).
+    - **num_drift**: índice del dato donde se produce el drift.
+    - **Dist1, params1**: distribución de la primera parte de los datos y sus parámetros. Casos posibles:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **c, phi, teta**: parámetros del modelo ARMA de la segunda parte de los datos:
+        - **c**: constante del modelo.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad (número de datos por ciclo estacional).
+    - **columna**: nombre de la columna generada.
+
+    Devuelve:
+    - **StreamingResponse**: gráfica con la serie temporal generada.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
     plot_df(df)
@@ -3455,34 +3503,45 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 @app.get("/reporte/drift/periodos/dist-ARMA")
 async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve un reporte estadístico de los datos graficados a partir de un drift cambiando una distribución por un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un reporte estadístico de los datos generados a partir de un drift que cambia una distribución por un modelo autorregresivo y de medias móviles. 
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles que sigue la segunda parte de los datos
-    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación), del modelo que sigue la segunda parte de los datos
+    - **freq**: frecuencia de los datos. Valores posibles:  B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (número de pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (número aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **c, phi, teta**: parámetros del modelo ARMA de la segunda parte de los datos:
+        - **c**: constante del modelo.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación).
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **dict**: Reporte estadístico.
     """
+
+    
     if dist1 == 1 :
         subtipo1 = "normal"
         parametros1 ="Modelo con media = params1[0] y desviación típica = params1[1]. La media es " + str(params1[0])+ " y la desviación típica es " + str(params1[1])
@@ -3751,33 +3810,40 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, di
 @app.get("/Datos/drift/periodos/dist-ARMA")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, c:float ,desv:float ,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles")):
     """
-    Devuelve un csv de los datos generados a partir de un drift cambiando una distribución por un modelo autorregresivo y de medias móviles. Parámetros:
+    Devuelve un archivo CSV con los datos generados a partir de un drift, cambiando una distribución por un modelo autorregresivo y de medias móviles.Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles que sigue la segunda parte de los datos
-    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación), del modelo que sigue la segunda parte de los datos
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (número de pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (número aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **c, phi, teta**: parámetros del modelo ARMA de la segunda parte de los datos:
+        - **c**: constante del modelo.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación).
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingReponse**: Archivo CSV con la serie temporal generada.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
 
@@ -3800,29 +3866,36 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles que sigue la segunda parte de los datos
-    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación), del modelo que sigue la segunda parte de los datos
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (número de pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (número aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **c, phi, teta**: parámetros del modelo ARMA de la segunda parte de los datos:
+        - **c**: constante del modelo.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación).
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: Archivo CSV con la serie temporal generada.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[c,desv,s,phi,teta,[]],2,num_drift)
     plot_df(df)
@@ -3841,49 +3914,36 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos que posee la segunda distribución
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
+    - **freq**: frecuencia de los datos. Valores posibles:  B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: dato donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos (mismos casos que Dist1).
+    - **p2**: cantidad de periodos o amplitud de los periodos que posee la segunda distribución.
+    - **tipo2**: valores posibles:
+        1. p2 es amplitud de periodo.
+        2. p2 es número de periodos.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **dict**: resumen estadístico y análisis descriptivo de la serie temporal generada.
     """ 
     if dist1 == 1 :
         subtipo1 = "normal"
@@ -4346,53 +4406,40 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 @app.get("/Datos/drift/fin/dist-periodico")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un csv con los datos generados a partir de un drift cambiando de una distribución a un modelo periódico que sigue cierta distribución. Parámetros:
+    Devuelve un CSV con los datos generados a partir de un drift cambiando de una distribución a un modelo periódico que sigue cierta distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos que posee la segunda distribución
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
+    - **freq**: frecuencia de los datos. Valores posibles:  B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: dato donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos(mismos casos que Dist1)
+    - **p2**: cantidad de periodos o amplitud de los periodos que posee la segunda distribución.
+    - **tipo2**: valores posibles:
+        1. p2 es amplitud de periodo.
+        2. p2 es número de periodos.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: archivo CSV con la serie temporal generada.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -4414,50 +4461,38 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos que posee la segunda distribución
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
+    - **freq**: frecuencia de los datos. Valores posibles:  B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: dato donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos (mismos casos que Dist1).
+    - **p2**: cantidad de periodos o amplitud de los periodos que posee la segunda distribución.
+    - **tipo2**: valores posibles:
+        1. p2 es amplitud de periodo.
+        2. p2 es número de periodos.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: Imagen con la serie temporal graficada.
     """
+
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna, [dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -4475,49 +4510,36 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, di
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos que posee la segunda distribución
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: dato donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos (mismos casos que Dist1).
+    - **p2**: cantidad de periodos o amplitud de los periodos que posee la segunda distribución.
+    - **tipo2**: valores posibles:
+        1. p2 es amplitud de periodo.
+        2. p2 es número de periodos.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **dict**: Reporte estadístico con estadísticas descriptivas de la serie generada.
     """
     if dist1 == 1 :
         subtipo1 = "normal"
@@ -4980,53 +5002,40 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, di
 @app.get("/Datos/drift/periodos/dist-periodico")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un csv con los datos generados a partir de un drift cambiando de una distribución a un modelo periódico que sigue cierta distribución. Parámetros:
+    Devuelve un CSV con los datos generados a partir de un drift cambiando de una distribución a un modelo periódico que sigue cierta distribución. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos que posee la segunda distribución
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: dato donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos (mismos casos que Dist1).
+    - **p2**: cantidad de periodos o amplitud de los periodos que posee la segunda distribución.
+    - **tipo2**: valores posibles:
+        1. p2 es amplitud de periodo.
+        2. p2 es número de periodos.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: archivo CSV que contiene los datos generados y sus índices temporales.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -5048,49 +5057,36 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos que posee la segunda distribución
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
+    - **freq**: frecuencia de los datos. Valores posibles:  B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: dato donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos (mismos casos que Dist1).
+    - **p2**: cantidad de periodos o amplitud de los periodos que posee la segunda distribución.
+    - **tipo2**: valores posibles:
+        1. p2 es amplitud de periodo.
+        2. p2 es número de periodos.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: Imagen con la serie temporal graficada en formato PNG.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[tipo2,dist2,params2,p2],3,num_drift)
     plot_df(df)
@@ -5105,34 +5101,46 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
 @app.get("/reporte/drift/fin/dist-tendencia")
 async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[float,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     """
-    Devuelve un reporte estadísitico sobre los datos generados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **coef_error**: coeficiente de error del modelo de tendencia determinista
+    - **freq**: frecuencia de los datos. Valores posibles:  B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: dato donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
+    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **dict**: Reporte estadístico de la serie generada.
     """
     if dist1 == 1 :
         subtipo1 = "normal"
@@ -5394,34 +5402,48 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 @app.get("/Datos/drift/fin/dist-tendencia")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[float,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     """
-    Devuelve un csv con los datos generados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
+    Devuelve un CSV con los datos generados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **coef_error**: coeficiente de error del modelo de tendencia determinista
+    - **freq**: frecuencia de los datos. Valores posibles:  
+    B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  
+    h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
+    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: CSV con los datos generados y la serie temporal correspondiente.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -5438,34 +5460,49 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, dist1:int
 @app.get("/Plot/drift/fin/dist-tendencia")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[float,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     """
-    Devuelve una imagen con un gráfico con los datos graficados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
+    Devuelve una imagen con un gráfico que muestra los datos generados a partir de un drift,
+    cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **coef_error**: coeficiente de error del modelo de tendencia determinista
+    - **freq**: frecuencia de los datos. Valores posibles:  
+    B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  
+    h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
+    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: Imagen con el gráfico de la serie temporal.
     """
     
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
@@ -5481,34 +5518,49 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
 @app.get("/reporte/drift/periodos/dist-tendencia")
 async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error: Union[float,None] = 0 ,columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     """
-    Devuelve un reporte estadístico con los datos generados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un drift,
+    cambiando de una distribución a un modelo de tendencia determinista.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **freq**: frecuencia de los datos. Valores posibles:  B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **dict**: Reporte estadístico de la serie generada.
     """
     if dist1 == 1 :
         subtipo1 = "normal"
@@ -5770,34 +5822,47 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, di
 @app.get("/Datos/drift/periodos/dist-tendencia")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[float,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
     """
-    Devuelve un csv con los datos generados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
+    Devuelve un CSV con los datos generados a partir de un drift,
+    cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **freq**: frecuencia de los datos. Valores posibles:  B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: csv con los datos generados.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -5813,37 +5878,49 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, dist
 
 # Gráfico con drift del cambio de una distribución a un modelo de tendencia determinista
 @app.get("/Plot/drift/periodos/dist-tendencia")
-async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[float,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")):
-    
+async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, dist1:int, tipo2:int, coef_error : Union[float,None] = 0, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: List[float]= Query(...,description="Parametros de la tendencia")): 
     """
-    Devuelve una imagen con los datos graficados a partir de un drift cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
+    Devuelve una imagen con un gráfico de los datos generados a partir de un drift,
+    cambiando de una distribución a un modelo de tendencia determinista. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato donde se produce el drift
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo.
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **freq**: frecuencia de los datos. Valores posibles:  B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **Dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). Mínimo 0, si se alcanza se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: Imagen con el gráfico generado.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[dist1,params1],[params2,tipo2,coef_error],4,num_drift)
     plot_df(df)
@@ -5858,20 +5935,34 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
 @app.get("/reporte/drift/fin/ARMA-ARMA")
 async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     """
-    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a otro. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un *drift*,
+    cambiando de un modelo autorregresivo y de medias móviles a otro.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c1, phi1, teta1** : parámetros de los modelo autorregresivos y de medias móviles 1. c1 --> constante, phi1 --> parámetros del modelo autorregresivo y teta1 --> parámetros del modelo de medias móviles
-    - **s1** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv1**: desviación típica del ruido blanco del modelo 1
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi2 --> parámetros del modelo autorregresivo y teta2 --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice en el que se produce el drift (cambio de modelo).
+    - **c1, phi1, teta1**: parámetros del primer modelo:
+        - **c1**: constante.
+        - **phi1**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta1**: lista con coeficientes del modelo de medias móviles (MA).
+    - **s1**: estacionalidad del modelo 1 (número de datos por estación).
+    - **desv1**: desviación típica del ruido blanco para el modelo 1.
+    - **c2, phi2, teta2**: parámetros del segundo modelo:
+        - **c2**: constante.
+        - **phi2**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista con coeficientes del modelo de medias móviles (MA).
+    - **s2**: estacionalidad del modelo 2.
+    - **desv2**: desviación típica del ruido blanco para el modelo 2.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **dict**: reporte estadístico del conjunto de datos simulados.
     """
+
     if phi1 == []:
         subtipo1 = "de medias móviles"
         parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c1)+" y con valores de teta1: teta1_0 " + str(teta1[0])
@@ -5955,19 +6046,30 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int ,c1:floa
 @app.get("/Datos/drift/fin/ARMA-ARMA")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     """
-    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a otro. Parámetros:
+    Devuelve un archivo CSV con los datos generados a partir de un modelo que sufre un *drift*, 
+    cambiando de un modelo autorregresivo y de medias móviles a otro. Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c1, phi1, teta1** : parámetros de los modelo autorregresivos y de medias móviles 1. c1 --> constante, phi1 --> parámetros del modelo autorregresivo y teta1 --> parámetros del modelo de medias móviles
-    - **s1** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv1**: desviación típica del ruido blanco del modelo 1
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi2 --> parámetros del modelo autorregresivo y teta2 --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice en el que se produce el drift (cambio de modelo).
+    - **c1, phi1, teta1**: parámetros del primer modelo:
+        - **c1**: constante.
+        - **phi1**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta1**: lista con coeficientes del modelo de medias móviles (MA).
+    - **s1**: estacionalidad del modelo 1 (número de datos por estación).
+    - **desv1**: desviación típica del ruido blanco para el modelo 1.
+    - **c2, phi2, teta2**: parámetros del segundo modelo:
+        - **c2**: constante.
+        - **phi2**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista con coeficientes del modelo de medias móviles (MA).
+    - **s2**: estacionalidad del modelo 2.
+    - **desv2**: desviación típica del ruido blanco para el modelo 2.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: CSV con la serie de tiempo generada.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
     
@@ -5986,20 +6088,35 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int ,c1:float 
 @app.get("/Plot/drift/fin/ARMA-ARMA")
 async def obtener_gráfica(inicio: str, fin:str, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     """
-    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a otro. Parámetros:
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un *drift*, 
+    cambiando de un modelo autorregresivo y de medias móviles a otro.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c1, phi1, teta1** : parámetros de los modelo autorregresivos y de medias móviles 1. c1 --> constante, phi1 --> parámetros del modelo autorregresivo y teta1 --> parámetros del modelo de medias móviles
-    - **s1** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv1**: desviación típica del ruido blanco del modelo 1
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi2 --> parámetros del modelo autorregresivo y teta2 --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice en el que se produce el *drift* (cambio de modelo).
+    - **c1, phi1, teta1**: parámetros del primer modelo:
+        - **c1**: constante.
+        - **phi1**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta1**: lista con coeficientes del modelo de medias móviles (MA).
+    - **s1**: estacionalidad del modelo 1 (número de datos por estación).
+    - **desv1**: desviación típica del ruido blanco para el modelo 1.
+    - **c2, phi2, teta2**: parámetros del segundo modelo:
+        - **c2**: constante.
+        - **phi2**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista con coeficientes del modelo de medias móviles (MA).
+    - `teta2`: lista con coeficientes del modelo de medias móviles (MA).
+    - **s2**: estacionalidad del modelo 2.
+    - **desv2**: desviación típica del ruido blanco del modelo 2.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: Imagen con la visualización de la serie temporal generada.
     """
+    
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -6013,20 +6130,34 @@ async def obtener_gráfica(inicio: str, fin:str, freq:str, num_drift:int ,c1:flo
 @app.get("/reporte/drift/periodos/ARMA-ARMA")
 async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float , desv1:float, c2:float, desv2:float, s1: Union[int,None] = 0, s2: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi1: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta1:Optional[List[float]]= Query([],description="Parámetros medias móviles"), phi2: Optional[List[float]]= Query([],description="Parámetros autorregresivos 2"), teta2:Optional[List[float]]= Query([],description="Parámetros medias móviles 2")):
     """
-    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a otro. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un *drift*,
+    cambiando de un modelo autorregresivo y de medias móviles a otro.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c1, phi1, teta1** : parámetros de los modelo autorregresivos y de medias móviles 1. c1 --> constante, phi1 --> parámetros del modelo autorregresivo y teta1 --> parámetros del modelo de medias móviles
-    - **s1** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv1**: desviación típica del ruido blanco del modelo 1
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi2 --> parámetros del modelo autorregresivo y teta2 --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice en el que se produce el *drift* (cambio de modelo).
+    - **c1, phi1, teta1**: parámetros del primer modelo:
+    - **c1, phi1, teta1**: parámetros del primer modelo:
+        - **c1**: constante.
+        - **phi1**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta1**: lista con coeficientes del modelo de medias móviles (MA).
+    - **s1**: estacionalidad del modelo 1 (número de datos por estación).
+    - **desv1**: desviación típica del ruido blanco para el modelo 1.
+    - **c2, phi2, teta2**: parámetros del segundo modelo:
+        - **c2**: constante.
+        - **phi2**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista con coeficientes del modelo de medias móviles (MA).
+    - **s2**: estacionalidad del modelo 2.
+    - **desv2**: desviación típica del ruido blanco del modelo 2.
     - **columna**: nombre de la columna con los datos generados.
-    """
+
+    Devuelve:
+
+    - **dic** : Reporte estadístico de la serie temporal generada.
+"""
     
     if phi1 == []:
         subtipo1 = "de medias móviles"
@@ -6115,14 +6246,25 @@ def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int ,c1:float ,
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c1, phi1, teta1** : parámetros de los modelo autorregresivos y de medias móviles 1. c1 --> constante, phi1 --> parámetros del modelo autorregresivo y teta1 --> parámetros del modelo de medias móviles
-    - **s1** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv1**: desviación típica del ruido blanco del modelo 1
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi2 --> parámetros del modelo autorregresivo y teta2 --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
-    - **columna**: nombre de la columna con los datos generados.
+    - **num_drift**: índice (posición temporal) en el que se produce el cambio de modelo.
+    - **c1, phi1, teta1**: parámetros del primer modelo:
+        - **c1**: constante.
+        - **phi1**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta1**: lista con coeficientes del modelo de medias móviles (MA).
+    - **s1**: estacionalidad del modelo 1 (número de datos por estación).
+    - **desv1**: desviación típica del ruido blanco para el modelo 1.
+    - **c2, phi2, teta2**: parámetros del segundo modelo:
+        - **c2**: constante.
+        - **phi2**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista con coeficientes del modelo de medias móviles (MA).
+    - **s2**: longitud de una estación del modelo 2
+    - **desv2**: desviación estándar del ruido blanco del modelo 2
+
+    - **columna**: nombre de la columna que contendrá los datos generados en el CSV.
+
+    Devuelve:
+
+    - **StreamingResponse**: Un archivo **CSV** con los datos de la serie temporal simulada.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
     
@@ -6146,15 +6288,25 @@ async def obtener_gráfica(inicio: str, periodos:int, freq:str, num_drift:int ,c
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c1, phi1, teta1** : parámetros de los modelo autorregresivos y de medias móviles 1. c1 --> constante, phi1 --> parámetros del modelo autorregresivo y teta1 --> parámetros del modelo de medias móviles
-    - **s1** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv1**: desviación típica del ruido blanco del modelo 1
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi2 --> parámetros del modelo autorregresivo y teta2 --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
-    - **columna**: nombre de la columna con los datos generados.
-    """
+    - **num_drift**: índice (posición temporal) en el que se produce el cambio de modelo.
+    - **c1, phi1, teta1**: parámetros del primer modelo:
+        - **c1**: constante.
+        - **phi1**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta1**: lista con coeficientes del modelo de medias móviles (MA).
+    - **s1**: estacionalidad del modelo 1 (número de datos por estación).
+    - **desv1**: desviación típica del ruido blanco para el modelo 1.
+    - **c2, phi2, teta2**: parámetros del segundo modelo:
+        - **c2**: constante.
+        - **phi2**: lista con coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista con coeficientes del modelo de medias móviles (MA).
+    - **s2**: tamaño de la estacionalidad en el modelo 2
+    - **desv2**: desviación estándar del ruido blanco del modelo 2
+    - **columna**: nombre de la serie a representar (nombre de la variable en el gráfico)
+
+    Devuelve:
+
+    - **StreamingResponse**: Una imagen que representa la evolución temporal de los datos generados.
+"""
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c1,desv1,s1,phi1,teta1,[]],[c2,desv2,s2,phi2,teta2,[]],5,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -6168,34 +6320,43 @@ async def obtener_gráfica(inicio: str, periodos:int, freq:str, num_drift:int ,c
 @app.get("/reporte/drift/fin/ARMA-dist")
 async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un distribución. Parámetros:
+    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift, cambiando de un modelo autorregresivo y de medias móviles a una distribución.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles (modelo 1):
+        - **c**: constante.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1.
+    - **desv**: desviación típica del ruido blanco del modelo 1.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (número de pruebas), p (probabilidad de éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (número aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **dict**: reporte estadístico con las características de la serie generada.
     """
     
     if phi == []:
@@ -6466,34 +6627,43 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int ,c:float
 @app.get("/Datos/drift/fin/ARMA-dist")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un distribución. Parámetros:
+    Devuelve un archivo CSV con los datos generados a partir de un modelo que sufre un drift, cambiando de un modelo autorregresivo y de medias móviles a una distribución.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles (modelo 1):
+        - **c**: constante.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1.
+    - **desv**: desviación típica del ruido blanco del modelo 1.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (número de pruebas), p (probabilidad de éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (número aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: archivo CSV con la serie temporal generada.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
     
@@ -6512,34 +6682,43 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int ,c:float ,
 @app.get("/Plot/drift/fin/ARMA-dist")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un distribución. Parámetros:
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift, cambiando de un modelo autorregresivo y de medias móviles a una distribución.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles (modelo 1):
+        - **c**: constante.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos por estación) del modelo 1.
+    - **desv**: desviación típica del ruido blanco del modelo 1.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (número de pruebas), p (probabilidad de éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (número aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **Imagen**: objeto imagen con el gráfico de la serie temporal generada.
     """
     
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
@@ -6555,35 +6734,45 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float
 @app.get("/reporte/drift/periodos/ARMA-dist")
 async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, dist2:int,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un distribución. Parámetros:
+    Devuelve un diccionario con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a una distribución.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
-    - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **periodos**: número total de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles (modelo 1):
+        - **c**: constante.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos por estación) del modelo 1.
+    - **desv**: desviación típica del ruido blanco del modelo 1.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (número de pruebas), p (probabilidad de éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (número aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **dict**: diccionario con el resumen estadístico descriptivo de los datos generados.
     """
+
     if phi == []:
         subtipo1 = "de medias móviles"
         parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
@@ -6852,34 +7041,43 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int ,c:
 @app.get("/Datos/drift/periodos/ARMA-dist")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un distribución. Parámetros:
+    Devuelve un CSV con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a una distribución.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
-    - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **periodos**: número total de datos a generar.
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles (modelo 1):
+        - **c**: constante.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos por estación) del modelo 1.
+    - **desv**: desviación típica del ruido blanco del modelo 1.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (número de pruebas), p (probabilidad de éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (número aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: archivo CSV con la serie temporal generada.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
     
@@ -6898,34 +7096,43 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int ,c:fl
 @app.get("/Plot/drift/periodos/ARMA-dist")
 async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:float, desv:float, dist2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un distribución. Parámetros:
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift, cambiando de un modelo autorregresivo y de medias móviles a una distribución.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
-    - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles:  B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly),  h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles (modelo 1):
+        - **c**: constante.
+        - **phi**: lista de coeficientes AR (autoregresivos).
+        - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos por estación) del modelo 1.
+    - **desv**: desviación típica del ruido blanco del modelo 1.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:
+        1. Normal: media y desviación típica.
+        2. Binomial: n (número de pruebas), p (probabilidad de éxito), opcional localización.
+        3. Poisson: mu, opcional localización.
+        4. Geométrica: p, opcional localización.
+        5. Hipergeométrica: M (tamaño población), n (número aciertos), N (tamaño muestra), opcional localización.
+        6. Constante: valor constante.
+        7. Uniforme: sin parámetros, o localización, o localización y escala.
+        8. Lognormal: s, opcional localización o localización y escala.
+        9. Exponencial: sin parámetros, o localización, o localización y escala.
+        10. Gamma: a, opcional localización o localización y escala.
+        11. Beta: a y b, opcional localización o localización y escala.
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.
+        13. T-Student: t, opcional localización o localización y escala.
+        14. Pareto: b, opcional localización o localización y escala.
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.
+        16. Lineal ascendente: dato inicial y pendiente.
+        17. Aleatorio: valores entre dos parámetros.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **Imagen**: objeto imagen con el gráfico de la serie temporal generada.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[dist2,params2],6,num_drift)
     plot_df(df)
@@ -6940,39 +7147,48 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:
 @app.get("/reporte/drift/fin/ARMA-periodico")
 async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, dist2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico. Parámetros:
+Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift, cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico.
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
-    - **columna**: nombre de la columna con los datos generados.
-    """
+Parámetros:
+
+- **inicio**: fecha de inicio.
+- **fin**: fecha de fin.
+- **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+- **num_drift**: índice donde se produce el drift.
+- **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles:  
+  - **c**: constante.  
+  - **phi**: lista de coeficientes AR (autoregresivos).  
+  - **teta**: lista de coeficientes MA (medias móviles).
+- **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1.
+- **desv**: desviación típica del ruido blanco del modelo 1.
+- **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:  
+  1. Normal: media y desviación típica.  
+  2. Binomial: n (número de pruebas), p (probabilidad de éxito), opcional localización.  
+  3. Poisson: mu, opcional localización.  
+  4. Geométrica: p, opcional localización.  
+  5. Hipergeométrica: M (tamaño población), n (número aciertos), N (tamaño muestra), opcional localización.  
+  6. Constante: valor constante.  
+  7. Uniforme: sin parámetros, o localización, o localización y escala.  
+  8. Lognormal: s, opcional localización o localización y escala.  
+  9. Exponencial: sin parámetros, o localización, o localización y escala.  
+  10. Gamma: a, opcional localización o localización y escala.  
+  11. Beta: a y b, opcional localización o localización y escala.  
+  12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+  13. T-Student: t, opcional localización o localización y escala.  
+  14. Pareto: b, opcional localización o localización y escala.  
+  15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.  
+  16. Lineal ascendente: dato inicial y pendiente.  
+  17. Aleatorio: valores entre dos parámetros.
+- **p2**: cantidad de periodos o amplitud de los periodos del segundo modelo.
+- **tipo2**: tipo de interpretación de **p2**. Valores posibles:  
+  1. p2 = amplitud de periodo.  
+  2. p2 = número de periodos.
+- **columna**: nombre de la columna con los datos generados.
+
+Devuelve:
+
+- **dict**: reporte estadístico de la serie temporal generada.
+"""
     if phi == []:
         subtipo1 = "de medias móviles"
         parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
@@ -7249,38 +7465,47 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, c:float
 @app.get("/Datos/drift/fin/ARMA-periodico")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico. Parámetros:
+    Devuelve un archivo CSV con los datos generados a partir de un modelo que sufre un drift, cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice donde se produce el drift.
+    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles:  
+    - **c**: constante.  
+    - **phi**: lista de coeficientes AR (autoregresivos).  
+    - **teta**: lista de coeficientes MA (medias móviles).
+    - **s**: estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1.
+    - **desv**: desviación típica del ruido blanco del modelo 1.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (número de pruebas), p (probabilidad de éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (número aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es 0; si se alcanza, el valor se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p2**: cantidad de periodos o amplitud de los periodos del segundo modelo.
+    - **tipo2**: tipo de interpretación de **p2**. Valores posibles:  
+        1. p2 = amplitud de periodo.  
+        2. p2 = número de periodos.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: archivo CSV con la serie temporal generada.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     
@@ -7299,39 +7524,50 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, c:float, 
 @app.get("/Plot/drift/fin/ARMA-periodico")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, c:float, desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico. Parámetros:
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift,
+    cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico.
+
+    Parámetros:
 
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
     - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
+    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles:  
+    - c: constante.  
+    - phi: parámetros del modelo autorregresivo (lista o array).  
+    - teta: parámetros del modelo de medias móviles (lista o array).
+    - **s**: estacionalidad, tamaño de una estación (número de datos por estación) del modelo 1.
+    - **desv**: desviación típica del ruido blanco del modelo 1.
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero, si se alcanza se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: números aleatorios entre dos parámetros.
+    - **p2**: cantidad de periodos o amplitud de los periodos del segundo modelo.
+    - **tipo2**: valores posibles:  
+        1. p2 = amplitud de periodo.  
+        2. p2 = número de periodos.
     - **columna**: nombre de la columna con los datos generados.
+
+    Devuelve:
+
+    - **StreamingResponse**: Imagen con la gráfica generada de la serie temporal.
     """
+
     
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     plot_df(df)
@@ -7346,39 +7582,50 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, c:float
 @app.get("/reporte/drift/periodos/ARMA-periodico")
 async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, c:float, desv:float, tipo2:int, dist2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un reporte estadístico de los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico. Parámetros:
+    Devuelve un reporte estadístico de los datos generados a partir de un modelo que sufre un drift,
+    cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico.
 
-    - **inicio**: fecha de inicio.
-    - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
-    - **columna**: nombre de la columna con los datos generados.
+    Parámetros:
+
+    - **inicio**: fecha de inicio (str o datetime).
+    - **periodos**: número total de datos a generar (int).
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice en el que se produce el drift (int).
+    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles para la primera parte:  
+    - c: constante (float).  
+    - phi: lista o array con parámetros autorregresivos.  
+    - teta: lista o array con parámetros de medias móviles.
+    - **s**: estacionalidad o tamaño de estación (número de datos por estación) del modelo 1 (int).
+    - **desv**: desviación típica del ruido blanco del modelo 1 (float).
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero, se mantiene constante si se alcanza.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: números aleatorios entre dos parámetros.
+    - **p2**: cantidad de periodos o amplitud de los periodos del segundo modelo.
+    - **tipo2**: valores posibles:  
+        1. p2 = amplitud de periodo.  
+        2. p2 = número de periodos.
+    - **columna**: nombre de la columna con los datos generados (str).
+
+    Devuelve:
+
+    - **dict**: Reporte estadístico con métricas descriptivas de la serie temporal generada.
     """
+
     if phi == []:
         subtipo1 = "de medias móviles"
         parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
@@ -7655,39 +7902,50 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, c:
 @app.get("/Datos/drift/periodos/ARMA-periodico")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico. Parámetros:
+    Devuelve un CSV con los datos generados a partir de un modelo que sufre un drift,
+    cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico.
 
-    - **inicio**: fecha de inicio.
-    - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
-    - **columna**: nombre de la columna con los datos generados.
+    Parámetros:
+
+    - **inicio**: fecha de inicio (str o datetime).
+    - **periodos**: número de datos a generar (int).
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice en el que se produce el drift (int).
+    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles para la primera parte:  
+    - c: constante (float).  
+    - phi: lista o array con parámetros autorregresivos (list/array de floats).  
+    - teta: lista o array con parámetros de medias móviles (list/array de floats).
+    - **s**: estacionalidad o tamaño de estación (número de datos por estación) del modelo 1 (int).
+    - **desv**: desviación típica del ruido blanco del modelo 1 (float).
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero, se mantiene constante si se alcanza.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: números aleatorios entre dos parámetros.
+    - **p2**: cantidad de periodos o amplitud de los periodos del segundo modelo (int).
+    - **tipo2**: valores posibles:  
+        1. p2 = amplitud de periodo.  
+        2. p2 = número de periodos.
+    - **columna**: nombre de la columna con los datos generados (str).
+
+    Devuelve:
+
+    - **StreamingResponse**:  CSV con los datos generados.
     """
+
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     
     # Convertir el DataFrame a un buffer de CSV
@@ -7705,39 +7963,50 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int ,c:fl
 @app.get("/Plot/drift/periodos/ARMA-periodico")
 async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int, distr2:int, p2:int, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico. Parámetros:
+    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift,
+    cambiando de un modelo autorregresivo y de medias móviles a un modelo periódico.
 
-    - **inicio**: fecha de inicio.
-    - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
-        2. p2 = número de periodos
-    - **columna**: nombre de la columna con los datos generados.
+    Parámetros:
+
+    - **inicio**: fecha de inicio (str o datetime).
+    - **periodos**: número de datos a generar (int).
+    - **freq**: frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: índice en el que se produce el drift (int).
+    - **c, phi, teta**: parámetros del modelo autorregresivo y de medias móviles para la primera parte:  
+    - c: constante (float).  
+    - phi: lista o array con parámetros autorregresivos (list/array de floats).  
+    - teta: lista o array con parámetros de medias móviles (list/array de floats).
+    - **s**: estacionalidad o tamaño de estación (número de datos por estación) del modelo 1 (int).
+    - **desv**: desviación típica del ruido blanco del modelo 1 (float).
+    - **Dist2, params2**: distribución y parámetros para la segunda parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero, se mantiene constante si se alcanza.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: números aleatorios entre dos parámetros.
+    - **p2**: cantidad de periodos o amplitud de los periodos del segundo modelo (int).
+    - **tipo2**: valores posibles:  
+        1. p2 = amplitud de periodo.  
+        2. p2 = número de periodos.
+    - **columna**: nombre de la columna con los datos generados (str).
+
+    Devuelve:
+
+    - **StreamingResponse**: Imagen con la gráfica de los datos generados.
     """
+
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[tipo2,distr2,params2,p2],7,num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -7751,20 +8020,36 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:
 @app.get("/reporte/drift/fin/ARMA-tendencia")
 async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un reporte estadístico con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo de tendencia determinista. Parámetros:
+    Genera un reporte estadístico con datos producidos por un modelo que sufre un drift, pasando de un modelo ARMA a un modelo de tendencia determinista.
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
-    - **columna**: nombre de la columna con los datos generados.
+    Parámetros:
+    - **inicio**: Fecha de inicio.
+    - **fin**: Fecha de fin.
+    - **freq**: Frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: Índice donde ocurre el drift.
+    - **c**: Constante del modelo ARMA.
+    - **phi**: Coeficientes del modelo autorregresivo (AR).
+    - **teta**: Coeficientes del modelo de medias móviles (MA).
+    - **s**: Estacionalidad (tamaño de la estación) del modelo ARMA.
+    - **desv**: Desviación típica del ruido blanco del modelo ARMA.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
+    - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
+    - **columna**: Nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **dict**: Reporte estadístico con las métricas calculadas.
     """
+
+
     if phi == []:
         subtipo1 = "de medias móviles"
         parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
@@ -7839,20 +8124,36 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int ,c:float
 @app.get("/Datos/drift/fin/ARMA-tendencia")
 async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo de tendencia determinista. Parámetros:
+    Genera un archivo CSV con datos provenientes de un modelo que sufre un drift, cambiando de un modelo ARMA a un modelo de tendencia determinista.
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
-    - **columna**: nombre de la columna con los datos generados.
+    Parámetros:
+    - **inicio**: Fecha de inicio.
+    - **fin**: Fecha de fin.
+    - **freq**: Frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: Índice donde se produce el drift.
+    - **c**: Constante del modelo ARMA.
+    - **phi**: Coeficientes AR (autoregresivos).
+    - **teta**: Coeficientes MA (medias móviles).
+    - **s**: Estacionalidad (tamaño de la estación) del modelo ARMA.
+    - **desv**: Desviación típica del ruido blanco del modelo ARMA.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
+    - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
+    - **columna**: Nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: Archivo CSV con la serie temporal generada.
     """
+
+
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
     # Convertir el DataFrame a un buffer de CSV
     stream = io.StringIO()
@@ -7869,20 +8170,35 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int ,c:float ,
 @app.get("/Plot/drift/fin/ARMA-tendencia")
 async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
     """
-    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo de tendencia determinista. Parámetros:
+    Genera una imagen con la gráfica de datos que sufren un drift, cambiando de un modelo ARMA a un modelo de tendencia determinista.
 
-    - **inicio**: fecha de inicio.
-    - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
-    - **columna**: nombre de la columna con los datos generados.
+    Parámetros:
+    - **inicio**: Fecha de inicio.
+    - **fin**: Fecha de fin.
+    - **freq**: Frecuencia de los datos. Valores posibles:  B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: Índice donde se produce el drift.
+    - **c**: Constante del modelo ARMA.
+    - **phi**: Coeficientes AR (autoregresivos).
+    - **teta**: Coeficientes MA (medias móviles).
+    - **s**: Estacionalidad (tamaño de la estación) del modelo ARMA.
+    - **desv**: Desviación típica del ruido blanco del modelo ARMA.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
+    - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
+    - **columna**: Nombre de la columna con los datos generados.
+
+    Devuelve:
+    -  **StreamingResponse**: Gráfica con la serie temporal generada.
     """
+
     
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
     plot_df(df)
@@ -7896,21 +8212,36 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float
 # reporte estadístico de drift de un modelo ARMA por una tendencia
 @app.get("/reporte/drift/periodos/ARMA-tendencia")
 async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0,s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
-    """
-    Devuelve un reporte estadístico con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo de tendencia determinista. Parámetros:
+    """    
+    Genera un reporte estadístico con datos producidos por un modelo que sufre un drift, pasando de un modelo ARMA a un modelo de tendencia determinista.
 
-    - **inicio**: fecha de inicio.
+    Parámetros:
+    - **inicio**: Fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
-    - **columna**: nombre de la columna con los datos generados.
+    - **freq**: Frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: Índice donde ocurre el drift.
+    - **c**: Constante del modelo ARMA.
+    - **phi**: Coeficientes del modelo autorregresivo (AR).
+    - **teta**: Coeficientes del modelo de medias móviles (MA).
+    - **s**: Estacionalidad (tamaño de la estación) del modelo ARMA.
+    - **desv**: Desviación típica del ruido blanco del modelo ARMA.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
+    - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
+    - **columna**: Nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **dict**: Reporte estadístico con las métricas calculadas.
     """
+
     if phi == []:
         subtipo1 = "de medias móviles"
         parametros1= "La serie sigue una distribución de medias móviles con constante c = "+ str(c)+" y con valores de teta: teta_0 " + str(teta[0])
@@ -7987,19 +8318,33 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int ,c:
 @app.get("/Datos/drift/periodos/ARMA-tendencia")
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
     """
-    Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo de tendencia determinista. Parámetros:
+    Genera un archivo CSV con datos provenientes de un modelo que sufre un drift, cambiando de un modelo ARMA a un modelo de tendencia determinista.
 
-    - **inicio**: fecha de inicio.
+    Parámetros:
+    - **inicio**: Fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
-    - **columna**: nombre de la columna con los datos generados.
+    - **freq**: Frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: Índice donde se produce el drift.
+    - **c**: Constante del modelo ARMA.
+    - **phi**: Coeficientes AR (autoregresivos).
+    - **teta**: Coeficientes MA (medias móviles).
+    - **s**: Estacionalidad (tamaño de la estación) del modelo ARMA.
+    - **desv**: Desviación típica del ruido blanco del modelo ARMA.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
+    - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
+    - **columna**: Nombre de la columna con los datos generados.
+
+    Devuelve:
+    - **StreamingResponse**: Archivo CSV con la serie temporal generada.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
     
@@ -8018,19 +8363,33 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int ,c:fl
 @app.get("/Plot/drift/periodos/ARMA-tendencia")
 async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:float , desv:float, tipo2:int,coef_error: Union[float, None] = 0, s: Union[int,None] = 0, columna: List[str]= Query(description="Nombres de las columnas"), phi: Optional[List[float]]= Query([],description="Parámetros autorregresivos"), teta:Optional[List[float]]= Query([],description="Parámetros medias móviles"), params2: List[float]= Query(...,description="Parametros de la tendencia determinista")):
     """
-    Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo autorregresivo y de medias móviles a un modelo de tendencia determinista. Parámetros:
+    Genera una imagen con la gráfica de datos que sufren un drift, cambiando de un modelo ARMA a un modelo de tendencia determinista.
 
-    - **inicio**: fecha de inicio.
+    Parámetros:
+    - **inicio**: Fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
-    - **num_drift**: dato en el que se produce el drift.
-    - **c, phi, teta** : parámetros de los modelo autorregresivos y de medias móviles 1. c --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 1
-    - **desv**: desviación típica del ruido blanco del modelo 1
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
-    - **coef_error**: coeficiente de error del modelo de tendencia determinista.
-    - **columna**: nombre de la columna con los datos generados.
+    - **freq**: Frecuencia de los datos. Valores posibles: B (business day), D (calendar day), W (weekly), M (monthly), Q (quarterly), Y (yearly), h (hourly), min (minutely), s (secondly), ms (milliseconds), us (microseconds), ns (nanoseconds).
+    - **num_drift**: Índice donde se produce el drift.
+    - **c**: Constante del modelo ARMA.
+    - **phi**: Coeficientes AR (autoregresivos).
+    - **teta**: Coeficientes MA (medias móviles).
+    - **s**: Estacionalidad (tamaño de la estación) del modelo ARMA.
+    - **desv**: Desviación típica del ruido blanco del modelo ARMA.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
+    - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
+    - **columna**: Nombre de la columna con los datos generados.
+
+    Devuelve:
+    -  **StreamingResponse**: Gráfica con la serie temporal generada.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[c,desv,s,phi,teta,[]],[params2,tipo2,coef_error],8,num_drift)
     plot_df(df)
@@ -8045,57 +8404,44 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:
 @app.get("/reporte/drift/fin/periodico-periodico")
 async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int, dist1:int, p1:int, tipo2:int, dist2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
-    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a otro. Parámetros:
+    Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a otro.
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **tipo2**: valores posibles  
+        1. p2 = amplitud de periodo  
         2. p2 = número de periodos
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1).
+    - **p2**: cantidad de periodos o amplitud de periodos del segundo modelo.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **dict**: Reporte estadístico.
     """
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
@@ -8564,55 +8910,42 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     """
     Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a otro. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **tipo2**: valores posibles  
+        1. p2 = amplitud de periodo  
         2. p2 = número de periodos
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1).
+    - **p2**: cantidad de periodos o amplitud de periodos del segundo modelo.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Archivo csv con la serie generada.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -8632,55 +8965,42 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     """
     Devuelve una imagen sobre los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a otro. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **tipo2**: valores posibles  
+        1. p2 = amplitud de periodo  
         2. p2 = número de periodos
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1).
+    - **p2**: cantidad de periodos o amplitud de periodos del segundo modelo.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la gráfica de la serie.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     plot_df(df)
@@ -8697,56 +9017,43 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, ti
     """
     Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a otro. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **tipo2**: valores posibles  
+        1. p2 = amplitud de periodo  
         2. p2 = número de periodos
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1).
+    - **p2**: cantidad de periodos o amplitud de periodos del segundo modelo.
     - **columna**: nombre de la columna con los datos generados.
-    """   
+    
+    Devuelve:
+    - **dict**: Reporte estadístico. 
+    """  
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
     elif tipo1==2 :
@@ -9214,56 +9521,43 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, ti
 async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
     Devuelve una imagen sobre los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a otro. Parámetros:
-
+    
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **tipo2**: valores posibles  
+        1. p2 = amplitud de periodo  
         2. p2 = número de periodos
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1).
+    - **p2**: cantidad de periodos o amplitud de periodos del segundo modelo.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Archivo csv con la serie generada.
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     
@@ -9283,57 +9577,45 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
 async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, tipo1:int, distr1:int, p1:int, tipo2:int, distr2:int, p2:int, columna: List[str]= Query(...,description="Nombres de las columnas"), params1: Optional[List[float]]= Query([],description="Parametros de la primera distribución"), params2: Optional[List[float]]= Query([],description="Parametros de la segunda distribución")):
     """
     Devuelve una imagen de los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a otro. Parámetros:
-
+    
+    Parámetros:
     - **inicio**: fecha de inicio.
-    - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **fin**: fecha de fin.
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p2**: indica la cantidad de periodos/ la amplitud de los periodos del segundo modelo
-    - **tipo2**: valores posibles
-        1. p2 = amplitud de periodo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **tipo2**: valores posibles  
+        1. p2 = amplitud de periodo  
         2. p2 = número de periodos
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1).
+    - **p2**: cantidad de periodos o amplitud de periodos del segundo modelo.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la gráfica.
     """
+  
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[tipo2,distr2,params2,p2], 9, num_drift)
     plot_df(df)
     buffer = io.BytesIO()
@@ -9349,51 +9631,38 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     """
     Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a una distribución. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1)..
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **dict**: Reporte estadístico de la serie.
     """
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
@@ -9855,51 +10124,38 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     """
     Devuelve un csv con  los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a una distribución. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1)..
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Archivo csv con la serie generada.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -9919,51 +10175,38 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     """
     Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a una distribución. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1)..
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la serie generada graficada.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
 
@@ -9981,51 +10224,38 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, ti
     """
     Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a una distribución. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1)..
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **dict**: Reporte estadístico de la serie.
     """
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
@@ -10488,51 +10718,38 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
     """
     Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a una distribución. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1)..
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Archivo CSV con la serie. 
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
     
@@ -10553,51 +10770,38 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
     """
     Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a una distribución. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **dist2, params2**: distribución y parámetros para la segunda parte de los datos (misma lista que para dist1)..
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la serie graficada. 
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[distr2,params2], 10, num_drift)
     plot_df(df)
@@ -10614,36 +10818,43 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     """
     Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
-    - **columna**: nombre de la columna con los datos generados.
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **c2, phi2, teta2**: parámetros del modelo autorregresivo y de medias móviles para la segunda parte de los datos.
+        - **c2**: constante del modelo.
+        - **phi2**: lista de coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista de coeficientes del modelo de medias móviles (MA).
+    - **s2**: estacionalidad del modelo 2 (número de datos por estación).
+    - **desv2**: desviación típica del ruido blanco en el modelo 2.
+    - **columna**: nombre de la columna donde se almacenan los datos generados.
+    
+    Devuelve:
+    - **dict**: Reporte estadístico de la serie.  
     """
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
@@ -10926,36 +11137,43 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     """
     Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
-    - **columna**: nombre de la columna con los datos generados.
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **c2, phi2, teta2**: parámetros del modelo autorregresivo y de medias móviles para la segunda parte de los datos.
+        - **c2**: constante del modelo.
+        - **phi2**: lista de coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista de coeficientes del modelo de medias móviles (MA).
+    - **s2**: estacionalidad del modelo 2 (número de datos por estación).
+    - **desv2**: desviación típica del ruido blanco en el modelo 2.
+    - **columna**: nombre de la columna donde se almacenan los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Archivo CSV con la serie generada. 
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -10975,36 +11193,43 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     """
     Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
-    - **columna**: nombre de la columna con los datos generados.
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **c2, phi2, teta2**: parámetros del modelo autorregresivo y de medias móviles para la segunda parte de los datos.
+        - **c2**: constante del modelo.
+        - **phi2**: lista de coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista de coeficientes del modelo de medias móviles (MA).
+    - **s2**: estacionalidad del modelo 2 (número de datos por estación).
+    - **desv2**: desviación típica del ruido blanco en el modelo 2.
+    - **columna**: nombre de la columna donde se almacenan los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la serie graficada. 
     """
     
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
@@ -11022,36 +11247,43 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, ti
     """
     Devuelve un reporte estadístico con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
-    - **columna**: nombre de la columna con los datos generados.
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **c2, phi2, teta2**: parámetros del modelo autorregresivo y de medias móviles para la segunda parte de los datos.
+        - **c2**: constante del modelo.
+        - **phi2**: lista de coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista de coeficientes del modelo de medias móviles (MA).
+    - **s2**: estacionalidad del modelo 2 (número de datos por estación).
+    - **desv2**: desviación típica del ruido blanco en el modelo 2.
+    - **columna**: nombre de la columna donde se almacenan los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la serie graficada. 
     """
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
@@ -11331,36 +11563,43 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
     """
     Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
-    - **columna**: nombre de la columna con los datos generados.
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **c2, phi2, teta2**: parámetros del modelo autorregresivo y de medias móviles para la segunda parte de los datos.
+        - **c2**: constante del modelo.
+        - **phi2**: lista de coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista de coeficientes del modelo de medias móviles (MA).
+    - **s2**: estacionalidad del modelo 2 (número de datos por estación).
+    - **desv2**: desviación típica del ruido blanco en el modelo 2.
+    - **columna**: nombre de la columna donde se almacenan los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Archivo CSV con la serie generada. 
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
     
@@ -11381,36 +11620,43 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
     """
     Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo autorregresivo y de medias móviles. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
-    - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
-    - **desv2**: desviación típica del ruido blanco del modelo 2
-    - **columna**: nombre de la columna con los datos generados.
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **c2, phi2, teta2**: parámetros del modelo autorregresivo y de medias móviles para la segunda parte de los datos.
+        - **c2**: constante del modelo.
+        - **phi2**: lista de coeficientes del modelo autorregresivo (AR).
+        - **teta2**: lista de coeficientes del modelo de medias móviles (MA).
+    - **s2**: estacionalidad del modelo 2 (número de datos por estación).
+    - **desv2**: desviación típica del ruido blanco en el modelo 2.
+    - **columna**: nombre de la columna donde se almacenan los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la serie graficada. 
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[c2,desv2,s2,phi2,teta2,[]], 11, num_drift)
     plot_df(df)
@@ -11427,36 +11673,48 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     """
     Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **dict**: Reporte estadístico de la serie. 
     """
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
@@ -11725,36 +11983,48 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     """
     Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+            - Tipo 1 (lineal): [a, b]
+            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+            - Tipo 3 (exponencial): [a, b]
+            - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Archivo CSV con la serie.
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -11774,36 +12044,40 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     """
     Devuelve una imagen con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
     - **params2**: parámetros de la tendencia.
     - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la serie graficada. 
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     plot_df(df)
@@ -11820,36 +12094,40 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, ti
     """
     Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
     - **params2**: parámetros de la tendencia.
     - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **dict**: Reporte estadístico de la serie. 
     """
     if tipo1==1:
         periodicidad1 = "periodos de amplitud " + str(p1)
@@ -12120,36 +12398,40 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
     """
     Devuelve un csv con los datos generados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
     - **params2**: parámetros de la tendencia.
     - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la serie graficada. 
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -12169,36 +12451,40 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
     """
     Devuelve una gráfica con los datos graficados a partir de un modelo que sufre un drift cambiando de un modelo periódico a un modelo de tendencia determinista. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **periodos**: número de datos a generar.
-    - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
+    - **freq**: frecuencia de los datos. Valores posibles: B business day, D calendar day, W weekly, M monthly, Q quarterly, Y yearly, h hourly, min minutely, s secondly, ms milliseconds, us microseconds, ns nanoseconds.
     - **num_drift**: dato en el que se produce el drift.
-    - **Dist1, params1** : Indica la distribución a seguir y los parámetros que sigue la primera parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
-    - **p1**: indica la cantidad de periodos/ la amplitud de los periodos del primer modelo
-    - **tipo1**: valores posibles
-        1. p1 = amplitud de periodo
+    - **tipo1**: valores posibles  
+        1. p1 = amplitud de periodo  
         2. p1 = número de periodos
+    - **dist1, params1**: distribución y parámetros para la primera parte de los datos. Casos:  
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
+    - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
     - **params2**: parámetros de la tendencia.
     - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la serie graficada. 
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[tipo1,distr1,params1,p1],[params2,tipo2,coef_error], 12, num_drift)
     plot_df(df)
@@ -12215,6 +12501,7 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     """
     Devuelve un reporte estadístico sobre los datos generados a partir de un modelo que sufre un drift cambiando de un modelo de tendencia determinista a otro. Parámetros:
 
+    Parámetros:
     - **inicio**: fecha de inicio.
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
@@ -12226,6 +12513,9 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **dict**: Reporte estadístico de la serie. 
     """
     if tipo1 == 1:
         subtipo1 = "lineal"
@@ -12305,6 +12595,9 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Archivo CSV con la serie generada. 
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     # Convertir el DataFrame a un buffer de CSV
@@ -12335,6 +12628,9 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la serie graficada. 
     """
     df = crear_df_fin_DRIFT(inicio,fin,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     plot_df(df)
@@ -12362,6 +12658,9 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, ti
     - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **dict**: Reporte estadístico de la serie. 
     """
     if tipo1 == 1:
         subtipo1 = "lineal"
@@ -12441,6 +12740,9 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
     - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Archivo CSV con la serie generada. 
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     
@@ -12472,6 +12774,9 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
     - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
+    
+    Devuelve:
+    - **StreamingResponse**: Imagen con la serie graficada. 
     """
     df = crear_df_periodos_DRIFT(inicio,periodos,freq,columna,[params1,tipo1,coef_error1],[params2,tipo2,coef_error2], 13, num_drift)
     plot_df(df)
@@ -12496,23 +12801,23 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
-        1. Normal: Los parámetros son la media y la desv_típica de los datos.
-        2. Binomial: Los parámetros son n (nº pruebas) y p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        3. Poisson: El parámetro es mu. Además, podemos añadir otro parámetro que indica la localización de los datos.
-        4. Geómetrica: El parámetro es p (probabilidad éxito). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        5. Hipergeómetrica: Los parámetros son M (tamaño población), n (nº aciertos) y N (tamaño muestra). Además, podemos añadir otro parámetro que indica la localización de los datos.
-        6. Constante: El parámetro es el valor constante que toma los datos.
-        7. Uniforme: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        8. Lognormal: El parámetro es s. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        9. Exponencial: Puede no tener parámetros, indicar solo la localización o indicar la localización y escala. 
-        10. Gamma: El parámetro es a. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        11. Beta: Los parámetros son a y b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        12. Chi-Cuadrado: El parámetro es df. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        13. T-Student: El parámetro es t. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        14. Pareto: El parámetro es b. Además, podemos añadir otros parámetros que indican la localización o localización y escala de los datos.
-        15. Lineal descendente: Los parámetros son el dato inicial y la pendiente (en valor absoluto). El mínimo valor posible es cero, si se alcanza los datos se mantienen constante con ese valor. 
-        16. Lineal ascendente: Los parámetros son el dato inicial y la pendiente. 
-        17. Aleatorio: Obtiene números aleatorios cuyos valores oscilan entre el primer parámetro y el segundo
+        1. Normal: media y desviación típica.  
+        2. Binomial: n (nº pruebas), p (probabilidad éxito), opcional localización.  
+        3. Poisson: mu, opcional localización.  
+        4. Geométrica: p, opcional localización.  
+        5. Hipergeométrica: M (tamaño población), n (nº aciertos), N (tamaño muestra), opcional localización.  
+        6. Constante: valor constante.  
+        7. Uniforme: sin parámetros, o localización, o localización y escala.  
+        8. Lognormal: s, opcional localización o localización y escala.  
+        9. Exponencial: sin parámetros, o localización, o localización y escala.  
+        10. Gamma: a, opcional localización o localización y escala.  
+        11. Beta: a y b, opcional localización o localización y escala.  
+        12. Chi-Cuadrado: df, opcional localización o localización y escala.  
+        13. T-Student: t, opcional localización o localización y escala.  
+        14. Pareto: b, opcional localización o localización y escala.  
+        15. Lineal descendente: dato inicial y pendiente (valor absoluto). El mínimo es cero; si se alcanza, se mantiene constante.  
+        16. Lineal ascendente: dato inicial y pendiente.  
+        17. Aleatorio: valores entre dos parámetros.
     - **columna**: nombre de la columna con los datos generados.
     """
     if tipo1 == 1:
@@ -14449,7 +14754,7 @@ async def obtener_grafica( indice:str, columna:str, a: List[float]= Query(...,de
 async def obtener_datos( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
     """
     Devuelve un csv con los datos añadiendole una columna a partir de una relación exponencial respecto a la columna ya existente. Parámetros:
-    - **a**, **b** : coeficientes de la relación exponencial (a + e*<sup>bx</sup>)
+    - **a**, **b** : coeficientes de la relación exponencial (a + e<sup>bx</sup>)
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **columna** : nombre de la nueva columna generada 
     - **file** : csv con los datos univariables
@@ -14481,7 +14786,7 @@ async def obtener_datos( a:float,b:float,indice:str, columna:str, file: UploadFi
 async def obtener_grafica( a:float,b:float,indice:str, columna:str, file: UploadFile = File(...)) :
     """
     Devuelve una imagen con los datos graficados añadiendole una columna a partir de una relación exponencial respecto a la columna ya existente. Parámetros:
-    - **a**, **b** : coeficientes de la relación exponencial (a + e*<sup>bx</sup>)
+    - **a**, **b** : coeficientes de la relación exponencial (a + e<sup>bx</sup>)
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **columna** : nombre de la nueva columna generada 
     - **file** : csv con los datos univariables
@@ -14801,7 +15106,24 @@ async def obtener_grafica(umbral:float, f: str,g:str , indice:str, columna:str, 
     """
     Devuelve una imagen con los datos graficados a partir de una relación escalonada respecto a la columna ya existente. Parámetros:
     - **umbral** : valor umbral (si x < umbral --> f(x), si x>= umbral --> g(x))
-    - **f** , **g** : funciones que se usan para obtener el valor de la nueva columna 
+    - **f** , **g** : funciones que se usan para obtener el valor de la nueva columna. Valores posibles de cada función:
+        1. *Lineal*: relación lineal 
+        2. *Polinomica2*: relación polinómica de grado 2 
+        3. *Polinomica3*: relación polinómica de grado 3 
+        4. *Polinomica4*: relación polinómica de grado 4
+        5. *Exponencial*: relación exponencial  
+        6. *Exponencial2*: relación exponencial de base 2  
+        7. *Log*: relación logarítmica  
+        8. *Raiz*: relación radical  
+        9. *Seno*: relación senoidal  
+        10. *Coseno*: relación cosenoidal  
+        11. *Tangente*: relación tangencial  
+        12. *Absoluto*: valor absoluto  
+        13. *Truncar*: truncar  
+        14. *Log10*: logarítmo en base 10  
+        15. *Log1p*: logaritmo  
+        16. *Log2*: logaritmo en base 2  
+        17. *Ceil*: parte entera  
     - **indice** : nombre de la columna que se usa como índice en el csv
     - **columna** : nombre de la nueva columna generada 
     - **file** : csv con los datos univariable
@@ -15230,7 +15552,7 @@ async def obtener_grafica( indice:str, columna:str, file: UploadFile = File(...)
 async def obtener_datos(tipo_interpolacion : str, tipo_array:str,num: int,  freq:str, indice:str, s:int=1,file: UploadFile = File(...)) :
     """
     Devuelve un csv con los datos aumentados aplicando interpolación matemática. Parámetros: 
-    - **tipo_interpolacion**: tipo de interpolación a aplicar --> ‘linear’, ‘nearest’, ‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, or ‘next’. ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’
+    - **tipo_interpolacion**: tipo de interpolación a aplicar --> ‘linear’, ‘nearest’, ‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, or ‘next’.
     - **tipo_array**: inicio y fin del array tomado para interpolar --> min-max (desde el valor mínimo al máximo o viceversa), normal (desde el primero al último). Otro valor posible es spline --> interpolación tipo spline.
     - **num**: número de datos a generar
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
@@ -15269,7 +15591,7 @@ async def obtener_datos(tipo_interpolacion : str, tipo_array:str,num: int,  freq
 async def obtener_grafica(tipo_interpolacion : str, tipo_array:str, num: int, freq:str, indice:str,s:int=0, file: UploadFile = File(...)) :
     """
     Devuelve una imagen con los datos graficados que han sido aumentados aplicando interpolación matemática. Parámetros: 
-    - **tipo_interpolacion**: tipo de interpolación a aplicar --> linear, cubic, quadratic
+    - **tipo_interpolacion**: tipo de interpolación a aplicar --> ‘linear’, ‘nearest’, ‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, or ‘next’.
     - **tipo_array**: inicio y fin del array tomado para interpolar --> min-max (desde el valor mínimo al máximo o viceversa), normal (desde el primero al último). Otro valor posible es spline --> interpolación tipo spline.
     - **num**: número de datos a generar
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
@@ -16677,7 +16999,7 @@ async def obtener_grafica_error(indice:str,freq:str,regresor:str, file: UploadFi
     elif regresor =='RIDGE':
         #Forecaster con Ridge
         forecaster = ForecasterAutoreg(
-             regressor     = Ridge(random_state=123),
+            regressor     = Ridge(random_state=123),
             transformer_y = StandardScaler(),
             lags          = 5
         )
@@ -17317,7 +17639,7 @@ async def obtener_grafica_error(indice:str,freq:str, file: UploadFile = File(...
     df.index.freq=freq
     
     train = int(df.shape[0]*0.8)
-    y_pred=pred_prophet_prediccion(df[:train],df[train:].shape[0],freq)
+    y_pred=pred_prophet_prediccion(df[:train],df.columns[0],df[train:].shape[0],freq)
     plt.figure()
     y_true=df[train:].values
     result = pd.DataFrame({
@@ -17628,7 +17950,7 @@ async def obtener_grafica_errores(indice:str,freq:str, file: UploadFile = File(.
     y_pred2_2 = prediccion_backtesting_forecasterAutoreg(df[:train],df.columns[0],df[train:].shape[0],180,param_gridGB,lags_gridGB,forecasterGB)[:df[train:].shape[0]]
     y_pred2_3 = prediccion_backtesting_forecasterAutoreg(df[:train],df.columns[0],df[train:].shape[0],180,param_gridET,lags_gridET,forecasterET)[:df[train:].shape[0]]
     y_pred2_4 = prediccion_backtesting_forecasterAutoreg(df[:train],df.columns[0],df[train:].shape[0],180,param_gridRidge,lags_gridRidge,forecasterRidge)[:df[train:].shape[0]]
-    y_pred1=prediccion_sarimax(df,df[:train], df.columns[0])[:df[train:].shape[0]]
+    y_pred1 = prediccion_sarimax(df,df[:train], df.columns[0],df[train:].shape[0])[:df[train:].shape[0]]
     y_pred3_1 = predicciones_backtesting_forecasterAutoregDirect(df[:train],df.columns[0],df[train:].shape[0],param_gridRF,lags_gridRF,forecasterDirectRF)[:df[train:].shape[0]]
     y_pred3_0 = predicciones_backtesting_forecasterAutoregDirect(df[:train],df.columns[0],df[train:].shape[0],param_gridDT,lags_gridDT,forecasterDirectDT)[:df[train:].shape[0]]
     y_pred3_2 = predicciones_backtesting_forecasterAutoregDirect(df[:train],df.columns[0],df[train:].shape[0],param_gridGB,lags_gridGB,forecasterDirectGB)[:df[train:].shape[0]]
