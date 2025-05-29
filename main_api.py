@@ -11706,10 +11706,10 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12016,10 +12016,10 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12071,8 +12071,16 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
         16. Lineal ascendente: dato inicial y pendiente.  
         17. Aleatorio: valores entre dos parámetros.
     - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12121,8 +12129,16 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, ti
         16. Lineal ascendente: dato inicial y pendiente.  
         17. Aleatorio: valores entre dos parámetros.
     - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12425,8 +12441,16 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
         16. Lineal ascendente: dato inicial y pendiente.  
         17. Aleatorio: valores entre dos parámetros.
     - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12478,8 +12502,16 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
         16. Lineal ascendente: dato inicial y pendiente.  
         17. Aleatorio: valores entre dos parámetros.
     - **p1**: cantidad de periodos o amplitud de periodos del primer modelo.
-    - **params2**: parámetros de la tendencia.
-    - **tipo2**: tipo de la tendencia --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12507,10 +12539,27 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
     - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
-    - **params2**: parámetros de la tendencia 2.
-    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12588,11 +12637,27 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
-    - **params2**: parámetros de la tendencia 2.
-    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12621,11 +12686,27 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
-    - **params2**: parámetros de la tendencia 2.
-    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12651,11 +12732,27 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, ti
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
-    - **params2**: parámetros de la tendencia 2.
-    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12733,11 +12830,27 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
-    - **params2**: parámetros de la tendencia 2.
-    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12767,11 +12880,27 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
-    - **params2**: parámetros de la tendencia 2.
-    - **tipo2**: tipo de la tendencia 2 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo2**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error2**: coeficiente de error del modelo de tendencia determinista 2.
     - **columna**: nombre de la columna con los datos generados.
     
@@ -12797,8 +12926,16 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: media y desviación típica.  
@@ -13085,8 +13222,16 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: Los parámetros son la media y la desv_típica de los datos.
@@ -13130,8 +13275,16 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: Los parámetros son la media y la desv_típica de los datos.
@@ -13172,8 +13325,16 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, ti
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: Los parámetros son la media y la desv_típica de los datos.
@@ -13460,8 +13621,16 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: Los parámetros son la media y la desv_típica de los datos.
@@ -13504,8 +13673,16 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: Los parámetros son la media y la desv_típica de los datos.
@@ -13546,8 +13723,16 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
@@ -13638,8 +13823,16 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
@@ -13668,8 +13861,16 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
@@ -13695,8 +13896,16 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, ti
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
@@ -13787,8 +13996,16 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
@@ -13816,8 +14033,16 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **c2, phi2, teta2** : parámetros de los modelo autorregresivos y de medias móviles 2. c2 --> constante, phi --> parámetros del modelo autorregresivo y teta --> parámetros del modelo de medias móviles
     - **s2** : estacionalidad, tamaño de una estación (número de datos que hay en cada estación) del modelo 2
@@ -13843,8 +14068,16 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: Los parámetros son la media y la desv_típica de los datos.
@@ -14146,8 +14379,16 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, tipo1:int
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: Los parámetros son la media y la desv_típica de los datos.
@@ -14194,8 +14435,16 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, tipo1:i
     - **fin**: fecha de fin.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+   - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: Los parámetros son la media y la desv_típica de los datos.
@@ -14240,8 +14489,16 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, ti
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: Los parámetros son la media y la desv_típica de los datos.
@@ -14543,8 +14800,16 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, tipo
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: Los parámetros son la media y la desv_típica de los datos.
@@ -14592,8 +14857,16 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, ti
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: B business day frequency, D calendar day frequency, W weekly frequency, M monthly frequency, Q quarterly frequency, Y yearly frequency, h hourly frequency, min minutely frequency, s secondly frequency, ms milliseconds, us microseconds, ns nanoseconds
     - **num_drift**: dato en el que se produce el drift.
-    - **params1**: parámetros de la tendencia 1.
-    - **tipo1**: tipo de la tendencia 1 --> lineal (1), polinómica (2), exponencial (3) y logarítmica (4)
+    - **tipo1**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **params1**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error1**: coeficiente de error del modelo de tendencia determinista 1.
     - **Dist2, params2** : Indica la distribución a seguir y los parámetros que sigue la segunda parte de los datos. Casos:
         1. Normal: Los parámetros son la media y la desv_típica de los datos.
