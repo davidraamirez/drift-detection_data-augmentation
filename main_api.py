@@ -55,10 +55,10 @@ def obtener_reporte(inicio: str, fin:str, freq:str, tipo:int , error: Union[floa
     - **error**: nivel de ruido aleatorio a aplicar a los datos generados.
     - **columna**: lista con los nombres de las columnas objetivo.
     - **params**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
 
     Devuelve:
     - **dict**: reporte con las estadísticas generadas por el modelo de tendencia.
@@ -107,13 +107,21 @@ async def obtener_datos(inicio: str, fin:str, freq:str, tipo:int , error: Union[
     Genera y devuelve una imagen PNG con la representación gráfica de una serie temporal
     construida a partir de un modelo de tendencia determinista. Parámetros: 
 
-    - **inicio** (str): Fecha de inicio del rango temporal (formato ISO 8601, ej. '2023-01-01').
-    - **fin** (str): Fecha de fin del rango temporal (formato ISO 8601).
-    - **freq** (str): Frecuencia de los datos generados. Ejemplos válidos: 'B' (días hábiles), 'D' (días calendario), 'W' (semanal), 'M' (mensual), 'Q' (trimestral), 'Y' (anual), 'h' (horaria), 'min' (minutaria), 's' (segundos), 'ms' (milisegundos), 'us' (microsegundos), 'ns' (nanosegundos).
-    - **tipo** (int): Tipo de tendencia a utilizar para la generación de datos: 1: Lineal, 2: Polinómica, 3: Exponencial, 4: Logarítmica.
-    - **error** (float, opcional): Nivel de ruido aleatorio a aplicar a los datos. Si se omite, no se aplica error.
-    - **columna** (List[str]): Lista de nombres para las columnas generadas en la serie temporal.
-    - **params** (List[float]): Parámetros numéricos que definen la forma del modelo de tendencia.
+    - **inicio**: Fecha de inicio del rango temporal (formato ISO 8601, ej. '2023-01-01').
+    - **fin**: Fecha de fin del rango temporal (formato ISO 8601).
+    - **freq**: Frecuencia de los datos generados. Ejemplos válidos: 'B' (días hábiles), 'D' (días calendario), 'W' (semanal), 'M' (mensual), 'Q' (trimestral), 'Y' (anual), 'h' (horaria), 'min' (minutaria), 's' (segundos), 'ms' (milisegundos), 'us' (microsegundos), 'ns' (nanosegundos).
+    - **tipo**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **error**: Nivel de ruido aleatorio a aplicar a los datos. Si se omite, no se aplica error.
+    - **columna**: Lista de nombres para las columnas generadas en la serie temporal.
+    - **params**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
 
     Devuelve:
     - **StreamingResponse**: Imagen PNG con la gráfica de la tendencia generada.
@@ -139,14 +147,18 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, tipo:int , error: Unio
     - **inicio**: fecha de inicio del rango temporal (formato ISO 8601, ej. '2023-01-01').
     - **fin**: fecha de fin del rango temporal (formato ISO 8601).
     - **freq**: frecuencia de los datos generados. Ejemplos: 'B' (días hábiles), 'D' (días calendario), 'W' (semanal), 'M' (mensual), 'Q' (trimestral), 'Y' (anual), 'h' (horaria), 'min' (minutaria), 's' (segundos), 'ms' (milisegundos), 'us' (microsegundos), 'ns' (nanosegundos).
-    - **tipo**: tipo de tendencia a utilizar para la generación de datos:
-        - 1: Lineal
-        - 2: Polinómica
-        - 3: Exponencial
-        - 4: Logarítmica
+    - **tipo**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
     - **error**: nivel de ruido aleatorio a aplicar a los datos. Si se omite, no se aplica error.
     - **columna**: lista con los nombres de las columnas generadas.
-    - **params**: lista de parámetros numéricos que definen la forma del modelo de tendencia.
+    - **params**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
 
     Devuelve:
     - **StreamingResponse**: imagen PNG con la gráfica de la tendencia generada.
@@ -170,13 +182,17 @@ def obtener_reporte(inicio: str, periodos: int, freq:str, tipo:int , error: Unio
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: 'B' (business day frequency), 'D' (calendar day frequency), 'W' (weekly frequency), 'M' (monthly frequency), 'Q' (quarterly frequency), 'Y' (yearly frequency), 'h' (hourly frequency), 'min' (minutely frequency), 's' (secondly frequency), 'ms' (milliseconds), 'us' (microseconds), 'ns' (nanoseconds).
     - **tipo**: tipo de modelo de tendencia:
-        - 1: Lineal
-        - 2: Polinómica
-        - 3: Exponencial
-        - 4: Logarítmica
-    - **error**: coeficiente de error que se usa para generar los datos.
-    - **columna**: nombre de la columna con los datos generados.
-    - **params**: parámetros de la tendencia.
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **error**: nivel de ruido aleatorio a aplicar a los datos. Si se omite, no se aplica error.
+    - **columna**: lista con los nombres de las columnas generadas.
+    - **params**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
 
     Devuelve:
     - **dict**: reporte con las estadísticas generadas por el modelo de tendencia.
@@ -228,14 +244,18 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, tipo:int , error: U
     - **inicio**: fecha de inicio del rango temporal (formato ISO 8601, ej. '2023-01-01').
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: 'B' (business day frequency), 'D' (calendar day frequency), 'W' (weekly frequency), 'M' (monthly frequency), 'Q' (quarterly frequency), 'Y' (yearly frequency), 'h' (hourly frequency), 'min' (minutely frequency), 's' (secondly frequency), 'ms' (milliseconds), 'us' (microseconds), 'ns' (nanoseconds).
-    - **tipo**: tipo de tendencia a utilizar:
-        - 1: Lineal
-        - 2: Polinómica
-        - 3: Exponencial
-        - 4: Logarítmica
-    - **error**: coeficiente de error que se usa para generar los datos.
-    - **columna**: nombre de la columna con los datos generados.
-    - **params**: parámetros de la tendencia.
+    - **tipo**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **error**: nivel de ruido aleatorio a aplicar a los datos. Si se omite, no se aplica error.
+    - **columna**: lista con los nombres de las columnas generadas.
+    - **params**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
 
     Devuelve:
     - **StreamingResponse**: archivo CSV con los datos generados.
@@ -262,14 +282,18 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, tipo:int , error:
     - **inicio**: fecha de inicio del rango temporal (formato ISO 8601, ej. '2023-01-01').
     - **periodos**: número de datos a generar.
     - **freq**: frecuencia de los datos. Valores posibles: 'B' (business day frequency), 'D' (calendar day frequency), 'W' (weekly frequency), 'M' (monthly frequency), 'Q' (quarterly frequency), 'Y' (yearly frequency), 'h' (hourly frequency), 'min' (minutely frequency), 's' (secondly frequency), 'ms' (milliseconds), 'us' (microseconds), 'ns' (nanoseconds).
-    - **tipo**: tipo de tendencia a utilizar:
-        - 1: Lineal
-        - 2: Polinómica
-        - 3: Exponencial
-        - 4: Logarítmica
-    - **error**: coeficiente de error que se usa para generar los datos.
-    - **columna**: nombre de la columna con los datos generados.
-    - **params**: parámetros de la tendencia.
+    - **tipo**: tipo de modelo de tendencia:
+        - 1: Lineal (y = a + t * b + e0)
+        - 2: Polinómica (y= a + b[1] * t + b[2] * t^2 + ... + b[n] * t^n + e0)
+        - 3: Exponencial (y = e ** (a + b * t + e0))
+        - 4: Logarítmica (y = a + b * log(t) + e0)
+    - **error**: nivel de ruido aleatorio a aplicar a los datos. Si se omite, no se aplica error.
+    - **columna**: lista con los nombres de las columnas generadas.
+    - **params**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
 
     Devuelve:
     - **StreamingResponse**: imagen PNG con la gráfica generada.
@@ -5131,10 +5155,10 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
 
@@ -5434,10 +5458,10 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int, dist1:int
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
 
@@ -5493,10 +5517,10 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int, dist1:i
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
 
@@ -5551,10 +5575,10 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int, di
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
 
@@ -5853,10 +5877,10 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int, dist
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
 
@@ -5911,10 +5935,10 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int, di
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: coeficiente de error del modelo de tendencia determinista.
     - **columna**: nombre de la columna con los datos generados.
 
@@ -8038,10 +8062,10 @@ async def obtener_reporte(inicio: str, fin:str, freq:str, num_drift:int ,c:float
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
     - **columna**: Nombre de la columna con los datos generados.
 
@@ -8142,10 +8166,10 @@ async def obtener_datos(inicio: str, fin:str, freq:str, num_drift:int ,c:float ,
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
     - **columna**: Nombre de la columna con los datos generados.
 
@@ -8188,10 +8212,10 @@ async def obtener_grafica(inicio: str, fin:str, freq:str, num_drift:int ,c:float
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
     - **columna**: Nombre de la columna con los datos generados.
 
@@ -8231,10 +8255,10 @@ async def obtener_reporte(inicio: str, periodos:int, freq:str, num_drift:int ,c:
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
     - **columna**: Nombre de la columna con los datos generados.
 
@@ -8336,10 +8360,10 @@ async def obtener_datos(inicio: str, periodos:int, freq:str, num_drift:int ,c:fl
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
     - **columna**: Nombre de la columna con los datos generados.
 
@@ -8381,10 +8405,10 @@ async def obtener_grafica(inicio: str, periodos:int, freq:str, num_drift:int ,c:
         - 3: Exponencial (y = e ** (a + b * t + e0))
         - 4: Logarítmica (y = a + b * log(t) + e0)
     - **params2**: Parámetros del modelo de tendencia. Su contenido varía según el tipo:
-            - Tipo 1 (lineal): [a, b]
-            - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
-            - Tipo 3 (exponencial): [a, b]
-            - Tipo 4 (logarítmica): [a, b]
+        - Tipo 1 (lineal): [a, b]
+        - Tipo 2 (polinómica): [a0, a1, a2, ..., an]
+        - Tipo 3 (exponencial): [a, b]
+        - Tipo 4 (logarítmica): [a, b]
     - **coef_error**: Coeficiente de error del modelo de tendencia determinista.
     - **columna**: Nombre de la columna con los datos generados.
 
@@ -19100,7 +19124,7 @@ async def detectar_drift(indice:str,threshold_js: float = 0.2,inicio:int=1, file
 
 # Detección de drift usando Population Stability Index
 @app.post("/Deteccion/PSI")
-async def detectar_drift(indice:str,threshold_psi: float = 2,num_bins :int =10,inicio:int=1, file: UploadFile = File(...)) :
+async def detectar_drift(indice:str,threshold_psi: float = 0.25,num_bins :int =10,inicio:int=1, file: UploadFile = File(...)) :
     """
     Devuelve una dupla (Drift,reporte) donde Drift indica si se ha detectado drift mediante el Population Stability Index y el reporte informa en que columna se ha detectado el drift:
     - **threshold_psi**: umbral a partir del cual se considera que existe *drift*
@@ -19133,7 +19157,7 @@ async def detectar_drift(indice:str,threshold_psi: float = 2,num_bins :int =10,i
 
 # Detección de drift usando Population Stability Index con cuantiles
 @app.post("/Deteccion/PSI/Cuantiles")
-async def detectar_drift(indice:str,threshold_psi: float = 2,num_quantiles :int =10,inicio:int=1, file: UploadFile = File(...)) :
+async def detectar_drift(indice:str,threshold_psi: float = 0.25,num_quantiles :int =10,inicio:int=1, file: UploadFile = File(...)) :
     """
     Devuelve una dupla (Drift,reporte) donde Drift indica si se ha detectado drift mediante el Population Stability Index dividiendo en cuantiles y el reporte informa en que columna se ha detectado el drift:
     - **threshold_psi**: umbral a partir del cual se considera que existe drift.
