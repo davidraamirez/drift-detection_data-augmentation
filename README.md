@@ -1,6 +1,6 @@
 # Análisis de Data Drift en Series Temporales: Generación de Datos Sintéticos, Aumentación de Datos y Evaluación de Modelos Predictivos
 
-Este proyecto ofrece un entorno completo para el **análisis y monitoreo de drift en series temporales**, complementado con herramientas de **generación de datos sintéticos**, **técnicas de aumentación** y **evaluación de modelos predictivos multivariantes**. 
+Este proyecto ofrece un entorno completo para el **análisis y monitoreo de drift en series temporales**, complementado con herramientas de **generación de datos sintéticos**, **técnicas de aumentación** y **evaluación de modelos predictivos**. 
 
 ## 🚀 Instalación
 
