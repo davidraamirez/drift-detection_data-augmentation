@@ -6,8 +6,8 @@ Este proyecto ofrece un entorno completo para el **análisis y monitoreo de drif
 
 1. **Clona el repositorio**
 ```bash
-git clone https://github.com/davidraamirez/trabajo_fin_grado.git
-cd tu-repositorio
+git clone https://github.com/davidraamirez/drift-detection_data-augmentation.git
+cd drift-detection_data-augmentation
 ```
 
 2. **Crea un entorno virtual e instala las dependencias:**

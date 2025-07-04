@@ -118,25 +118,25 @@ if uploaded_file is not None:
                     st.write("En el caso de la columna "+x+", hemos obtenido un valor de "+ str(driftJS["reporte"][x]["Jensen-Shannon"]) + " que es inferior al valor umbral, 0.2.")
 
             else :
-                st.write("Se ha detectado un cambio en la distribución entre la primera mitad de los datos y la segunda mitad, gracias a las medidas de Kolmogorov-Smirnov.")
+                st.write("Se ha detectado un cambio en la distribución entre la primera mitad de los datos y la segunda mitad, gracias a la medida de Jensen-Shannon.")
                 for x in df.columns:
-                    if driftPSI["reporte"][x]["drift"]==True:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftJS["reporte"][x]["Jensen-Shannon"]) + " que es superior al valor umbral, 0.2. Por tanto, detectamos drift en esta columna.")
+                    if driftJS["reporte"][x]["drift"]==True:
+                        st.write("En el caso de la columna "+x+", hemos obtenido un valor de divergencia de "+ str(driftJS["reporte"][x]["Jensen-Shannon"]) + " que es superior al valor umbral, 0.2. Por tanto, detectamos drift en esta columna.")
                     else:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un p-value de "+ str(driftJS["reporte"][x]["Jensen-Shannon"]) + " que es inferior al valor umbral, 0.2. Por tanto, NO detectamos drift en esta columna.")
+                        st.write("En el caso de la columna "+x+", hemos obtenido un valor de divergencia de "+ str(driftJS["reporte"][x]["Jensen-Shannon"]) + " que es inferior al valor umbral, 0.2. Por tanto, NO detectamos drift en esta columna.")
 
             if driftPSI["Drift"]  == "No detectado":
                 st.write("No se han detectado cambios en la distribución entre los primeros datos (80%) y los últimos datos (20%), según el Population Stability Index. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
                 for x in df.columns:
-                    st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["reporte"][x]["PSI"]) + " que es inferior al valor umbral, 1.")
+                    st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["reporte"][x]["PSI"]) + " que es inferior al valor umbral, 0,5.")
 
             else :
                 st.write("Se ha detectado un cambio en la distribución entre los primeros datos (80%) y los últimos datos (20%), gracias al Population Stability Index.")
                 for x in df.columns:
                     if driftPSI["reporte"][x]["drift"]==True:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["reporte"][x]["PSI"]) + " que es superior al valor umbral, 1. Por tanto, detectamos drift en esta columna.")
+                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["reporte"][x]["PSI"]) + " que es superior al valor umbral, 0,5. Por tanto, detectamos drift en esta columna.")
                     else:
-                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["reporte"][x]["PSI"]) + " que es inferior al valor umbral, 1. Por tanto, NO detectamos drift en esta columna.")
+                        st.write("En el caso de la columna "+x+", hemos obtenido un Population Stability Index de "+ str(driftPSI["reporte"][x]["PSI"]) + " que es inferior al valor umbral, 0,5. Por tanto, NO detectamos drift en esta columna.")
            
             if driftPSIQ["Drift"]  == "No detectado":
                 st.write("No se han detectado cambios en la distribución entre los primeros datos (80%) y los últimos datos (20%), según el Population Stability Index con cuantiles. Por ello, podemos intuir que la distribución de los datos se mantiene a lo largo del tiempo.")
